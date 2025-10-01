@@ -39,6 +39,7 @@
     "lint": "echo 'ESLint not configured yet - TODO'",
     "format": "echo 'Prettier not configured yet - TODO'",
     "test": "vitest run --coverage --passWithNoTests",
+    "test:watch": "vitest",
     "test:forge": "python3 -m pytest -q -rA tests/test_unforged_forge.py",
     "doctor:fast": "node dist/cli/index.js doctor --skip-provider || true",
     "typecheck": "tsc -p tsconfig.json --noEmit",

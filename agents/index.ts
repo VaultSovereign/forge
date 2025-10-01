@@ -1,2 +1,1 @@
-export { triageAgent, runnerAgent, askGuardian } from './vaultmesh-agent.js';
-
+export { triageAgent, runnerAgent, askGuardian } from './vaultmesh-agent';
