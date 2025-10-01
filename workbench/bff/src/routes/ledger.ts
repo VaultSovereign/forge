@@ -5,7 +5,7 @@ import { coreLedgerQuery } from '../core/client.js';
 export default async function ledgerRoutes(app: FastifyInstance) {
   app.get(
     '/v1/api/ledger/events',
-    { preHandler: rbac(['auditor', 'operator']) },
+    { preHandler: rbac(['ledger:read']) },
     async (request) => {
       const { template, limit } = (request.query ?? {}) as {
         template?: string;

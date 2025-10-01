@@ -9,6 +9,12 @@ export default async function tickRoutes(app: FastifyInstance) {
       .header('X-Accel-Buffering', 'no')
       .code(200);
 
+    // Ensure CORS is applied for SSE as well (esp. when streaming headers flush early)
+    const origin = (request.headers['origin'] as string | undefined) ?? '';
+    if (origin) {
+      reply.header('Access-Control-Allow-Origin', origin);
+    }
+
     const raw = reply.raw as typeof reply.raw & { flush?: () => void };
     raw.flush?.();
 

@@ -1,35 +1,60 @@
 import { FastifyInstance } from 'fastify';
-import { z } from 'zod';
 import { rbac } from '../auth/rbac.js';
-
-const TemplatesResp = z.array(
-  z.object({
-    id: z.string(),
-    name: z.string(),
-    description: z.string().optional(),
-    inputs: z.record(z.any()).optional()
-  })
-);
+import { listTemplates, countTemplates } from '../providers/catalog.js';
+import { z } from 'zod';
+import type { TemplateMeta, TemplateCount } from '../../../types/templates.js';
+import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 
 export default async function templatesRoutes(app: FastifyInstance) {
-  app.get(
+  const appZ = app.withTypeProvider<ZodTypeProvider>();
+
+  const TemplateMetaSchema = z
+    .object({
+      id: z.string(),
+      name: z.string().optional(),
+      description: z.string().optional(),
+      version: z.string().optional(),
+      tags: z.array(z.string()).optional(),
+      updatedAt: z.string().optional() // ISO
+    })
+    .passthrough();
+
+  const TemplateArrayResponse = z.array(TemplateMetaSchema);
+  const TemplateCountResponse = z.object({ total: z.number() });
+  // Backward-compatible response: array of summaries
+  appZ.get(
     '/v1/api/templates',
-    { preHandler: rbac(['auditor', 'author', 'operator']) },
-    async () => {
-      const data = [
-        {
-          id: 'demo.echo',
-          name: 'Echo',
-          description: 'Echo args back',
-          inputs: { message: { type: 'string' } }
-        },
-        {
-          id: 'dora.ict_risk_framework.v1',
-          name: 'DORA ICT Risk',
-          description: 'Run ICT risk assessment'
-        }
-      ];
-      return TemplatesResp.parse(data);
+    {
+      preHandler: rbac(['templates:read']),
+      schema: { response: { 200: TemplateArrayResponse } }
+    },
+    async (request, reply): Promise<TemplateMeta[]> => {
+      const q = (request.query ?? {}) as Record<string, string>;
+      const limit = q.limit ? Number(q.limit) : undefined;
+      const cursor = (q.cursor as string | undefined) ?? null;
+      const filter = (q.filter as string | undefined) ?? null;
+
+      const { items, nextCursor, total } = listTemplates({ limit, cursor, filter });
+      // Include pagination metadata as headers (non-breaking for existing FE)
+      if (nextCursor) reply.header('x-next-cursor', nextCursor);
+      reply.header('x-total-count', String(total));
+
+      // Return array of summaries to keep existing UI intact
+      return items.map((t) => ({ id: t.id, name: t.name, description: t.description }));
+    }
+  );
+
+  // Tiny count endpoint for Overview and dashboards
+  appZ.get(
+    '/v1/api/templates/count',
+    {
+      preHandler: rbac(['templates:read']),
+      schema: { response: { 200: TemplateCountResponse } }
+    },
+    async (request): Promise<TemplateCount> => {
+      const q = (request.query ?? {}) as Record<string, string>;
+      const filter = (q.filter as string | undefined) ?? null;
+      return { total: countTemplates(filter) };
     }
   );
 }

@@ -7,11 +7,21 @@ import OverviewStrip, { type OverviewItem } from './components/dashboard/Overvie
 import QuickLinks from './components/dashboard/QuickLinks.js';
 import { useDashboardSnapshot } from './hooks/useDashboardSnapshot.js';
 import type { LedgerRow } from './api.js';
+import GuardianConsole from './components/GuardianConsole.js';
+import { useGuardianMode } from './hooks/useGuardianMode.js';
+import { useTemplateCount } from './hooks/useTemplateCount.js';
 
 export default function App() {
   const snapshot = useDashboardSnapshot(20);
+  const { mode: guardianMode, loading: guardianLoading } = useGuardianMode(0);
+  const { count: templateCountLive, loading: templateCountLoading } = useTemplateCount();
 
-  const derived = useMemo(() => {
+  const templateCount =
+    (typeof templateCountLive === 'number' ? templateCountLive : undefined) ??
+    (Array.isArray(snapshot?.templates) ? snapshot.templates.length : undefined) ??
+    0;
+
+  const derived = useMemo<{ profileCount: number; errorCount: number; latest: LedgerRow | null }>(() => {
     const profiles = new Set<string>();
     let errorCount = 0;
     let latest: LedgerRow | null = null;
@@ -49,9 +59,7 @@ export default function App() {
       ];
     }
 
-    const templateCount = snapshot.templates.length;
-
-    return [
+    const items: OverviewItem[] = [
       {
         label: 'Templates',
         value: templateCount.toString(),
@@ -75,7 +83,20 @@ export default function App() {
         tone: errorCount > 0 ? 'alert' : 'ok'
       }
     ];
-  }, [snapshot.loading, snapshot.templates.length, snapshot.ledger.length, latest, profileCount, errorCount]);
+
+    items.push({
+      label: 'Guardian',
+      value: guardianLoading ? '…' : guardianMode,
+      hint:
+        guardianMode === 'agent'
+          ? 'Agent active (tools available)'
+          : guardianMode === 'stub'
+            ? 'Stub mode (echo only)'
+            : 'Status unavailable',
+      tone: guardianMode === 'agent' ? 'ok' : guardianMode === 'stub' ? 'neutral' : 'alert'
+    });
+    return items;
+  }, [snapshot.loading, snapshot.templates.length, snapshot.ledger.length, latest, profileCount, errorCount, guardianMode, guardianLoading, templateCount]);
 
   const lastUpdated = useMemo(() => {
     if (snapshot.loading) {
@@ -174,6 +195,15 @@ export default function App() {
             <div className="table-responsive">
               <LedgerTable rows={snapshot.ledger} showHeader={false} />
             </div>
+          </Panel>
+
+          <Panel
+            id="guardian"
+            label="Agent"
+            title="Guardian Console"
+            description="Ask the VaultMesh Guardian to inspect health, list events, or run templates via tools."
+          >
+            <GuardianConsole />
           </Panel>
 
           <Panel
