@@ -72,7 +72,8 @@
     "ledger:inspect": "python3 scripts/ledger_inspect.py --pretty",
     "codex:build": "npx ts-node tools/codex.ts build",
     "codex:search": "npx ts-node tools/codex.ts search",
-    "demo:compliance": "bash scripts/demo-compliance.sh"
+    "demo:compliance": "bash scripts/demo-compliance.sh",
+    "build:agents": "tsup agents/index.ts --format esm --target node20 --dts=false --splitting=false --out-dir agents/build --clean"
   },
   "bin": {
     "vm": "dist/cli/index.js"
@@ -102,6 +103,7 @@
     "dotenv-cli": "^7.4.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3",
+    "tsup": "^8.2.4",
     "vitest": "^1.0.0",
     "yaml": "^2.5.1"
   }

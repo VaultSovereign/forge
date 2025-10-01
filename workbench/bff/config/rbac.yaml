@@ -1,0 +1,21 @@
+# roles → allowed actions (expand as needed)
+roles:
+  operator:
+    - templates:read
+    - templates:write
+    - execute:run
+    - ledger:read
+  auditor:
+    - templates:read
+    - ledger:read
+  template-author:
+    - templates:read
+    - templates:write
+
+# optional mapping claim -> role(s)
+# e.g. for Auth0: "https://vaultmesh/roles": ["operator","auditor"]
+claims:
+  roles_claim_path: "https://vaultmesh/roles"
+  # fallback if claim missing:
+  default_roles: ["auditor"]
+

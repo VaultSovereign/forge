@@ -13,6 +13,14 @@ export default defineConfig({
         target: process.env.VITE_API_BASE || 'http://localhost:8787',
         changeOrigin: true,
       },
+      '/guardian': {
+        target: process.env.VITE_API_BASE || 'http://localhost:8787',
+        changeOrigin: true,
+      },
+      '/metrics': {
+        target: process.env.VITE_API_BASE || 'http://localhost:8787',
+        changeOrigin: true,
+      }
     },
   },
   preview: {

@@ -68,3 +68,52 @@ jobs:
         if: always()
         run: |
           kill "$(cat .bff.pid)" || true
+
+  smoke-script:
+    name: smoke script (auth-dev-bypass)
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: production
+      PORT: 3000
+      AI_CORE_MODE: mock
+      AUTH_DEV_BYPASS: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Enable Corepack (respect package.json packageManager)
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.17.0 --activate
+
+      - name: Install
+        run: pnpm -w install --no-frozen-lockfile
+
+      - name: Build web + bff
+        run: pnpm -w run build:web && pnpm -w run build:bff
+
+      - name: Ensure smoke script executable
+        run: chmod +x scripts/smoke-workbench.sh
+
+      - name: Boot BFF
+        run: |
+          node workbench/bff/dist/server.js & echo $! > .bff.pid
+          n=0
+          until curl -fsS "http://127.0.0.1:${PORT}/v1/health" | jq .ok | grep -q true; do
+            n=$((n+1)); [ $n -gt 20 ] && echo "health check failed" && exit 1
+            sleep 0.5
+          done
+
+      - name: Run smoke script
+        run: PORT=${PORT} scripts/smoke-workbench.sh
+
+      - name: Stop BFF
+        if: always()
+        run: |
+          kill "$(cat .bff.pid)" || true

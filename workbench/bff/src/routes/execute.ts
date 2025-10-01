@@ -13,7 +13,7 @@ const ExecuteReq = z.object({
 export default async function executeRoutes(app: FastifyInstance) {
   app.post(
     '/v1/api/execute',
-    { preHandler: [authMiddleware(), rbac(['operator'])] },
+    { preHandler: [authMiddleware(), rbac(['execute:run'])] },
     async (request, reply) => {
       const body = ExecuteReq.parse(request.body ?? {});
       const result = await coreExecute(body);
@@ -23,7 +23,7 @@ export default async function executeRoutes(app: FastifyInstance) {
 
   app.get(
     '/v1/api/execute/stream',
-    { preHandler: [authMiddleware(), rbac(['operator'])] },
+    { preHandler: [authMiddleware(), rbac(['execute:run'])] },
     async (req: FastifyRequest, reply: FastifyReply) => {
       const rawQuery: Record<string, unknown> = { ...(req.query as Record<string, unknown> ?? {}) };
       if (typeof rawQuery.args === 'string') {

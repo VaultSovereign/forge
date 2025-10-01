@@ -1,4 +1,9 @@
-const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8787';
+function apiBase() {
+  const raw = (import.meta as any).env?.VITE_API_BASE as string | undefined;
+  if (!raw) return '';
+  return raw.endsWith('/') ? raw.slice(0, -1) : raw;
+}
+const API_BASE = apiBase();
 
 export type TemplateSummary = {
   id: string;
@@ -27,13 +32,14 @@ export type LedgerQueryResponse = {
 export async function listTemplates(): Promise<TemplateSummary[]> {
   const response = await fetch(`${API_BASE}/v1/api/templates`);
   if (!response.ok) throw new Error(`templates: ${response.status}`);
-  return (await response.json()) as TemplateSummary[];
+  const data = (await response.json()) as unknown;
+  return (Array.isArray(data) ? data : []) as TemplateSummary[];
 }
 
 export async function executeOnce(body: TemplateExecution) {
   const response = await fetch(`${API_BASE}/v1/api/execute`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
     body: JSON.stringify(body)
   });
   if (!response.ok) throw new Error(`execute: ${response.status}`);
@@ -43,7 +49,7 @@ export async function executeOnce(body: TemplateExecution) {
 export function streamExecute(
   query: TemplateExecution,
   onLog: (line: string) => void,
-  onDone: (result: unknown) => void,
+  onDone: (result: { ok?: boolean; id?: string; [k: string]: any }) => void,
   onError: (error: unknown) => void
 ) {
   const params = new URLSearchParams({
@@ -73,5 +79,6 @@ export function streamExecute(
 export async function listLedger(limit = 25): Promise<LedgerQueryResponse> {
   const response = await fetch(`${API_BASE}/v1/api/ledger/events?limit=${limit}`);
   if (!response.ok) throw new Error(`ledger: ${response.status}`);
-  return (await response.json()) as LedgerQueryResponse;
+  const json = (await response.json()) as Partial<LedgerQueryResponse> | null;
+  return { rows: Array.isArray(json?.rows) ? (json!.rows as LedgerRow[]) : [] };
 }
