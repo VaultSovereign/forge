@@ -11,11 +11,11 @@ else
   echo "repld not found; starting dev servers directly (non-Replit)" >&2
   # Kick off BFF then frontend. Use pnpm if available, else npm.
   if command -v pnpm >/dev/null 2>&1; then
-    (cd workbench/bff && pnpm i && pnpm run dev) &
-    (cd workbench/frontend && pnpm i && pnpm run dev) &
+    (cd workbench/bff && PORT=8787 pnpm i && PORT=8787 pnpm run dev) &
+    (cd workbench/frontend && VITE_API_BASE="http://localhost:8787" pnpm i && VITE_API_BASE="http://localhost:8787" pnpm run dev) &
   else
-    (cd workbench/bff && npm i && npm run dev) &
-    (cd workbench/frontend && npm i && npm run dev) &
+    (cd workbench/bff && PORT=8787 npm i && PORT=8787 npm run dev) &
+    (cd workbench/frontend && VITE_API_BASE="http://localhost:8787" npm i && VITE_API_BASE="http://localhost:8787" npm run dev) &
   fi
   wait
 fi
