@@ -11,11 +11,11 @@ else
   echo "repld not found; starting dev servers directly (non-Replit)" >&2
   # Kick off BFF then frontend. Use pnpm if available, else npm.
   if command -v pnpm >/dev/null 2>&1; then
-    (cd vaultmesh-ai/workbench/bff && pnpm i && pnpm run dev) &
-    (cd vaultmesh-ai/workbench/frontend && pnpm i && pnpm run dev) &
+    (cd workbench/bff && pnpm i && pnpm run dev) &
+    (cd workbench/frontend && pnpm i && pnpm run dev) &
   else
-    (cd vaultmesh-ai/workbench/bff && npm i && npm run dev) &
-    (cd vaultmesh-ai/workbench/frontend && npm i && npm run dev) &
+    (cd workbench/bff && npm i && npm run dev) &
+    (cd workbench/frontend && npm i && npm run dev) &
   fi
   wait
 fi
