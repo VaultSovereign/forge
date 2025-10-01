@@ -1,0 +1,18 @@
+{
+  "applied_at": "2025-09-30T09:30:43.102Z",
+  "proposal_id": "TEO-2025-0001",
+  "proposed_at": "2025-09-30T12:00:00Z",
+  "rationale": "Clarify incident classification alignment and add post-coercion guardrails. Non-breaking minor version bump.",
+  "receipt_type": "template_evolution_receipt.v1",
+  "repo_hash": "2c4fa98",
+  "targets": [
+    {
+      "deprecation_window_days": 30,
+      "from_version": "1.1.0",
+      "hash_after": "777178c61fe2da7702e98e8872d0cdcd979f805ded37f52d8b38886a41ceafbe",
+      "hash_before": "1bd9b89b66138d9fe8a2a5191069667ebe60167d5ff4938a51b1ae41d1eab659",
+      "template_path": "catalog/cyber/dora.ict_risk_framework.v1.yaml",
+      "to_version": "1.1.1"
+    }
+  ]
+}

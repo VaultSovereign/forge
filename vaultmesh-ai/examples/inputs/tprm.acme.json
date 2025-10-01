@@ -1,0 +1,9 @@
+{
+  "vendor_name": "AcmeCloud",
+  "criticality": "high",
+  "business_services": ["Payments"],
+  "data_categories": ["PII", "PCI"],
+  "regions": ["EU"],
+  "evidence_paths": ["examples/evidence/tprm/acme/**"],
+  "questionnaires": ["examples/evidence/tprm/ddq/acme-ddq.json"]
+}

@@ -1,0 +1,13 @@
+{
+  "org_name": "AcmeBank",
+  "assessment_date": "2025-01-15",
+  "org_type": "bank",
+  "critical_functions": ["Payments", "Trading"],
+  "regions": ["EU"],
+  "policies": ["examples/evidence/policies/*.md"],
+  "assets": ["examples/evidence/assets/*.csv"],
+  "incidents": ["examples/evidence/incidents/*.json"],
+  "third_parties": ["examples/evidence/tprm/**/*.json"],
+  "tests": [],
+  "notes": "Initial ICT risk assessment (demo run for AcmeBank)"
+}

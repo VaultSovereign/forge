@@ -1,0 +1,22 @@
+# VaultMesh Code Ownership
+
+# Core Architecture
+/dispatcher/           @vaultsovereign
+/reality_ledger/       @vaultsovereign
+/cli/                  @vaultsovereign
+
+# Templates & Compliance
+/catalog/              @vaultsovereign
+/profiles/             @vaultsovereign
+/schemas/              @vaultsovereign
+
+# Documentation & Process
+/docs/                 @vaultsovereign
+/.github/              @vaultsovereign
+/scripts/              @vaultsovereign
+
+# Security-sensitive files
+.env                   @vaultsovereign
+.env.example           @vaultsovereign
+SECURITY.md            @vaultsovereign
+package*.json          @vaultsovereign

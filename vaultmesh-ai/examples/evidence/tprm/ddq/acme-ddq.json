@@ -1,0 +1,10 @@
+{
+  "vendor": "AcmeCloud",
+  "security_certifications": ["ISO 27001"],
+  "data_residency": "EU",
+  "encryption_at_rest": true,
+  "encryption_in_transit": true,
+  "subprocessors": ["SubCloud-1"],
+  "breach_history": false,
+  "notes": "Starter DDQ for demo purposes"
+}

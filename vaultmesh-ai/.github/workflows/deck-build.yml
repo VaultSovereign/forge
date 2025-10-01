@@ -1,0 +1,36 @@
+name: deck-build
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs/SALES/**'
+      - '.github/workflows/deck-build.yml'
+  pull_request:
+    paths:
+      - 'docs/SALES/**'
+      - '.github/workflows/deck-build.yml'
+  workflow_dispatch: {}
+
+jobs:
+  deck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build deck (HTML + PDF)
+        run: |
+          npm run deck:build
+
+      - name: Upload deck artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sales-deck
+          path: |
+            dist/sales-deck.html
+            dist/sales-deck.pdf
+          if-no-files-found: error

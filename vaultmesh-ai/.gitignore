@@ -1,0 +1,51 @@
+# Environment variables and secrets
+.env
+.env.local
+.env.*.local
+
+# Claude MCP configuration (may contain sensitive paths)
+.claude/mcp_servers.json
+
+# Dependencies
+node_modules/
+*.lock
+pnpm-lock.yaml
+
+# Build outputs
+dist/
+build/
+workbench/frontend-dist/
+workbench/frontend/vite.config.js
+*.tsbuildinfo
+
+# Runtime logs
+logs/
+*.log
+audit.jsonl
+reality_ledger/*.jsonl
+reality_ledger/*.idx
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Test coverage
+coverage/
+.nyc_output/

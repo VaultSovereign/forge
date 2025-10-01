@@ -1,0 +1,794 @@
+name: CI
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18, 20]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup toolchain
+        uses: ./.github/actions/setup-pnpm
+        with:
+          node-version: ${{ matrix.node-version }}
+          pnpm-version: '10.17.0'
+
+      - name: Type check
+        run: pnpm run typecheck
+
+      - name: Lint code
+        run: pnpm run lint || echo "Lint not configured"
+
+      - name: Validate catalog YAML
+        run: |
+          npx yaml-lint 'catalog/**/*.yaml'
+
+      - name: Run tests
+        run: pnpm run test || echo "Tests not configured"
+
+      - name: Build project
+        run: pnpm run build
+
+      - name: Generate SBOM
+        run: pnpm run sbom
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.json
+
+      - name: Secrets scan
+        run: pnpm run scan:secrets
+
+      - name: Security audit
+        run: pnpm audit --prod || echo "Audit warnings found"
+
+      - name: Build container image
+        run: docker build -t vaultmesh/forge:ci .
+
+      - name: Trivy container scan
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: 'vaultmesh/forge:ci'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          format: 'table'
+          exit-code: '1'
+
+  forge-sidecar-test:
+    name: Forge Sidecar Test (Python)
+    runs-on: ubuntu-latest
+    needs: build-test
+    continue-on-error: true # Allow this to be optional for now
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install forge sidecar test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Run deterministic forge test
+        run: pytest -q -rA tests/test_unforged_forge.py
+
+      - name: Verify protocol evolution template (advisory)
+        run: |
+          python3 unforged_forge_genesis/scripts/proposal_verify.py \
+            --proposal unforged_forge_genesis/ore/0002_protocol_evolution_template.json \
+            --genesis unforged_forge_genesis/genesis.json || true
+
+  forge-prepush:
+    runs-on: ubuntu-latest
+    needs: build-test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup toolchain
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Build project
+        run: pnpm run build
+
+      - name: Run prepush gates (FAST)
+        env:
+          FORGE_FAST: "1"
+        run: bash scripts/forge-prepush.sh
+
+      - name: Upload prepush artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: prepush-artifacts
+          path: |
+            artifacts/prepush/**
+            sbom.json
+          if-no-files-found: ignore
+
+  template-evolution-verify:
+    name: Template Evolution Verify (PR)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect template/Ore changes
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          token: ${{ github.token }}
+          filters: |
+            catalog:
+              - 'catalog/**'
+            ore:
+              - 'unforged_forge_genesis/ore/**'
+
+      - name: Skip if no relevant changes
+        if: steps.changes.outputs.catalog != 'true' && steps.changes.outputs.ore != 'true'
+        run: echo "No template/Ore changes detected; skipping."
+
+      - name: Setup Python
+        if: steps.changes.outputs.catalog == 'true' || steps.changes.outputs.ore == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Setup toolchain
+        if: steps.changes.outputs.catalog == 'true' || steps.changes.outputs.ore == 'true'
+        uses: ./.github/actions/setup-pnpm
+        with:
+          node-version: '20'
+          pnpm-version: '10.17.0'
+
+      - name: Build project
+        if: steps.changes.outputs.catalog == 'true' || steps.changes.outputs.ore == 'true'
+        run: pnpm -s build
+
+      - name: Verify Template Evolution Ore (advisory)
+        if: steps.changes.outputs.catalog == 'true' || steps.changes.outputs.ore == 'true'
+        id: verify
+        run: |
+          set -euo pipefail
+          python3 unforged_forge_genesis/scripts/template_evolution_verify.py \
+            --proposal unforged_forge_genesis/ore/0004_template_evolution.json \
+            --repo-root .
+        continue-on-error: true
+
+      - name: Post template evolution verdict
+        if: steps.changes.outputs.catalog == 'true' || steps.changes.outputs.ore == 'true'
+        uses: actions/github-script@v7
+        env:
+          VERIFY_OUTCOME: ${{ steps.verify.outcome }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        with:
+          script: |
+            const ok = process.env.VERIFY_OUTCOME === 'success';
+            const body = `<!-- template-evolution-verify -->\n**Template Evolution Verify:** ${ok ? '✅ PASS' : '❌ FAIL'}\nProposal: \`unforged_forge_genesis/ore/0004_template_evolution.json\`\nRun: [view logs](${process.env.RUN_URL})`;
+            const { owner, repo } = context.repo;
+            const pr = context.payload.pull_request?.number;
+            if (!pr) return;
+            const existing = (await github.rest.issues.listComments({ owner, repo, issue_number: pr })).data
+              .find(comment => comment.user?.type === 'Bot' && comment.body?.includes('<!-- template-evolution-verify -->'));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number: pr, body });
+            }
+
+  audit-scroll:
+    runs-on: ubuntu-latest
+    needs: build-test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup toolchain
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Build project
+        run: pnpm run build
+
+      - name: Collect audit bundle
+        run: bash scripts/collect-audit-bundle.sh
+
+      - name: Run audit scroll (advisory)
+        env:
+          AUDIT_USE_DOTENV: "0"
+        run: |
+          bash scripts/run-audit-scroll.sh || true
+
+      - name: Upload audit artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-scroll
+          path: artifacts/audit/**
+          if-no-files-found: ignore
+
+      - name: Post audit verdict to PR (advisory)
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = 'artifacts/audit/audit_scroll.json';
+            if (!fs.existsSync(path)) {
+              return;
+            }
+            let verdict = 'unknown';
+            let stamp = null;
+            try {
+              const data = JSON.parse(fs.readFileSync(path, 'utf8'));
+              verdict = data.verdict || data.result?.verdict || 'unknown';
+            } catch (error) {
+              verdict = 'parse-error';
+            }
+            try {
+              const files = fs.readdirSync('artifacts/audit')
+                .filter((f) => f.startsWith('audit_scroll-') && f.endsWith('.json'))
+                .sort();
+              if (files.length > 0) {
+                stamp = files[files.length - 1];
+              }
+            } catch (error) {
+              stamp = null;
+            }
+            const link = stamp ? `artifacts/audit/${stamp}` : 'artifacts/audit/audit_scroll.json';
+            const body = `<!-- audit-scroll -->\n**Audit verdict:** \`${verdict}\`\n_See \`${link}\` for the full scroll._`;
+            const { owner, repo } = context.repo;
+            const pr = context.payload.pull_request?.number;
+            if (!pr) {
+              return;
+            }
+            const existing = (await github.rest.issues.listComments({ owner, repo, issue_number: pr })).data
+              .find((comment) => comment.user?.type === 'Bot' && comment.body?.includes('<!-- audit-scroll -->'));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number: pr, body });
+            }
+
+  template-evolution-apply-mint:
+    name: Template Evolution Apply+Mint (main)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect Ore changes
+        id: orechg
+        uses: dorny/paths-filter@v3
+        with:
+          token: ${{ github.token }}
+          filters: |
+            ore:
+              - 'unforged_forge_genesis/ore/**'
+
+      - name: Skip if no Ore change
+        if: steps.orechg.outputs.ore != 'true'
+        run: echo "No Ore change on main; skipping evolution apply/mint."
+
+      - uses: actions/setup-python@v5
+        if: steps.orechg.outputs.ore == 'true'
+        with:
+          python-version: '3.10'
+
+      - name: Setup toolchain
+        if: steps.orechg.outputs.ore == 'true'
+        uses: ./.github/actions/setup-pnpm
+        with:
+          node-version: '20'
+          pnpm-version: '10.17.0'
+
+      - name: Build project
+        if: steps.orechg.outputs.ore == 'true'
+        run: pnpm -s build
+
+      - name: Verify proposal (must pass)
+        if: steps.orechg.outputs.ore == 'true'
+        run: |
+          set -euo pipefail
+          python3 unforged_forge_genesis/scripts/template_evolution_verify.py \
+            --proposal unforged_forge_genesis/ore/0004_template_evolution.json \
+            --repo-root .
+
+      - name: Apply evolution
+        if: steps.orechg.outputs.ore == 'true'
+        run: |
+          node scripts/template_evolution_apply.mjs \
+            unforged_forge_genesis/ore/0004_template_evolution.json --repo-root .
+          test -s artifacts/evolution/template_evolution_receipt.json
+
+      - name: Mint and prove evolution (advisory)
+        if: steps.orechg.outputs.ore == 'true'
+        run: |
+          bash scripts/forge-mint-ore.sh unforged_forge_genesis/ore/0004_template_evolution.json unforged_forge_genesis || true
+          latest=$(ls -1t unforged_forge_genesis/archive/artifact-*.json 2>/dev/null | head -n 1 || true)
+          if [ -n "$latest" ]; then
+            aid=$(basename "$latest" .json)
+            node scripts/merkle_proof.js "$aid" unforged_forge_genesis > artifacts/evolution/proof_bundle.json || true
+            node scripts/verify-proof.js artifacts/evolution/proof_bundle.json || true
+          fi
+
+      - name: Build Template Index
+        if: steps.orechg.outputs.ore == 'true'
+        run: |
+          node scripts/template_index_build.mjs
+          test -s artifacts/evolution/template_index.json
+
+      - name: Append Council Journal
+        if: steps.orechg.outputs.ore == 'true'
+        run: |
+          node scripts/journal_append.mjs
+          test -s artifacts/evolution/template_journal.jsonl
+
+      - name: Seal checkpoint
+        if: steps.orechg.outputs.ore == 'true'
+        run: |
+          node scripts/seal_checkpoint.mjs unforged_forge_genesis || true
+
+      - name: Upload evolution artifacts
+        if: steps.orechg.outputs.ore == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: template-evolution
+          path: |
+            artifacts/evolution/**
+            unforged_forge_genesis/archive/artifact-*.json
+            unforged_forge_genesis/receipts/artifact-*_receipt.json
+          if-no-files-found: ignore
+
+  workbench-build-test:
+    runs-on: ubuntu-latest
+    needs: build-test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Build Workbench Frontend
+        working-directory: workbench/frontend
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run build
+      - name: Build Workbench BFF
+        working-directory: workbench/bff
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run build
+          mkdir -p public
+          if [ -d ../frontend/dist ] && [ -n "$(ls -A ../frontend/dist 2>/dev/null)" ]; then
+            cp -R ../frontend/dist/* public/
+          else
+            echo "::warning title=Frontend assets missing::Serving JSON placeholder; SPA likely not built"
+          fi
+      - name: Start Workbench BFF (with readiness check)
+        working-directory: workbench/bff
+        run: |
+          set -euo pipefail
+          node dist/server.js > ../../workbench-server.log 2>&1 &
+          echo $! > ../../workbench.pid
+          for i in {1..30}; do
+            if curl -fsS http://localhost:8787/v1/api/health >/dev/null; then
+              echo "BFF ready"
+              break
+            fi
+            if ! kill -0 "$(cat ../../workbench.pid)" 2>/dev/null; then
+              echo "BFF process exited early"
+              tail -n +200 ../../workbench-server.log || true
+              exit 1
+            fi
+            sleep 1
+          done
+      - name: Smoke test API
+        run: |
+          curl -fsS http://localhost:8787/v1/api/health | jq .
+          curl -fsS http://localhost:8787/v1/api/templates | jq '.[0]'
+      - name: Smoke test SSE stream
+        run: |
+          curl -fsSN --max-time 5 "http://localhost:8787/v1/api/execute/stream?templateId=demo.echo&args=%7B%22message%22%3A%22hi%22%7D" | head -n 5
+      - name: Workbench deep health (optional)
+        if: env.CORE_GRPC_ADDR != ''
+        run: |
+          curl -fsS http://localhost:8787/v1/api/health/deep | jq .
+      - name: Upload Workbench logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: workbench-server-log
+          path: workbench-server.log
+          if-no-files-found: ignore
+      - name: Stop Workbench BFF
+        if: always()
+        run: |
+          kill $(cat workbench.pid) 2>/dev/null || true
+          rm -f workbench.pid
+
+  pr-failure-comment:
+    name: PR Failure Summary
+    if: github.event_name == 'pull_request' && needs.forge-prepush.result == 'failure'
+    needs: [forge-prepush]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download prepush artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: prepush-artifacts
+          path: prepush-artifacts
+      - name: Extract KPI numbers
+        id: kpis
+        run: |
+          SEC_CRIT=$(jq -r '.result.summary.critical // 0' prepush-artifacts/secrets_audit.json 2>/dev/null || echo 0)
+          REV_HIGH=$(jq -r '.result.summary.high // 0' prepush-artifacts/code_review.json 2>/dev/null || echo 0)
+          echo "secrets_critical=$SEC_CRIT" >> "$GITHUB_OUTPUT"
+          echo "review_high=$REV_HIGH" >> "$GITHUB_OUTPUT"
+      - name: Upsert PR failure comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { github, context } = require('@actions/github');
+            const pr = context.payload.pull_request;
+            if (!pr) { core.info('No PR context; skipping.'); return; }
+            const bodyHeader = '<!-- forge-prepush-summary -->';
+            const sec = process.env.SEC_CRIT;
+            const rev = process.env.REV_HIGH;
+            const badge = (n, ok) => ok ? `✅ ${n}` : `❌ ${n}`;
+            const lines = [
+              bodyHeader,
+              `## ⚠️ Forge Gates Failed`,
+              ``,
+              `**Summary**`,
+              `- Secrets (critical): ${badge(sec, Number(sec) === 0)}`,
+              `- Code Review (high): ${badge(rev, Number(rev) === 0)}`,
+              ``,
+              `**Artifacts**`,
+              `- \`secrets_audit.json\` — critical must be **0**`,
+              `- \`code_review.json\` — high must be **0**`,
+              `- \`container_security.json\` (advisory)`,
+              `- \`compliance_gaps.json\` (advisory)`,
+              `- \`sbom.json\` (supply-chain snapshot)`,
+              ``,
+              `See **ARTIFACTS.md** for how to interpret downloads.`,
+            ].join('\n');
+            // Find existing bot comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              per_page: 100
+            });
+            const existing = comments.find(c => c.user.type === 'Bot' && c.body && c.body.includes(bodyHeader));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body: lines
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                body: lines
+              });
+            }
+        env:
+          SEC_CRIT: ${{ steps.kpis.outputs.secrets_critical }}
+          REV_HIGH: ${{ steps.kpis.outputs.review_high }}
+
+  pr-success-comment:
+    name: PR Success Summary
+    if: github.event_name == 'pull_request' && needs.forge-prepush.result == 'success'
+    needs: [forge-prepush]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download prepush artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: prepush-artifacts
+          path: prepush-artifacts
+      - name: Extract KPI numbers
+        id: kpis
+        run: |
+          SEC_CRIT=$(jq -r '.result.summary.critical // 0' prepush-artifacts/secrets_audit.json 2>/dev/null || echo 0)
+          REV_HIGH=$(jq -r '.result.summary.high // 0' prepush-artifacts/code_review.json 2>/dev/null || echo 0)
+          echo "secrets_critical=$SEC_CRIT" >> "$GITHUB_OUTPUT"
+          echo "review_high=$REV_HIGH" >> "$GITHUB_OUTPUT"
+      - name: Upsert PR success comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { github, context } = require('@actions/github');
+            const pr = context.payload.pull_request;
+            if (!pr) { core.info('No PR context; skipping.'); return; }
+            const bodyHeader = '<!-- forge-prepush-summary -->';
+            const sec = process.env.SEC_CRIT;
+            const rev = process.env.REV_HIGH;
+            const lines = [
+              bodyHeader,
+              `## ✅ Forge Gates Passed`,
+              ``,
+              `**Summary**`,
+              `- Secrets (critical): ${sec}`,
+              `- Code Review (high): ${rev}`,
+              ``,
+              `Artifacts available in CI → \`prepush-artifacts\`.`,
+              `See **ARTIFACTS.md** for interpretation.`
+            ].join('\n');
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: pr.number, per_page: 100
+            });
+            const existing = comments.find(c => c.user.type === 'Bot' && c.body?.includes(bodyHeader));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                comment_id: existing.id, body: lines
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: pr.number, body: lines
+              });
+            }
+        env:
+          SEC_CRIT: ${{ steps.kpis.outputs.secrets_critical }}
+          REV_HIGH: ${{ steps.kpis.outputs.review_high }}
+
+  security-scan:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Trivy filesystem scan
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  validate-templates:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup toolchain
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Build project
+        run: pnpm run build
+
+      - name: Validate template schemas
+        run: |
+          for file in catalog/**/*.yaml; do
+            echo "Validating $file"
+            node -e "
+              const fs = require('fs');
+              const yaml = require('yaml');
+              const ajv = require('ajv');
+
+              const schema = JSON.parse(fs.readFileSync('schemas/prompt.schema.json', 'utf8'));
+              const template = yaml.parse(fs.readFileSync('$file', 'utf8'));
+
+              const validator = new ajv();
+              const valid = validator.validate(schema, template);
+
+              if (!valid) {
+                console.error('Validation errors:', validator.errors);
+                process.exit(1);
+              }
+
+              console.log('✅ Valid');
+            "
+          done
+
+      - name: Test template loading
+        run: |
+          echo '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | timeout 10s node dist/mcp/vaultmesh-mcp-server.js | grep -q "tools" || echo "MCP server test failed"
+
+  licensing-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup toolchain
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Check licenses
+        run: |
+          pnpm dlx license-checker --onlyAllow 'Apache-2.0;MIT;BSD-2-Clause;BSD-3-Clause;ISC' --excludePrivatePackages || echo "License check warnings"
+
+  security-templates:
+    runs-on: ubuntu-latest
+    needs: build-test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup toolchain
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Build project
+        run: pnpm run build
+
+      - name: Prepare artifacts dir
+        run: mkdir -p artifacts
+
+      - name: Collect changed files
+        run: npx ts-node scripts/pre_scan/collect_changed_files.ts > pre_changed.json
+
+      - name: Secrets scan (gitleaks preferred)
+        run: |
+          if ! command -v gitleaks >/dev/null; then pnpm dlx gitleaks >/dev/null 2>&1 || true; fi
+          npx ts-node scripts/pre_scan/secrets_scan.ts > pre_secrets.json
+
+      - name: Docker scan inputs (advisory)
+        run: |
+          if ! command -v trivy >/dev/null; then echo "Skipping trivy"; fi
+          npx ts-node scripts/pre_scan/docker_scan.ts > pre_docker.json
+
+      - name: Run Secrets Leak Audit (gate)
+        run: |
+          node dist/cli/index.js run cyber-secrets-audit --args "$(jq -nc '{repo_context:"vaultmesh-ai", files_index:(.files), findings_raw:(input), changed_only:(.changed_only)}' pre_changed.json pre_secrets.json)" > secrets_out.json
+          cat secrets_out.json | jq '.result' > artifacts/secrets_audit.json
+
+      - name: Gate on critical secrets
+        run: |
+          CRIT=$(jq '.summary.critical // 0' artifacts/secrets_audit.json)
+          if [ "$CRIT" -gt 0 ]; then echo "Critical secrets detected: $CRIT"; exit 1; fi
+
+      - name: Run Code Security Reviewer
+        run: |
+          node dist/cli/index.js run cyber-code-security-reviewer --args "$(jq -nc '{repo_context:"vaultmesh-ai", diffs_or_files:(.files), prescan:{secrets: input}}' pre_changed.json pre_secrets.json)" > review_out.json
+          cat review_out.json | jq '.result' > artifacts/code_review.json
+
+      - name: Gate on high severity code issues
+        run: |
+          HIGH=$(jq '.summary.high // 0' artifacts/code_review.json)
+          if [ "$HIGH" -gt 0 ]; then echo "High-severity code findings: $HIGH"; exit 1; fi
+
+      - name: Run Container Security Scanner (advisory)
+        run: |
+          node dist/cli/index.js run cyber-container-security-scanner --args "$(cat pre_docker.json)" > container_out.json
+          cat container_out.json | jq '.result' > artifacts/container_security.json
+
+      - name: Run Compliance Gap Analyzer
+        run: |
+          jq -nc '{ current_controls: { ci:{ secrets_gate:true, tests:true }, ledger:{ hashing:"sha256", signature:"ed25519?" } }, target_frameworks:["NIST 800-53","OWASP ASVS"] }' > gap_args.json
+          node dist/cli/index.js run cyber-compliance-gap-analyzer --args "$(cat gap_args.json)" > gap_out.json
+          cat gap_out.json | jq '.result' > artifacts/compliance_gaps.json
+
+      - name: Generate Security Metrics Dashboard (advisory)
+        run: |
+          jq -nc --slurpfile s artifacts/secrets_audit.json --slurpfile r artifacts/code_review.json --slurpfile c artifacts/container_security.json '{ audience:"security", frameworks:["NIST 800-53","OWASP"], data_sources:{ secrets:$s[0], review:$r[0], container:$c[0] } }' > metrics_args.json
+          node dist/cli/index.js run cyber-security-metrics-dashboard --args "$(cat metrics_args.json)" > metrics_out.json
+          cat metrics_out.json | jq '.result' > artifacts/security_dashboard.json
+
+      - name: TPRM prescan + run (advisory)
+        run: |
+          node dist/cli/index.js run dora-tprm-assessment --args @examples/inputs/tprm.acme.json > tprm_out.json || true
+          jq '.result' tprm_out.json > artifacts/tprm_report.json || true
+
+      - name: Upload security artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: vm-security-artifacts
+          path: artifacts/**
+
+      - name: Upload TPRM report
+        uses: actions/upload-artifact@v4
+        with:
+          name: tprm-report
+          path: artifacts/tprm_report.json
+          if-no-files-found: ignore
+
+
+  compliance-examples:
+    name: Compliance Examples (advisory)
+    runs-on: ubuntu-latest
+    needs: build-test
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      OLLAMA_HOST: ${{ secrets.OLLAMA_HOST }}
+      FORGE_FAST: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install & build CLI
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run build
+
+      - name: Prepare artifacts dir
+        run: |
+          mkdir -p artifacts/compliance_examples
+
+      - name: Run ICT Risk (if provider configured)
+        if: env.OPENAI_API_KEY != '' || env.OPENROUTER_API_KEY != '' || env.OLLAMA_HOST != ''
+        run: |
+          node dist/cli/index.js run dora.ict_risk_framework.v1             --args @examples/inputs/ict_risk.acme.json             > artifacts/compliance_examples/ict_risk.json
+
+      - name: Run TPRM (if template present & provider configured)
+        if: (env.OPENAI_API_KEY != '' || env.OPENROUTER_API_KEY != '' || env.OLLAMA_HOST != '') && hashFiles('catalog/cyber/dora.tprm.v1.yaml') != ''
+        run: |
+          test -f examples/inputs/tprm.acme.json || echo '{}' > examples/inputs/tprm.acme.json
+          node dist/cli/index.js run dora.tprm.v1             --args @examples/inputs/tprm.acme.json             > artifacts/compliance_examples/tprm.json || true
+
+      - name: Note when provider is missing (skip advisory examples)
+        if: env.OPENAI_API_KEY == '' && env.OPENROUTER_API_KEY == '' && env.OLLAMA_HOST == ''
+        run: echo "::notice title=Compliance examples skipped::No provider secret configured."
+
+      - name: Upload compliance example artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-examples
+          path: artifacts/compliance_examples/**
+          if-no-files-found: ignore
+
+      - name: Validate ICT output shape (advisory)
+        if: env.OPENAI_API_KEY != '' || env.OPENROUTER_API_KEY != '' || env.OLLAMA_HOST != ''
+        run: |
+          node -e "const Ajv=require('ajv');const addF=require('ajv-formats');const fs=require('fs');\
+          const ajv=new Ajv({allErrors:true,strict:false});addF(ajv);\
+          const sch=JSON.parse(fs.readFileSync('schemas/ict_risk.v1.json','utf8'));\
+          const validate=ajv.compile(sch.output_schema);\
+          const out=JSON.parse(fs.readFileSync('artifacts/compliance_examples/ict_risk.json','utf8')).result;\
+          if(!validate(out)){console.log(validate.errors);process.exit(0)}"

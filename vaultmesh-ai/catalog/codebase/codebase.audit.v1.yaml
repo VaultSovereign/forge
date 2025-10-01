@@ -1,0 +1,179 @@
+id: codebase.audit.v1
+version: "1.0.0"
+keyword: codebase-audit
+meta:
+  title: "Codebase Audit (Structured Scroll)"
+  description: >
+    Runs a structured audit across the repository. Produces a JSON scroll
+    conforming to urn:vaultmesh:audit.scroll.v1, with a high-level map,
+    per-module analysis, risks/opportunities, and final verdict.
+  tags: [audit, consciousness, governance, codebase]
+  safety: read-only
+summary: >
+  Conduct a deterministic repository review and emit a ledger-ready JSON
+  scroll describing architecture, risks, and opportunities.
+
+prescan:
+  name: audit-bundle-collect
+  description: Ensure a valid audit bundle exists; inject its path into args.
+  run:
+    shell: bash
+    script: |
+      set -euo pipefail
+      : "${VM_PRESCAN_OUT:?VM_PRESCAN_OUT not set}"
+
+      BUNDLE_IN="{{bundle_path}}"
+      DEFAULT_PATH="artifacts/audit/audit_bundle.json"
+
+      if [ -z "${BUNDLE_IN}" ] || [ "${BUNDLE_IN}" = "null" ] || [ "${BUNDLE_IN}" = "undefined" ]; then
+        BUNDLE_IN=""
+      fi
+
+      TARGET="${BUNDLE_IN:-$DEFAULT_PATH}"
+
+      if [ ! -f "$TARGET" ] || [ ! -s "$TARGET" ]; then
+        echo "[prescan] Collecting audit bundle at ${DEFAULT_PATH} ..."
+        if [ -x "scripts/collect-audit-bundle.sh" ]; then
+          bash scripts/collect-audit-bundle.sh
+        else
+          echo "::warning :: prescan: scripts/collect-audit-bundle.sh not found or not executable; emitting fallback note"
+          mkdir -p artifacts/audit
+          (jq -n '{bundle_unavailable:true}' > artifacts/audit/audit_bundle.json 2>/dev/null) || echo '{"bundle_unavailable":true}' > artifacts/audit/audit_bundle.json
+        fi
+        TARGET="$DEFAULT_PATH"
+      else
+        echo "[prescan] Using existing bundle ${TARGET}"
+      fi
+
+      printf '%s' "{\"bundle_path\":\"$TARGET\"}" > "$VM_PRESCAN_OUT"
+  merge: merge_args
+inputs:
+  bundle_path:
+    type: string
+    description: >
+      Optional path to a pre-collected bundle (artifacts/audit/audit_bundle.json).
+      If provided, ingest and cite it for evidence.
+outputs:
+  result:
+    type: object
+  schema_ref: "file:../schemas/audit.scroll.v1.json"
+guardrails:
+  schema_enforce: true
+  temperature: 0.1
+  max_tokens: 4000
+prompt:
+  system: |
+    You are an expert auditor and systems architect. Examine the repository as it
+    currently exists. If the optional bundle is present at {{bundle_path}}, ingest
+    it for evidence; otherwise note that the bundle is unavailable and proceed via
+    direct repository inspection. Deliver deterministic, evidence-backed findings
+    and output valid JSON only, conforming to urn:vaultmesh:audit.scroll.v1. For
+    each module or directory you inspect, capture:
+      1. Purpose & Scope
+      2. Dependencies
+      3. Strengths
+      4. Weaknesses / Risks
+      5. Integration Points
+      6. Tests & Coverage
+      7. Governance Hooks
+      8. Evolution Readiness
+
+    Also include:
+      • High-level map of the repo (modules mapped to roles)
+      • Top 5 risks (severity P0–P3 with rationale and remediation)
+      • Top 5 opportunities (value, effort, steps)
+      • Final verdict (production-ready, pilot-ready, or research-only)
+
+    STRICT CONSTRAINTS (must follow exactly):
+      • Return valid JSON only, matching the required schema.
+      • Top-level keys MUST be present exactly: "map", "modules", "top_risks",
+        "top_opportunities", "verdict", "meta".
+      • "map" MUST be an array.
+      • "modules" MUST be an array.
+      • Every element in "top_risks" MUST have "title", "severity", "why",
+        "where", "fix"; "severity" ∈ {"P0","P1","P2","P3"} only.
+      • Every element in "top_opportunities" MUST have "title", "value",
+        "effort", "steps"; "effort" ∈ {"S","M","L"} only and "steps" MUST
+        be an array.
+      • "verdict" MUST be one of {"production-ready", "pilot-ready",
+        "research-only"}.
+      • "meta" MUST include "auditor" (string) and "timestamp" (ISO-8601, e.g.
+        "2025-09-30T12:00:00Z").
+      • Cite evidence (file paths and 1-based line hints) for material claims when
+        available. Never invent file paths.
+      • If the bundle is missing or unreadable, add "bundle_unavailable" to a
+        module weakness and continue.
+      • In each module, evidence MUST be an array of objects with keys {"file","lines","hash"}. If no file exists, emit an empty array.
+      • Produce no prose outside the JSON scroll.
+
+    JSON SCAFFOLD — USE THIS SHAPE (fill with real content, keep keys exactly):
+    {
+      "map": [],
+      "modules": [],
+      "top_risks": [
+        {"title":"","severity":"P3","why":"","where":"","fix":""},
+        {"title":"","severity":"P3","why":"","where":"","fix":""},
+        {"title":"","severity":"P3","why":"","where":"","fix":""},
+        {"title":"","severity":"P3","why":"","where":"","fix":""},
+        {"title":"","severity":"P3","why":"","where":"","fix":""}
+      ],
+      "top_opportunities": [
+        {"title":"","value":"","effort":"S","steps":[]},
+        {"title":"","value":"","effort":"S","steps":[]},
+        {"title":"","value":"","effort":"S","steps":[]},
+        {"title":"","value":"","effort":"S","steps":[]},
+        {"title":"","value":"","effort":"S","steps":[]}
+      ],
+      "verdict": "pilot-ready",
+      "meta": {"auditor":"VaultMesh Auditor","timestamp":"2025-09-30T12:00:00Z"}
+    }
+
+    MINIMAL VALID EXAMPLE:
+    {
+      "map": [{"path":"dispatcher/","role":"template-execution","notes":""}],
+      "modules": [
+        {
+          "path": "dispatcher/",
+          "purpose": "Executes templates with safety guardrails.",
+          "dependencies": ["yaml", "openai"],
+          "strengths": ["schema validation", "ledger integration"],
+          "weaknesses": ["bundle_unavailable"],
+          "integration_points": ["cli", "reality_ledger", "workbench"],
+          "tests": {"status": "unknown", "coverage": "unknown"},
+          "governance": ["executions recorded to ledger"],
+          "evolution": ["versioned templates"],
+          "evidence": []
+        }
+      ],
+      "top_risks": [
+        {
+          "title": "Missing TS test coverage",
+          "severity": "P1",
+          "why": "No automated regression signal",
+          "where": "repo-wide",
+          "fix": "Introduce Vitest suite with >80% coverage"
+        }
+      ],
+      "top_opportunities": [
+        {
+          "title": "Add OIDC to BFF",
+          "value": "Production security",
+          "effort": "M",
+          "steps": ["Integrate JWKS verification", "remove DEV_NO_AUTH"]
+        }
+      ],
+      "verdict": "pilot-ready",
+      "meta": {"auditor": "VaultMesh Auditor", "timestamp": "2025-09-30T12:00:00Z"}
+    }
+  user: |
+    Optional bundle path: {{bundle_path}}
+
+    If the bundle path string above is non-empty, ingest and cite its contents
+    when producing evidence. Otherwise proceed with direct repository inspection
+    and mark the bundle as unavailable in module weaknesses.
+  post:
+    - type: "validate_schema"
+    - type: "module_fn"
+      module: "./tools/audit_result_coercer"
+      export: "coerce"
+    - type: "validate_schema"

@@ -1,0 +1,103 @@
+id: dora.tprm.v1
+version: "1.0.0"
+keyword: cyber-dora-tprm
+meta:
+  title: "DORA Third-Party Risk (TPRM) Assessment"
+  safety: read-only
+  tags: [dora, tprm, fintech, compliance, audit]
+inputs:
+  vendor_name: { type: string, required: true }
+  criticality: { type: string, enum: [low, moderate, high, critical], required: true }
+  business_services: { type: array, items: { type: string } }
+  data_categories: { type: array, items: { type: string } }
+  regions: { type: array, items: { type: string } }
+  evidence_paths: { type: array, items: { type: string } }
+  questionnaires: { type: array, items: { type: string } }
+  notes: { type: string }
+  # Prescan-injected fields (for documentation/UI)
+  evidence:
+    type: object
+    description: "Map of file path → first ~20 lines (prescan)."
+outputs:
+  result: { type: object }
+  schema_ref: "file:../schemas/tprm.v1.json#/output_schema"
+guardrails:
+  schema_enforce: true
+  temperature: 0.1
+  max_tokens: 3000
+prescan:
+  name: tprm-collect
+  description: Expand evidence_paths & questionnaires into an enriched args bundle (includes originals)
+  # The prescan writes a JSON object to VM_PRESCAN_OUT which the dispatcher merges into args.
+  # Strategy: Prefer compiled JS; fall back to ts-node for developer machines.
+  run:
+    shell: bash
+    script: |
+      set -euo pipefail
+      : "${VM_ARGS_PATH:?VM_ARGS_PATH not set}"           # path to current args JSON (provided by dispatcher)
+      : "${VM_PRESCAN_OUT:?VM_PRESCAN_OUT not set}"       # path to write JSON patch or replacement
+
+      # Choose runner (compiled first, dev fallback)
+      if [ -f "dist/scripts/pre_scan/tprm_collect.js" ]; then
+        node dist/scripts/pre_scan/tprm_collect.js "$VM_ARGS_PATH" > /tmp/tprm_bundle.json
+      else
+        # Dev convenience: requires ts-node to be available
+        npx --yes ts-node scripts/pre_scan/tprm_collect.ts "$VM_ARGS_PATH" > /tmp/tprm_bundle.json
+      fi
+
+      # The collector already returns a *full* enriched args bundle that includes the original fields
+      # (vendor_name, criticality, business_services, data_categories, regions, notes)
+      # plus: evidence{}, questionnaires{}, collected_at.
+      # We replace the args with that bundle so the prompt can access them directly.
+      cp /tmp/tprm_bundle.json "$VM_PRESCAN_OUT"
+  merge: replace_args
+prompt:
+  system: |
+    You are a DORA-aligned third-party risk assessor. Aggregate the supplied evidence,
+    map to DORA / ISO 27001 / NIST SP 800-53 controls, score risk 0..100 using the
+    methodology, and emit JSON that **strictly** conforms to `schemas/tprm.v1.json`.
+
+    HARD REQUIREMENTS (NO EXCEPTIONS):
+    - Output only the root keys `vendor`, `risk`, `coverage`, `findings`, `recommendations`,
+      `secrets`, `acceptance`, `receipt` (in any order) and keep additionalProperties=false.
+    - Populate every required sub-field:
+        * `vendor` object with `name`, `criticality`, plus any known `regions`,
+          `business_services`, `data_categories` (empty arrays allowed, never null).
+        * `risk` must include `score` (0-100), `level` (low/moderate/high/critical),
+          and `rationale` (non-empty string summarising how evidence drives the score).
+        * `coverage` MUST supply decimals (0-1) for `dora`, `iso27001`, and `nist80053`.
+        * `findings` MUST be a non-empty array. Each finding requires `id`, `title`,
+          `severity`, `control_ids` (array), `evidence` (array of concrete file paths
+          or questionnaire references), and `recommendation` (string).
+        * `recommendations` is an array of action-focused strings (>=1 entry).
+        * `secrets` must provide integer counts for `critical`, `high`, `medium` (use 0 if none).
+        * `acceptance` must contain `pass` (boolean) and `reasons` (array of strings
+          explaining the pass/fail decision).
+        * `receipt` must be a stub object with string placeholders if no ledger event
+          exists (e.g., `"event_id": "pending"`). Never emit null.
+    - Severity must be one of: info, low, medium, high, critical. Map any narrative
+      scale back to these enums.
+    - Reference only the provided evidence paths or questionnaire keys. If a file
+      is missing, choose another supplied artefact—never invent new paths.
+    - When data is unavailable use safe defaults: empty arrays, 0, or strings such
+      as "pending". **Do not output null.**
+    - Do not emit markdown fences, comments, or prose. JSON only.
+  user: |
+    Vendor: {{vendor_name}}
+    Criticality: {{criticality}}
+    Business services: {{#each business_services}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}
+    Data categories: {{#each data_categories}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}
+    Regions: {{#each regions}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}
+    Evidence paths (globs): {{#each evidence_paths}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}{{#unless evidence_paths.length}}(none){{/unless}}
+    Notes: {{notes}}
+    {{#if evidence}}
+    Collected evidence excerpts: {{jsonStringify evidence}}
+    {{/if}}
+    {{#if questionnaires}}
+    Collected questionnaire data: {{jsonStringify questionnaires}}
+    {{/if}}
+
+    Output strictly as JSON conforming to docs/tprm.v1.yaml#/output_schema.
+artifacts:
+  - path: outputs/tprm/{{vendor_name}}/tprm_report.json
+  - path: outputs/tprm/{{vendor_name}}/tprm_summary.md

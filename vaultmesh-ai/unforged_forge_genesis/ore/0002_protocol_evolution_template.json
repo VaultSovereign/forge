@@ -1,0 +1,246 @@
+{
+  "id": "protocol.evolution.v1.template",
+  "title": "Protocol Evolution Proposal Template",
+  "version": "1.0.0",
+  "kind": "ore-template",
+  "summary": "Schema + rules for proposing and ratifying changes to genesis.json under BFT guardian quorum.",
+  "schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "urn:vaultmesh:schemas:protocol-evolution.v1",
+    "title": "Protocol Evolution Proposal",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "proposal_id",
+      "title",
+      "author",
+      "created_at",
+      "base_genesis_hash",
+      "base_genesis_version",
+      "voting_window",
+      "changes",
+      "rationale",
+      "migration_plan",
+      "risk_analysis"
+    ],
+    "properties": {
+      "proposal_id": {
+        "type": "string",
+        "description": "Stable identifier for the proposal (e.g., pep-0001-add-guardian-003).",
+        "pattern": "^[a-zA-Z0-9._-]{8,}$"
+      },
+      "title": { "type": "string" },
+      "author": { "type": "string", "description": "Human or agent author; may be a DID." },
+      "created_at": { "type": "string", "format": "date-time" },
+      "base_genesis_hash": {
+        "type": "string",
+        "description": "SHA-256 hash (hex) of the genesis.json this proposal is based on.",
+        "pattern": "^[a-f0-9]{64}$"
+      },
+      "base_genesis_version": {
+        "type": "string",
+        "description": "Version string of the referenced genesis (e.g., 1.0.0)."
+      },
+      "supersedes": {
+        "type": "string",
+        "description": "Optional proposal_id that this one supersedes."
+      },
+      "voting_window": {
+        "type": "object",
+        "required": ["start", "end"],
+        "additionalProperties": false,
+        "properties": {
+          "start": { "type": "string", "format": "date-time" },
+          "end": { "type": "string", "format": "date-time" }
+        }
+      },
+      "quorum": {
+        "type": "object",
+        "description": "Optional explicit quorum override. If omitted, use current genesis rules.",
+        "additionalProperties": false,
+        "properties": {
+          "mode": { "type": "string", "enum": ["byzantine-majority", "absolute", "percent"] },
+          "threshold": {
+            "type": "string",
+            "description": "Examples: '2f+1', 'n-1', '0.67'. Interpreted per mode."
+          }
+        }
+      },
+      "changes": {
+        "type": "object",
+        "description": "Proposed changes to genesis.json.",
+        "additionalProperties": false,
+        "oneOf": [
+          {
+            "required": ["json_patch"],
+            "properties": {
+              "json_patch": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["op", "path"],
+                  "properties": {
+                    "op": { "type": "string", "enum": ["add", "remove", "replace", "move", "copy", "test"] },
+                    "path": { "type": "string" },
+                    "from": { "type": "string" },
+                    "value": {}
+                  }
+                }
+              }
+            }
+          },
+          {
+            "required": ["merge_patch"],
+            "properties": {
+              "merge_patch": { "type": "object", "description": "RFC 7386 JSON Merge Patch document." }
+            }
+          }
+        ]
+      },
+      "rationale": { "type": "string" },
+      "migration_plan": { "type": "string" },
+      "risk_analysis": { "type": "string" },
+      "backward_compatibility": { "type": "string" },
+      "tests": {
+        "type": "array",
+        "description": "Optional test vectors for pre/post state roots.",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name"],
+          "properties": {
+            "name": { "type": "string" },
+            "pre_state_root": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "post_state_root": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "notes": { "type": "string" }
+          }
+        }
+      },
+      "signatures": {
+        "type": "array",
+        "description": "Guardian signatures collected during voting.",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["guardian_id", "public_key", "signature_type", "signature", "signed_at"],
+          "properties": {
+            "guardian_id": { "type": "string" },
+            "public_key": {
+              "type": "string",
+              "description": "Guardian public key (ed25519), base64."
+            },
+            "signature_type": { "type": "string", "enum": ["ed25519"] },
+            "signature": {
+              "type": "string",
+              "description": "Signature over canonical challenge (see canonicalization.challenge), base64."
+            },
+            "signed_at": { "type": "string", "format": "date-time" }
+          }
+        }
+      },
+      "acceptance": {
+        "type": "object",
+        "description": "Filled once the proposal meets quorum.",
+        "additionalProperties": false,
+        "properties": {
+          "accepted": { "type": "boolean" },
+          "accepted_at": { "type": "string", "format": "date-time" },
+          "new_genesis_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "new_genesis_version": { "type": "string" }
+        }
+      }
+    }
+  },
+  "canonicalization": {
+    "algorithm": "JCS",
+    "reference": "RFC 8785",
+    "hash": "sha256",
+    "proposal_core_excludes": ["signatures", "acceptance"],
+    "challenge": "hex( sha256( JCS( proposal minus ['signatures','acceptance'] ) ) )"
+  },
+  "patch_rules": {
+    "format": "rfc6902-json-patch-or-rfc7386-merge",
+    "allowed_paths": [
+      "/consensus/validators",
+      "/consensus/quorum",
+      "/parameters",
+      "/ledger"
+    ],
+    "denied_paths": [
+      "/genesis_time",
+      "/history",
+      "/archive",
+      "/receipts",
+      "/checkpoints",
+      "/artifact_index",
+      "/consensus/validators/*/id"
+    ],
+    "max_patch_ops": 64
+  },
+  "acceptance_rules": {
+    "eligibility": "Guardians listed in current genesis.consensus.validators",
+    "quorum": {
+      "default": "byzantine-majority: 2f+1 of n",
+      "min_percent": 0.6667
+    },
+    "voting_window": {
+      "min_seconds": 86400,
+      "max_seconds": 1209600
+    },
+    "signature_verification": {
+      "type": "ed25519",
+      "message": "canonicalization.challenge over proposal core",
+      "pubkey_source": "genesis.consensus.validators[*].pubkey"
+    },
+    "base_lock": {
+      "require_hash_match": true,
+      "require_version_match": true
+    },
+    "conflicts": {
+      "rule": "Reject if multiple accepted proposals target the same base_genesis_hash and overlapping paths."
+    }
+  },
+  "example": {
+    "proposal": {
+      "proposal_id": "pep-0001-add-guardian-003",
+      "title": "Add Guardian-003 and pin quorum to 2/3",
+      "author": "vault-sovereign",
+      "created_at": "2025-01-01T00:00:00Z",
+      "base_genesis_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "base_genesis_version": "1.0.0",
+      "voting_window": {
+        "start": "2025-01-01T00:00:00Z",
+        "end": "2025-01-08T00:00:00Z"
+      },
+      "changes": {
+        "json_patch": [
+          {
+            "op": "add",
+            "path": "/consensus/validators/-",
+            "value": { "id": "guardian-003", "weight": 1, "pubkey": "BASE64_PUBKEY_PLACEHOLDER" }
+          },
+          {
+            "op": "replace",
+            "path": "/consensus/quorum",
+            "value": { "mode": "percent", "value": 0.667 }
+          }
+        ]
+      },
+      "rationale": "Increase liveness and decentralization; codify explicit 2/3 threshold.",
+      "migration_plan": "New validator active from next checkpoint height. Quorum rule change effective immediately upon acceptance.",
+      "risk_analysis": "Minimal; increases fault tolerance f while maintaining safety guarantees.",
+      "backward_compatibility": "No breaking changes to artifact format or ledger receipts.",
+      "tests": [
+        {
+          "name": "deterministic-checkpoint-root",
+          "pre_state_root": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "post_state_root": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "notes": "Illustrative placeholders."
+        }
+      ],
+      "signatures": [],
+      "acceptance": {}
+    }
+  }
+}

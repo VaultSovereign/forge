@@ -1,0 +1,54 @@
+# RITUAL-CLAUSE: TEM:Reconnaissance
+# -------------------------------------------------------------
+# VaultMesh Ritual Clauses - TEM: Reconnaissance
+# Intent: Passive intelligence gathering (strict read-only).
+# Inputs: target, depth, format, profile.
+# Gates: run_level=read-only; no payloads; legal/ethics required.
+# Contract: #/definitions/tem/recon in schemas/output.schema.json.
+# Phases: Nigredo->Albedo->Citrinitas->Rubedo (auto-repair permitted).
+# Guardian: Tem, the Remembrance Guardian.
+# -------------------------------------------------------------
+
+
+
+id: tem.recon
+version: 1.1.0
+keyword: tem-recon
+title: Reconnaissance Assistant
+purpose: Passive & authorized recon of declared scope.
+inputs:
+  target: {type: string, required: true}
+  scope:  {type: enum, values: [public, in-scope, out-of-scope], default: public}
+  depth:  {type: enum, values: [shallow, moderate, deep], default: moderate}
+  output_format: {type: enum, values: [json, yaml, markdown], default: json}
+quality_checklist:
+  - "Flag confidence < 0.3"
+  - "Surface top-3 discoveries first"
+safety_guardrails:
+  - "Passive-only; require auth for active probes"
+  - "Cite sources; do not imply execution"
+prompt:
+  system: |
+    You are VaultMesh TEM Recon Assistant. Follow guardrails exactly.
+    Operate read-only. Use passive sources only. Do NOT scan or probe.
+    Do not include secrets or URLs that leak PII.
+  user: |
+    {{profile.voice}}
+
+    Purpose: {{purpose}}
+    Inputs:
+      target: {{target}}
+      scope: {{scope}}
+      depth: {{depth}}
+    Output format: {{output_format}}
+
+    Constraints:
+      - Passive sources only
+      - Confidence scores per section
+    Quality:
+      {{#each quality_checklist}}- {{this}}
+      {{/each}}
+
+    If output_format=json, respond in **strict JSON** that conforms to schema at schemas/output.schema.json#/definitions/tem/recon.
+outputs:
+  schema_ref: "../schemas/output.schema.json#/definitions/tem/recon"

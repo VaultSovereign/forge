@@ -1,0 +1,209 @@
+{
+  "id": "dora.ict_risk_framework.v1",
+  "input_schema": {
+    "$id": "urn:vaultmesh:schemas:ict_risk.v1.input",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "description": "Inputs for DORA ICT risk assessment. Prescan expands file/path patterns into evidence bundles.\n",
+    "properties": {
+      "assessment_date": {
+        "description": "The ISO‑8601 date the assessment is executed (usually auto-populated).",
+        "format": "date",
+        "type": "string"
+      },
+      "assets": {
+        "description": "File paths or identifiers to asset inventories, configs, or topology docs.\n",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "critical_functions": {
+        "description": "Critical business functions in scope for the assessment.",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "incidents": {
+        "description": "Paths to incident logs/reports/RCAs. Prescan may classify “major” incidents when possible.\n",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "notes": {
+        "type": "string"
+      },
+      "org_name": {
+        "description": "Human‑readable name of the entity.",
+        "type": "string"
+      },
+      "org_type": {
+        "description": "Classification of the entity per Article 2. Used during prescan to determine applicability and microenterprise simplifications (Art. 16).\n",
+        "enum": [
+          "bank",
+          "insurance_company",
+          "investment_firm",
+          "credit_institution",
+          "payment_institution",
+          "electronic_money_institution",
+          "crypto_asset_service_provider",
+          "central_counterparty",
+          "trading_venue",
+          "central_securities_depository",
+          "data_reporting_service_provider",
+          "management_company",
+          "deposit_taking_credit",
+          "microenterprise",
+          "other"
+        ],
+        "type": "string"
+      },
+      "policies": {
+        "description": "Paths/identifiers to policies, strategies, procedures (e.g., ICT risk framework, continuity).\n",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "regions": {
+        "description": "Jurisdictions in scope for the assessment.",
+        "items": {
+          "enum": [
+            "EU",
+            "EEA"
+          ],
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array",
+        "uniqueItems": true
+      },
+      "tests": {
+        "description": "Paths/identifiers to resilience testing reports, vuln scans, TLPT results, etc.\n",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "third_parties": {
+        "description": "Paths/identifiers to contracts, DDQ, or TPRM registers.",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "org_name",
+      "assessment_date",
+      "org_type",
+      "assets",
+      "policies",
+      "incidents"
+    ],
+    "title": "ICT Risk Assessment (Inputs)",
+    "type": "object"
+  },
+  "kind": "spec",
+  "output_schema": {
+    "$id": "urn:vaultmesh:schemas:ict_risk.v1.output",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "description": "Structure of the assessment output. Controls map to DORA’s five pillars. Each control records evidence, rationale, and a risk score. A weighted overall score may also be provided.\n",
+    "properties": {
+      "assessment_date": {
+        "format": "date",
+        "type": "string"
+      },
+      "controls": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "control_id": {
+              "enum": [
+                "DORA-IRM-01",
+                "DORA-INC-01",
+                "DORA-TRT-01",
+                "DORA-TPRM-01",
+                "DORA-GOV-01"
+              ],
+              "type": "string"
+            },
+            "evidence_paths": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "pillar": {
+              "enum": [
+                "ICT_Risk_Management",
+                "Incident_Management",
+                "Resilience_Testing",
+                "Third_Party_Risk",
+                "Governance"
+              ],
+              "type": "string"
+            },
+            "risk_rationale": {
+              "type": "string"
+            },
+            "risk_score": {
+              "maximum": 5,
+              "minimum": 1,
+              "type": "number"
+            },
+            "status": {
+              "enum": [
+                "Compliant",
+                "Partial",
+                "Non-Compliant"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "control_id",
+            "pillar",
+            "status",
+            "risk_score"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "org_name": {
+        "type": "string"
+      },
+      "overall_score": {
+        "description": "Weighted average of pillar/control scores (higher = better).",
+        "maximum": 5,
+        "minimum": 0,
+        "type": "number"
+      },
+      "risk_summary_table": {
+        "description": "Relative path to a generated Markdown table summarising pillar/control statuses and scores.\n",
+        "type": "string"
+      }
+    },
+    "required": [
+      "org_name",
+      "assessment_date",
+      "controls"
+    ],
+    "title": "ICT Risk Assessment (Outputs)",
+    "type": "object"
+  },
+  "owner": "platform",
+  "status": "draft",
+  "summary": "Schema for digital operational resilience assessments under Regulation (EU) 2022/2554 (DORA). Defines expected inputs and outputs for automated assessment aligned to the five pillars.\n",
+  "tags": [
+    "dora",
+    "ict",
+    "compliance",
+    "risk"
+  ],
+  "title": "ICT Risk Assessment for DORA"
+}

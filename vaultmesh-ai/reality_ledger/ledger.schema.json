@@ -1,0 +1,57 @@
+{
+  "$id": "https://vaultmesh.io/schemas/ledger-event.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "VaultMesh Reality Ledger Event",
+  "description": "Schema for reality ledger events tracking template executions",
+  "type": "object",
+  "required": ["id", "ts", "template", "profile", "input", "output", "hash"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique event identifier (UUID v4)",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Event timestamp in ISO 8601 format"
+    },
+    "template": {
+      "type": "string",
+      "description": "Template identifier (e.g., 'dora.ict_risk_framework.v1')"
+    },
+    "profile": {
+      "type": "string",
+      "description": "Profile identifier (e.g., '@vault', '@blue')"
+    },
+    "input": {
+      "type": "object",
+      "description": "Template input arguments"
+    },
+    "output": {
+      "type": "object",
+      "description": "Template execution result"
+    },
+    "hash": {
+      "type": "string",
+      "description": "SHA-256 hash of normalized input+output",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "sig": {
+      "type": "string",
+      "description": "Optional ed25519 signature for verification",
+      "pattern": "^[a-f0-9]{128}$"
+    },
+    "operator": {
+      "type": "string",
+      "description": "Execution operator identifier",
+      "default": "local"
+    },
+    "version": {
+      "type": "string",
+      "description": "Ledger schema version",
+      "default": "1.0.0"
+    }
+  },
+  "additionalProperties": false
+}

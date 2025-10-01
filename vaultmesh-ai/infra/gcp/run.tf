@@ -1,0 +1,67 @@
+variable "workbench_image_tag" {
+  type        = string
+  description = "Docker image tag (e.g., git SHA) for the workbench service."
+}
+
+resource "google_cloud_run_v2_service" "workbench" {
+  name     = "vaultmesh-workbench"
+  location = var.region
+  project  = var.project_id
+
+  template {
+    scaling {
+      min_instance_count = 0
+      max_instance_count = 3
+    }
+
+    containers {
+      image = "${var.region}-docker.pkg.dev/${var.project_id}/vaultmesh/workbench:${var.workbench_image_tag}"
+
+      ports {
+        container_port = 8787
+      }
+
+      resources {
+        limits = {
+          cpu    = "1000m"
+          memory = "512Mi"
+        }
+      }
+
+      env {
+        name  = "NODE_ENV"
+        value = "production"
+      }
+
+      env {
+        name  = "PORT"
+        value = "8787"
+      }
+
+      # Example: surface secrets from Secret Manager once environment-specific
+      # variables (e.g., var.env) are introduced.
+      # env {
+      #   name = "OPENROUTER_API_KEY"
+      #   value_source {
+      #     secret_key_ref {
+      #       secret  = "vaultmesh-${var.env}-openrouter"
+      #       version = "latest"
+      #     }
+      #   }
+      # }
+    }
+  }
+}
+
+resource "google_cloud_run_service_iam_member" "workbench_public" {
+  project  = google_cloud_run_v2_service.workbench.project
+  location = google_cloud_run_v2_service.workbench.location
+  service  = google_cloud_run_v2_service.workbench.name
+  role     = "roles/run.invoker"
+  member   = "allUsers"
+}
+
+output "workbench_url" {
+  description = "Deployed VaultMesh Workbench URL"
+  value       = google_cloud_run_v2_service.workbench.uri
+}

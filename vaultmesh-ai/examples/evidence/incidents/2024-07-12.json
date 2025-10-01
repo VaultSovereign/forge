@@ -1,0 +1,7 @@
+{
+  "id": "INC-2024-07-12-001",
+  "summary": "API latency spike",
+  "severity": "medium",
+  "root_cause": "DB connection pool exhaustion",
+  "actions": ["increase pool size", "add alert on saturation"]
+}

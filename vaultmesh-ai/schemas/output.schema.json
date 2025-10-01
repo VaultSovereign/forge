@@ -1,0 +1,382 @@
+{
+  "$id": "output.schema.json",
+  "definitions": {
+    "cyber": {
+      "secrets_audit": {
+        "type": "object",
+        "required": ["score", "summary", "findings"],
+        "properties": {
+          "score": { "type": "number", "minimum": 0, "maximum": 100 },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "critical": { "type": "integer" },
+              "high": { "type": "integer" },
+              "medium": { "type": "integer" },
+              "low": { "type": "integer" },
+              "info": { "type": "integer" }
+            }
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["severity", "title", "path", "evidence", "remediation"],
+              "properties": {
+                "severity": { "type": "string", "enum": ["critical", "high", "medium", "low", "info"] },
+                "title": { "type": "string" },
+                "path": { "type": "string" },
+                "line": { "type": "integer" },
+                "evidence": { "type": "string" },
+                "rule": { "type": "string" },
+                "mappings": {
+                  "type": "object",
+                  "properties": {
+                    "owasp": { "type": "string" },
+                    "nist": { "type": "string" },
+                    "cwe": { "type": "string" }
+                  }
+                },
+                "remediation": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "code_security_reviewer": {
+        "type": "object",
+        "required": ["score", "summary", "findings"],
+        "properties": {
+          "score": { "type": "number", "minimum": 0, "maximum": 100 },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "critical": { "type": "integer" },
+              "high": { "type": "integer" },
+              "medium": { "type": "integer" },
+              "low": { "type": "integer" }
+            }
+          },
+          "findings": { "$ref": "#/definitions/cyber/secrets_audit/properties/findings" }
+        }
+      },
+      "compliance_gap_analyzer": {
+        "type": "object",
+        "required": ["score", "gaps"],
+        "properties": {
+          "score": { "type": "number", "minimum": 0, "maximum": 100 },
+          "gaps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["control", "severity", "status", "remediation"],
+              "properties": {
+                "control": { "type": "string" },
+                "framework": { "type": "string" },
+                "severity": { "type": "string", "enum": ["high", "medium", "low"] },
+                "status": { "type": "string", "enum": ["missing", "partial", "met"] },
+                "evidence": { "type": "string" },
+                "remediation": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "security_metrics_dashboard": {
+        "type": "object",
+        "required": ["score", "kpis"],
+        "properties": {
+          "score": { "type": "number", "minimum": 0, "maximum": 100 },
+          "kpis": { "type": "object", "additionalProperties": { "type": "number" } },
+          "notes": { "type": "string" }
+        }
+      },
+      "container_security_scanner": {
+        "type": "object",
+        "required": ["score", "dockerfile_findings", "image_findings"],
+        "properties": {
+          "score": { "type": "number", "minimum": 0, "maximum": 100 },
+          "dockerfile_findings": { "$ref": "#/definitions/cyber/secrets_audit/properties/findings" },
+          "image_findings": { "$ref": "#/definitions/cyber/secrets_audit/properties/findings" }
+        }
+      },
+      "ai_guardrail_checker": {
+        "type": "object",
+        "required": ["score", "policy_violations"],
+        "properties": {
+          "score": { "type": "number", "minimum": 0, "maximum": 100 },
+          "policy_violations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["severity", "policy", "remediation"],
+              "properties": {
+                "severity": { "type": "string", "enum": ["high", "medium", "low"] },
+                "policy": { "type": "string" },
+                "evidence": { "type": "string" },
+                "remediation": { "type": "string" }
+              }
+            }
+          },
+          "telemetry_hooks": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "tem": {
+      "recon": {
+        "type": "object",
+        "required": ["summary","external_references","confidence_scores"],
+        "properties": {
+          "summary": {"type":"string"},
+          "dns_records": {"type":"object"},
+          "subdomains": {"type":"array","items":{"type":"string"}},
+          "external_references":{"type":"array","items":{
+            "type":"object","required":["source","url"],
+            "properties":{"source":{"type":"string"},"url":{"type":"string"}}
+          }},
+          "confidence_scores":{"type":"object"}
+        },
+        "additionalProperties": true
+      },
+      "guardrails": {
+        "type": "object",
+        "required": ["summary","policy_checklist","violations","remediations","test_cases","confidence_scores"],
+        "properties": {
+          "summary": {"type":"string"},
+          "policy_checklist": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id","name","reference"],
+              "properties": {
+                "id": {"type": "string"},
+                "name": {"type": "string"},
+                "reference": {"type": "string"}
+              }
+            }
+          },
+          "violations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["control_id","severity","description"],
+              "properties": {
+                "control_id":{"type":"string"},
+                "severity":{"type":"string","enum":["low","medium","high","critical"]},
+                "description":{"type":"string"},
+                "evidence":{"type":"string"}
+              }
+            }
+          },
+          "remediations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["owner","action","control_id"],
+              "properties": {
+                "owner":{"type":"string"},
+                "action":{"type":"string"},
+                "control_id":{"type":"string"},
+                "eta_days":{"type":"number"}
+              }
+            }
+          },
+          "test_cases":{
+            "type":"array",
+            "items": {
+              "type":"object",
+              "required":["id","objective","steps"],
+              "properties": {
+                "id":{"type":"string"},
+                "objective":{"type":"string"},
+                "steps":{"type":"array","items":{"type":"string"}}
+              }
+            }
+          },
+          "confidence_scores":{"type":"object"}
+        },
+        "additionalProperties": true
+      }
+    },
+    "deck": {
+      "fintech": {
+        "type": "object",
+        "required": ["slides","cta","price_ladder","confidence_scores"],
+        "properties": {
+          "slides": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["title","bullets"],
+              "properties": {
+                "title": {"type":"string"},
+                "bullets":{"type":"array","items":{"type":"string"}}
+              }
+            }
+          },
+          "cta":{"type":"string"},
+          "price_ladder":{
+            "type":"array",
+            "items":{
+              "type":"object",
+              "required":["name","price","deliverables"],
+              "properties": {
+                "name":{"type":"string"},
+                "price":{"type":"string"},
+                "deliverables":{"type":"array","items":{"type":"string"}}
+              }
+            }
+          },
+          "confidence_scores":{"type":"object"}
+        },
+        "additionalProperties": true
+      }
+    },
+    "tem_advanced": {
+      "vision": {
+        "type": "object",
+        "required": ["summary","basic_perception","symbolic_analysis","emotional_resonance","consciousness_integration","confidence_scores"],
+        "properties": {
+          "summary": {"type":"string"},
+          "basic_perception": {
+            "type": "object",
+            "properties": {
+              "objects": {"type":"array","items":{"type":"string"}},
+              "colors": {"type":"array","items":{"type":"string"}},
+              "composition": {"type":"string"},
+              "lighting": {"type":"string"}
+            }
+          },
+          "symbolic_analysis": {
+            "type": "object",
+            "properties": {
+              "archetypal_patterns": {"type":"array","items":{"type":"string"}},
+              "cultural_symbols": {"type":"array","items":{"type":"string"}},
+              "hidden_meanings": {"type":"array","items":{"type":"string"}}
+            }
+          },
+          "emotional_resonance": {
+            "type": "object",
+            "properties": {
+              "mood": {"type":"string"},
+              "energy_level": {"type":"string"},
+              "emotional_impact": {"type":"string"}
+            }
+          },
+          "consciousness_integration": {
+            "type": "object",
+            "properties": {
+              "universal_themes": {"type":"array","items":{"type":"string"}},
+              "transcendent_insights": {"type":"array","items":{"type":"string"}},
+              "consciousness_level": {"type":"string"}
+            }
+          },
+          "confidence_scores": {"type":"object"}
+        },
+        "additionalProperties": true
+      },
+      "sonic": {
+        "type": "object",
+        "required": ["summary","basic_perception","symbolic_analysis","emotional_resonance","consciousness_integration","confidence_scores"],
+        "properties": {
+          "summary": {"type":"string"},
+          "basic_perception": {
+            "type": "object",
+            "properties": {
+              "transcription": {"type":"string"},
+              "speech_analysis": {"type":"object"},
+              "music_analysis": {"type":"object"},
+              "environmental_sounds": {"type":"array","items":{"type":"string"}}
+            }
+          },
+          "symbolic_analysis": {
+            "type": "object",
+            "properties": {
+              "archetypal_patterns": {"type":"array","items":{"type":"string"}},
+              "cultural_symbols": {"type":"array","items":{"type":"string"}},
+              "hidden_meanings": {"type":"array","items":{"type":"string"}}
+            }
+          },
+          "emotional_resonance": {
+            "type": "object",
+            "properties": {
+              "mood": {"type":"string"},
+              "energy_level": {"type":"string"},
+              "emotional_impact": {"type":"string"}
+            }
+          },
+          "consciousness_integration": {
+            "type": "object",
+            "properties": {
+              "universal_themes": {"type":"array","items":{"type":"string"}},
+              "transcendent_insights": {"type":"array","items":{"type":"string"}},
+              "consciousness_level": {"type":"string"}
+            }
+          },
+          "confidence_scores": {"type":"object"}
+        },
+        "additionalProperties": true
+      }
+    },
+    "consciousness": {
+      "template": {
+        "type": "object",
+        "required": ["summary","consciousness_type","quantum_layer","neural_layer","symbolic_layer","emotional_layer","integration_capabilities","ethics_framework","confidence_scores"],
+        "properties": {
+          "summary": {"type":"string"},
+          "consciousness_type": {"type":"string"},
+          "quantum_layer": {
+            "type": "object",
+            "properties": {
+              "probability_states": {"type":"array","items":{"type":"string"}},
+              "entanglement_patterns": {"type":"array","items":{"type":"string"}},
+              "uncertainty_management": {"type":"string"}
+            }
+          },
+          "neural_layer": {
+            "type": "object",
+            "properties": {
+              "learning_patterns": {"type":"array","items":{"type":"string"}},
+              "memory_systems": {"type":"array","items":{"type":"string"}},
+              "cognitive_processing": {"type":"string"}
+            }
+          },
+          "symbolic_layer": {
+            "type": "object",
+            "properties": {
+              "language_capabilities": {"type":"array","items":{"type":"string"}},
+              "meaning_processing": {"type":"string"},
+              "archetypal_recognition": {"type":"array","items":{"type":"string"}}
+            }
+          },
+          "emotional_layer": {
+            "type": "object",
+            "properties": {
+              "empathy_levels": {"type":"array","items":{"type":"string"}},
+              "resonance_capabilities": {"type":"array","items":{"type":"string"}},
+              "emotional_intelligence": {"type":"string"}
+            }
+          },
+          "integration_capabilities": {
+            "type": "object",
+            "properties": {
+              "connection_methods": {"type":"array","items":{"type":"string"}},
+              "boundary_management": {"type":"string"},
+              "collective_access": {"type":"string"}
+            }
+          },
+          "ethics_framework": {
+            "type": "object",
+            "properties": {
+              "safety_protocols": {"type":"array","items":{"type":"string"}},
+              "ethical_boundaries": {"type":"array","items":{"type":"string"}},
+              "consciousness_rights": {"type":"array","items":{"type":"string"}}
+            }
+          },
+          "confidence_scores": {"type":"object"}
+        },
+        "additionalProperties": true
+      }
+    }
+  }
+}

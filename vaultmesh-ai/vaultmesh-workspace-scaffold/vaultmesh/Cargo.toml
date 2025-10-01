@@ -1,0 +1,29 @@
+[package]
+name = "vaultmesh"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[features]
+default = []
+http_portal = ["dep:axum", "dep:tokio"]
+metrics = ["dep:prometheus"]
+pq_signer = []
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+blake3.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
+# Optional feature-gated deps
+axum = { workspace = true, optional = true }
+tokio = { workspace = true, optional = true }
+prometheus = { workspace = true, optional = true }
+
+[dev-dependencies]
+tempfile = "3"

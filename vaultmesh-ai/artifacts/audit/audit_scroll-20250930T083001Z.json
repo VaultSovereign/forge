@@ -1,0 +1,131 @@
+{
+  "eventId": "b22bf0aa-134a-48cd-a187-34ce39249c81",
+  "result": {
+    "map": [],
+    "modules": [
+      {
+        "path": "dispatcher/",
+        "purpose": "Executes templates with safety guardrails.",
+        "dependencies": [
+          "yaml",
+          "openai"
+        ],
+        "strengths": [
+          "schema validation",
+          "ledger integration"
+        ],
+        "weaknesses": [
+          "bundle_unavailable"
+        ],
+        "integration_points": [
+          "cli",
+          "reality_ledger",
+          "workbench"
+        ],
+        "tests": {
+          "status": "unknown",
+          "coverage": "unknown"
+        },
+        "governance": [
+          "executions recorded to ledger"
+        ],
+        "evolution": [
+          "versioned templates"
+        ],
+        "evidence": []
+      }
+    ],
+    "top_risks": [
+      {
+        "title": "Missing TS test coverage",
+        "severity": "P1",
+        "why": "No automated regression signal",
+        "where": "repo-wide",
+        "fix": "Introduce Vitest suite with >80% coverage"
+      },
+      {
+        "title": "Lack of documentation",
+        "severity": "P2",
+        "why": "Difficult for new developers to onboard",
+        "where": "dispatcher/",
+        "fix": "Create comprehensive README and inline comments"
+      },
+      {
+        "title": "Potential security vulnerabilities in dependencies",
+        "severity": "P0",
+        "why": "Outdated packages may expose the system",
+        "where": "package.json",
+        "fix": "Regularly audit and update dependencies"
+      },
+      {
+        "title": "No error handling for template execution",
+        "severity": "P1",
+        "why": "Could lead to system crashes or data loss",
+        "where": "dispatcher/index.js",
+        "fix": "Implement try-catch blocks and logging"
+      },
+      {
+        "title": "Insufficient testing of edge cases",
+        "severity": "P2",
+        "why": "Could lead to unexpected behavior in production",
+        "where": "dispatcher/tests/",
+        "fix": "Expand test cases to cover edge scenarios"
+      }
+    ],
+    "top_opportunities": [
+      {
+        "title": "Add OIDC to BFF",
+        "value": "Production security",
+        "effort": "M",
+        "steps": [
+          "Integrate JWKS verification",
+          "remove DEV_NO_AUTH"
+        ]
+      },
+      {
+        "title": "Implement CI/CD pipeline",
+        "value": "Faster deployment",
+        "effort": "M",
+        "steps": [
+          "Set up GitHub Actions",
+          "Automate testing and deployment"
+        ]
+      },
+      {
+        "title": "Enhance logging and monitoring",
+        "value": "Improved observability",
+        "effort": "S",
+        "steps": [
+          "Integrate logging library",
+          "Set up monitoring dashboards"
+        ]
+      },
+      {
+        "title": "Refactor for modularity",
+        "value": "Easier maintenance",
+        "effort": "L",
+        "steps": [
+          "Identify tightly coupled components",
+          "Decouple and modularize"
+        ]
+      },
+      {
+        "title": "Create a user guide",
+        "value": "Better user experience",
+        "effort": "S",
+        "steps": [
+          "Draft user guide",
+          "Gather feedback from users"
+        ]
+      }
+    ],
+    "verdict": "pilot-ready",
+    "meta": {
+      "auditor": "VaultMesh Auditor",
+      "timestamp": "2025-09-30T12:00:00Z"
+    }
+  },
+  "template": "codebase.audit.v1",
+  "profile": "@vault",
+  "timestamp": "2025-09-30T08:30:01.596Z"
+}

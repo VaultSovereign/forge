@@ -1,0 +1,94 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:vaultmesh:schemas:template_index.v1",
+  "title": "VaultMesh Template Index v1",
+  "description": "Deterministic summary of all catalog templates and their most recent evolution metadata. Produced by scripts/template_index_build.mjs.\n",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "index_version": {
+      "type": "integer",
+      "enum": [
+        1
+      ]
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "repo_hash": {
+      "type": "string"
+    },
+    "templates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "template_path": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "keyword": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string",
+            "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[A-Za-z0-9.-]+)?$"
+          },
+          "checksum_sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "last_evolution": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "proposal_id": {
+                "type": "string"
+              },
+              "from_version": {
+                "type": "string"
+              },
+              "to_version": {
+                "type": "string"
+              },
+              "applied_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "repo_hash": {
+                "type": "string"
+              },
+              "receipt_path": {
+                "type": "string"
+              },
+              "artifact_id": {
+                "type": "string"
+              },
+              "proof_root": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "to_version"
+            ]
+          }
+        },
+        "required": [
+          "template_path",
+          "id",
+          "version",
+          "checksum_sha256"
+        ]
+      }
+    }
+  },
+  "required": [
+    "index_version",
+    "generated_at",
+    "templates"
+  ]
+}

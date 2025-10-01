@@ -1,0 +1,70 @@
+name: workbench-smoke
+
+on:
+  pull_request:
+    paths:
+      - "workbench/**"
+      - "replit.*"
+      - ".replit"
+      - "pnpm-workspace.yaml"
+      - "package.json"
+      - "docs/WORKBENCH.md"
+      - ".github/workflows/workbench-smoke.yml"
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: production
+      PORT: 3000
+      AI_CORE_MODE: mock
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Enable Corepack (respect package.json packageManager)
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.17.0 --activate
+
+      - name: Show tool versions
+        run: |
+          node -v
+          pnpm -v
+
+      - name: Install
+        run: pnpm -w install --no-frozen-lockfile
+
+      - name: Build frontend
+        run: pnpm -w run build:web
+
+      - name: Build BFF
+        run: pnpm -w run build:bff
+
+      - name: Sanity check build artifacts
+        run: |
+          test -f workbench/frontend/dist/index.html
+          test -f workbench/bff/dist/server.js
+
+      - name: Boot BFF and check /v1/health
+        run: |
+          node workbench/bff/dist/server.js & echo $! > .bff.pid
+          n=0
+          until curl -fsS "http://127.0.0.1:${PORT}/v1/health" | jq .ok | grep -q true; do
+            n=$((n+1)); [ $n -gt 20 ] && echo "health check failed" && exit 1
+            sleep 0.5
+          done
+          echo "Health OK:"
+          curl -fsS "http://127.0.0.1:${PORT}/v1/health"
+        shell: bash
+
+      - name: Stop BFF
+        if: always()
+        run: |
+          kill "$(cat .bff.pid)" || true

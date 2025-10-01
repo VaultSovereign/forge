@@ -1,0 +1,45 @@
+# RITUAL-CLAUSE: CYBER:CodeSecurityReviewer
+# -------------------------------------------------------------
+# Read-only focused review for secrets, injections, crypto misuse, and config hardening.
+# -------------------------------------------------------------
+
+id: cyber.code_security_reviewer.v1
+version: 1.0.0
+keyword: cyber-code-security-reviewer
+title: Code Security Reviewer
+purpose: Focused static review of provided files or diffs with prioritized findings and remediation.
+inputs:
+  repo_context: {type: string, required: true}
+  diffs_or_files: {type: string, required: true}
+  focus_areas: {type: string, required: false}
+  prescan: {type: string, required: false}
+  output_format: {type: enum, values: [json, yaml, markdown], default: json}
+quality_checklist:
+  - "Map each finding to OWASP/NIST/CWE"
+  - "Include minimal, actionable remediation"
+  - "Rate severity and provide a numeric score (0–100)"
+safety_guardrails:
+  - "Read-only; advisory"
+prompt:
+  system: |
+    You are a principal security engineer. Perform focused review on the provided files/diffs.
+    Prioritize: 1) secrets, 2) injection, 3) crypto misuse, 4) config hardening.
+    Map each finding to OWASP/NIST/CWE and give concise remediation.
+    Output JSON only, conforming to the referenced schema.
+  user: |
+    {{profile.voice}}
+    Context: {{repo_context}}
+    Focus areas (JSON or list): {{focus_areas}}
+    Files/diffs (paths or patches):
+    {{diffs_or_files}}
+
+    Prescan hints (JSON):
+    {{prescan}}
+
+    Produce:
+      - score (0–100),
+      - summary counts by severity,
+      - findings with severity, title, path, line, evidence (redacted), rule, mappings, remediation.
+outputs:
+  schema_ref: "../schemas/output.schema.json#/definitions/cyber/code_security_reviewer"
+

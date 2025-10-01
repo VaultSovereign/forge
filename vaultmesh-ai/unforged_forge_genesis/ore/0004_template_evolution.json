@@ -1,0 +1,32 @@
+{
+  "ore_type": "template_evolution.v1",
+  "proposal_id": "TEO-2025-0001",
+  "proposed_at": "2025-09-30T12:00:00Z",
+  "author": {
+    "name": "Vault Sovereign",
+    "email": "security@vaultmesh.org"
+  },
+  "rationale": "Clarify incident classification alignment and add post-coercion guardrails. Non-breaking minor version bump.",
+  "targets": [
+    {
+      "template_path": "catalog/cyber/dora.ict_risk_framework.v1.yaml",
+      "from_version": "1.1.0",
+      "to_version": "1.1.1",
+      "deprecation_window_days": 30,
+      "changes": [
+        "Clarify incident classification alignment to Delegated Reg (EU) 2024/1772",
+        "Add post-step coercer reminder for evidence objects in codebase.audit"
+      ],
+      "migration_notes": "No breaking fields; outputs remain schema-compatible for v1. Minor contract improvements only."
+    }
+  ],
+  "acceptance": {
+    "must_pass": [
+      "pnpm build"
+    ],
+    "must_emit": [
+      "dist/catalog/cyber/dora.ict_risk_framework.v1.yaml"
+    ]
+  },
+  "signatures": []
+}

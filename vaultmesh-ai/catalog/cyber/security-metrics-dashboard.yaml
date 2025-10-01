@@ -1,0 +1,34 @@
+# RITUAL-CLAUSE: CYBER:SecurityMetricsDashboard
+# -------------------------------------------------------------
+# Generate a KPI dashboard spec and roll-up risk score.
+# -------------------------------------------------------------
+
+id: cyber.security_metrics_dashboard.v1
+version: 1.0.0
+keyword: cyber-security-metrics-dashboard
+title: Security Metrics Dashboard Generator
+purpose: Produce an opinionated KPI dashboard spec with targets, thresholds, and roll-up score.
+inputs:
+  audience: {type: string, required: false}
+  frameworks: {type: string, required: false}
+  data_sources: {type: string, required: true}
+  output_format: {type: enum, values: [json, yaml, markdown], default: json}
+quality_checklist:
+  - "Define KPIs with numeric targets"
+  - "Compute roll-up score (0–100) and SLO notes"
+  - "Reference frameworks in KPI descriptions where applicable"
+safety_guardrails:
+  - "Read-only; advisory"
+prompt:
+  system: |
+    Produce an opinionated KPI dashboard spec with targets and SLO/SLA notes.
+    Include thresholds and a roll-up risk score (0–100). JSON only.
+  user: |
+    {{profile.voice}}
+    Audience: {{audience}}
+    Frameworks (JSON array): {{frameworks}}
+    Data sources (JSON):
+    {{data_sources}}
+outputs:
+  schema_ref: "../schemas/output.schema.json#/definitions/cyber/security_metrics_dashboard"
+

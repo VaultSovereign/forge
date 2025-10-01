@@ -1,0 +1,16 @@
+{
+  "$id": "prompt.schema.json",
+  "type": "object",
+  "required": ["id","version","keyword","purpose","inputs","prompt","outputs"],
+  "properties": {
+    "id": {"type":"string"},
+    "version":{"type":"string"},
+    "keyword":{"type":"string"},
+    "purpose":{"type":"string"},
+    "inputs":{"type":"object"},
+    "quality_checklist":{"type":"array","items":{"type":"string"}},
+    "safety_guardrails":{"type":"array","items":{"type":"string"}},
+    "prompt":{"type":"object","required":["system","user"]},
+    "outputs":{"type":"object","properties":{"schema_ref":{"type":"string"}}}
+  }
+}

@@ -1,0 +1,24 @@
+# Run from: infra/gcp
+# 1) Initialize
+terraform init
+
+# 2) IMPORT EXISTING RESOURCES YOU ALREADY CREATED
+
+# DNS managed zone
+terraform import google_dns_managed_zone.infra projects/vaultmesh-473618/managedZones/infra-vaultmesh-cloud
+
+# Secret Manager secrets (6)
+terraform import 'google_secret_manager_secret.secrets["vaultmesh-dev-openrouter"]'            projects/vaultmesh-473618/secrets/vaultmesh-dev-openrouter
+terraform import 'google_secret_manager_secret.secrets["vaultmesh-dev-db-password"]'          projects/vaultmesh-473618/secrets/vaultmesh-dev-db-password
+terraform import 'google_secret_manager_secret.secrets["vaultmesh-dev-guardian-signing-key"]' projects/vaultmesh-473618/secrets/vaultmesh-dev-guardian-signing-key
+terraform import 'google_secret_manager_secret.secrets["vaultmesh-prod-openrouter"]'          projects/vaultmesh-473618/secrets/vaultmesh-prod-openrouter
+terraform import 'google_secret_manager_secret.secrets["vaultmesh-prod-db-password"]'         projects/vaultmesh-473618/secrets/vaultmesh-prod-db-password
+terraform import 'google_secret_manager_secret.secrets["vaultmesh-prod-guardian-signing-key"]' projects/vaultmesh-473618/secrets/vaultmesh-prod-guardian-signing-key
+
+# Log-based metric
+terraform import google_logging_metric.receipts projects/vaultmesh-473618/metrics/vaultmesh-receipts
+
+# 3) PLAN to reconcile state
+terraform plan -var-file=envs/dev.tfvars
+
+# (Later) after you deploy Cloud Run and create domain mapping, you can model them in run.tf and import as needed.

@@ -1,0 +1,15 @@
+run: "bash replit-run.sh"
+
+services:
+  - name: bff
+    run: "bash -lc 'cd workbench/bff && node --version && corepack enable && corepack prepare pnpm@10.17.0 --activate || true && pnpm i && pnpm run dev'"
+    env:
+      PORT: "8787"
+    autoExpose: true
+
+  - name: frontend
+    run: "bash -lc 'cd workbench/frontend && node --version && corepack enable && corepack prepare pnpm@10.17.0 --activate || true && pnpm i && pnpm run dev'"
+    env:
+      VITE_API_BASE: "http://localhost:8787"
+      PORT: "5173"
+    autoExpose: true

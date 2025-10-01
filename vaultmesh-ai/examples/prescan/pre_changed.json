@@ -1,0 +1,10 @@
+{
+  "changed_only": false,
+  "files": [
+    "README.md",
+    "mcp/vaultmesh-mcp-server.ts",
+    "reality_ledger/node.ts",
+    "Dockerfile",
+    "schemas/output.schema.json"
+  ]
+}

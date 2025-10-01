@@ -1,0 +1,3 @@
+asset_id,name,owner,criticality,last_review
+A-001,Core Banking,Platform,High,2023-06-01
+A-002,Payments Gateway,Payments,High,2023-06-01

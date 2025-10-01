@@ -1,0 +1,23 @@
+version: '3.9'
+
+services:
+  bff:
+    image: vaultmesh/workbench:dev
+    build: .
+    environment:
+      - PORT=8787
+      - CORS_ORIGIN=http://localhost:5173
+      - DEV_NO_AUTH=1
+    ports:
+      - '8787:8787'
+
+  fe:
+    image: node:20-alpine
+    working_dir: /fe
+    volumes:
+      - ./frontend:/fe
+    command: sh -c "npm i && npm run dev -- --host"
+    environment:
+      - VITE_API_BASE=http://localhost:8787
+    ports:
+      - '5173:5173'

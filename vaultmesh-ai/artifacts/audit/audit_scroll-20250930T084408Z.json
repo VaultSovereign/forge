@@ -1,0 +1,102 @@
+{
+  "eventId": "085fd0a5-24df-4a82-93d0-8f05eb7bc396",
+  "result": {
+    "map": [],
+    "modules": [],
+    "top_risks": [
+      {
+        "title": "Missing TS test coverage",
+        "severity": "P1",
+        "why": "No automated regression signal",
+        "where": "repo-wide",
+        "fix": "Introduce Vitest suite with >80% coverage"
+      },
+      {
+        "title": "Inadequate error handling",
+        "severity": "P2",
+        "why": "Potential for unhandled exceptions leading to application crashes",
+        "where": "dispatcher/",
+        "fix": "Implement try-catch blocks and error logging"
+      },
+      {
+        "title": "Outdated dependencies",
+        "severity": "P3",
+        "why": "Increased risk of vulnerabilities and compatibility issues",
+        "where": "package.json",
+        "fix": "Regularly update dependencies and run security audits"
+      },
+      {
+        "title": "Lack of documentation",
+        "severity": "P2",
+        "why": "Difficult for new developers to onboard and understand the system",
+        "where": "repo-wide",
+        "fix": "Create comprehensive documentation for all modules"
+      },
+      {
+        "title": "Insufficient test coverage for critical paths",
+        "severity": "P1",
+        "why": "Critical functionality may break without notice",
+        "where": "dispatcher/",
+        "fix": "Increase test coverage to at least 80% for critical modules"
+      }
+    ],
+    "top_opportunities": [
+      {
+        "title": "Implement CI/CD pipeline",
+        "value": "Faster deployment cycles",
+        "effort": "M",
+        "steps": [
+          "Set up GitHub Actions",
+          "Automate testing and deployment"
+        ]
+      },
+      {
+        "title": "Enhance logging and monitoring",
+        "value": "Improved observability",
+        "effort": "M",
+        "steps": [
+          "Integrate with a logging service",
+          "Set up alerts for critical errors"
+        ]
+      },
+      {
+        "title": "Refactor legacy code",
+        "value": "Improved maintainability",
+        "effort": "L",
+        "steps": [
+          "Identify legacy modules",
+          "Plan refactoring sprints"
+        ]
+      },
+      {
+        "title": "Add API rate limiting",
+        "value": "Increased security",
+        "effort": "S",
+        "steps": [
+          "Implement middleware for rate limiting",
+          "Test against potential abuse scenarios"
+        ]
+      },
+      {
+        "title": "Conduct security audit",
+        "value": "Identify vulnerabilities",
+        "effort": "M",
+        "steps": [
+          "Engage third-party security firm",
+          "Review findings and implement fixes"
+        ]
+      }
+    ],
+    "verdict": "pilot-ready",
+    "meta": {
+      "auditor": "VaultMesh Auditor",
+      "timestamp": "2025-09-30T12:00:00Z"
+    }
+  },
+  "template": "codebase.audit.v1",
+  "profile": "@vault",
+  "timestamp": "2025-09-30T08:44:08.303Z",
+  "meta": {
+    "repo_hash": "2c4fa98"
+  }
+}

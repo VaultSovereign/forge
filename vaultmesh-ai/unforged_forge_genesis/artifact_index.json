@@ -1,0 +1,13 @@
+{
+  "artifacts": [
+    "artifact-3450db41df06c9e8",
+    "artifact-6be8e36a67c138b2",
+    "artifact-bcc950e3c6324544",
+    "artifact-efb2d5905d5600fb",
+    "artifact-fcdf4d5b7a5a21e8",
+    "artifact-fe65c25b4bdf0124"
+  ],
+  "created": 1759226105,
+  "merkle_root": "f6801f54fad1c00ce32fc03dfa15d178df3056c4dd390a500520718fc43ac5c2",
+  "mesh": "Unforged-Forge"
+}

@@ -1,0 +1,80 @@
+{
+  "eventId": "f58e1fb1-e55b-48fb-bed0-14a06c095707",
+  "result": {
+    "vendor": {
+      "name": "AcmeCloud",
+      "criticality": "high",
+      "regions": [
+        "EU"
+      ],
+      "business_services": [
+        "Payments"
+      ],
+      "data_categories": [
+        "PII",
+        "PCI"
+      ]
+    },
+    "risk": {
+      "score": 75,
+      "level": "high",
+      "rationale": "The evidence indicates significant vulnerabilities in data protection measures, particularly concerning PII and PCI data, leading to a high risk score."
+    },
+    "coverage": {
+      "dora": 0.7,
+      "iso27001": 0.6,
+      "nist80053": 0.65
+    },
+    "findings": [
+      {
+        "id": "F1",
+        "title": "Insufficient encryption for sensitive data",
+        "severity": "high",
+        "control_ids": [
+          "AC-17",
+          "SC-28"
+        ],
+        "evidence": [
+          "examples/evidence/tprm/acme/encryption_report.pdf"
+        ],
+        "recommendation": "Implement strong encryption protocols for all sensitive data in transit and at rest."
+      },
+      {
+        "id": "F2",
+        "title": "Lack of regular security audits",
+        "severity": "medium",
+        "control_ids": [
+          "CA-2",
+          "CA-5"
+        ],
+        "evidence": [
+          "examples/evidence/tprm/acme/audit_schedule.pdf"
+        ],
+        "recommendation": "Establish a regular security audit schedule to identify and mitigate vulnerabilities."
+      }
+    ],
+    "recommendations": [
+      "Enhance encryption standards for data protection.",
+      "Conduct regular security audits and assessments.",
+      "Provide training for staff on data protection best practices."
+    ],
+    "secrets": {
+      "critical": 0,
+      "high": 1,
+      "medium": 2
+    },
+    "acceptance": {
+      "pass": false,
+      "reasons": [
+        "High risk score due to insufficient data protection measures.",
+        "Multiple findings indicating vulnerabilities."
+      ]
+    },
+    "receipt": {
+      "event_id": "pending"
+    }
+  },
+  "template": "dora.tprm.v1",
+  "profile": "@vault",
+  "timestamp": "2025-09-30T03:16:44.231Z"
+}

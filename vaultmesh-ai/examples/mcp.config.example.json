@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "forge": {
+      "command": "node",
+      "args": ["dist/mcp/forge-mcp.js"],
+      "env": {
+        "MODEL": "meta-llama/llama-3.1-70b-instruct",
+        "REALITY_LEDGER_COMPACT": "1"
+      }
+    }
+  }
+}

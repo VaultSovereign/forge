@@ -1,0 +1,20 @@
+{
+  "artifact_id": "artifact-3450db41df06c9e8",
+  "leaf": "9f7c84c807c06d5a9ca035730c6dbd8e6d4e3b92de1d378019eca2eed6559012",
+  "merkle_root": "f7541e2545073627fdf9935b3b18b2e99fbd475411e3ebaf3f7e14a9f9e0c926",
+  "proof": [
+    {
+      "pos": "left",
+      "hash": "924bbf4f66c56e6ef979fa85d52853a85057fd1874175e94b9d6920e99d9f62a"
+    },
+    {
+      "pos": "left",
+      "hash": "a729cfb0e0b8aea7d4a5d8dc68ffe3b738e8de72454e29c79f612b924f48ca4f"
+    },
+    {
+      "pos": "right",
+      "hash": "c190eacfc39c17688961afffad099a794c94a463fee47f5ac9661e704d47ac08"
+    }
+  ],
+  "checkpoint_archive_root": "3124105dc2ef62376e0591e356a0758c56c285e6c97844f8af07db3f518fb2cf"
+}

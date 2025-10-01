@@ -1,0 +1,44 @@
+{
+  "eventId": "c1c6594a-fd7e-4915-a3c9-aa9fcb4b6611",
+  "result": {
+    "org_name": "AcmeBank",
+    "assessment_date": "2025-01-15",
+    "controls": [
+      {
+        "control_id": "DORA-GOV-01",
+        "pillar": "Governance",
+        "status": "Non-Compliant",
+        "risk_score": 4,
+        "risk_rationale": "Lack of documented ICT policies to guide governance.",
+        "evidence_paths": [
+          "examples/evidence/policies/*.md"
+        ]
+      },
+      {
+        "control_id": "DORA-IRM-01",
+        "pillar": "Incident_Management",
+        "status": "Non-Compliant",
+        "risk_score": 5,
+        "risk_rationale": "No incident register available to track and manage incidents.",
+        "evidence_paths": [
+          "examples/evidence/incidents/*.json"
+        ]
+      },
+      {
+        "control_id": "DORA-TPRM-01",
+        "pillar": "Third_Party_Risk",
+        "status": "Non-Compliant",
+        "risk_score": 5,
+        "risk_rationale": "Absence of third-party artefacts to assess risks associated with vendors.",
+        "evidence_paths": [
+          "examples/evidence/tprm/**/*.json"
+        ]
+      }
+    ],
+    "overall_score": 4.7,
+    "risk_summary_table": "outputs/ict/AcmeBank/risk_summary.md"
+  },
+  "template": "dora.ict_risk_framework.v1",
+  "profile": "@vault",
+  "timestamp": "2025-09-30T03:16:38.895Z"
+}

@@ -1,0 +1,42 @@
+# RITUAL-CLAUSE: CYBER:AIGuardrailChecker
+# -------------------------------------------------------------
+# Validate AI agent guardrails: least privilege, approvals, audit logging alignment to NIST controls.
+# -------------------------------------------------------------
+
+id: cyber.ai_guardrail_checker.v1
+version: 1.0.0
+keyword: cyber-ai-guardrail-checker
+title: AI Guardrail Checker
+purpose: Validate AI guardrails (authz, approvals, logging) against policy and NIST controls.
+inputs:
+  agent_description: {type: string, required: true}
+  permissions_matrix: {type: string, required: false}
+  data_access: {type: string, required: false}
+  safety_policies: {type: string, required: false}
+  ledger_expectations: {type: string, required: false}
+  output_format: {type: enum, values: [json, yaml, markdown], default: json}
+quality_checklist:
+  - "Deny-by-default, least privilege, approval flows present"
+  - "Audit logging includes inputs/outputs/hash/signature?"
+  - "Provide numeric score (0–100) and remediation"
+safety_guardrails:
+  - "Read-only; advisory"
+prompt:
+  system: |
+    Validate AI guardrails: deny-by-default, least privilege, approvals, audit logging.
+    Map to NIST AC-6 and logging controls. Output JSON only.
+  user: |
+    {{profile.voice}}
+    Agent:
+    {{agent_description}}
+    Permissions matrix (JSON):
+    {{permissions_matrix}}
+    Data access (JSON):
+    {{data_access}}
+    Safety policies (JSON):
+    {{safety_policies}}
+    Ledger expectations (JSON):
+    {{ledger_expectations}}
+outputs:
+  schema_ref: "../schemas/output.schema.json#/definitions/cyber/ai_guardrail_checker"
+

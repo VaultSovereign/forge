@@ -1,0 +1,36 @@
+# RITUAL-CLAUSE: CYBER:ComplianceGapAnalyzer
+# -------------------------------------------------------------
+# Map existing controls to frameworks and identify gaps with remediation.
+# -------------------------------------------------------------
+
+id: cyber.compliance_gap_analyzer.v1
+version: 1.0.0
+keyword: cyber-compliance-gap-analyzer
+title: Compliance Gap Analyzer
+purpose: Map controls to frameworks (NIST 800-53, OWASP ASVS) and surface prioritized remediation.
+inputs:
+  current_controls: {type: string, required: true}
+  target_frameworks: {type: string, required: false}
+  output_format: {type: enum, values: [json, yaml, markdown], default: json}
+quality_checklist:
+  - "Provide control mapping and explicit status (missing/partial/met)"
+  - "Prioritize remediation with rationale"
+  - "Include numeric score (0–100)"
+safety_guardrails:
+  - "Read-only; advisory"
+prompt:
+  system: |
+    You map controls to frameworks and identify concrete gaps with priority and fixes.
+    Output JSON only, matching the referenced schema.
+  user: |
+    {{profile.voice}}
+    Current controls (JSON):
+    {{current_controls}}
+
+    Target frameworks (JSON array):
+    {{target_frameworks}}
+
+    Produce a prioritized gap list and overall score.
+outputs:
+  schema_ref: "../schemas/output.schema.json#/definitions/cyber/compliance_gap_analyzer"
+

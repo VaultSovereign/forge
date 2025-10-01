@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package vaultmesh.ai.v1;
+
+// Core service: execute templates and query/verify ledger.
+service Core {
+  // Execute a template; returns final output + event id.
+  rpc Execute (ExecuteRequest) returns (ExecuteResponse);
+
+  // Query the ledger (server streaming).
+  rpc LedgerQuery (LedgerQueryRequest) returns (stream LedgerEvent);
+
+  // Verify a single ledger event.
+  rpc LedgerVerify (LedgerVerifyRequest) returns (LedgerVerifyResponse);
+}
+
+message ExecuteRequest {
+  string template_id = 1;
+  string profile = 2;
+  string args_json = 3;
+}
+
+message ExecuteResponse {
+  string event_id = 1;
+  string output_json = 2;     // JSON string (structured output)
+  string status = 3;          // "ok" | "error"
+  string error = 4;           // populated if status == "error"
+}
+
+message LedgerQueryRequest {
+  string template = 1;
+  string profile = 2;
+  int32  limit   = 3;         // server may cap
+  string cursor  = 4;         // opaque continuation token
+}
+
+message LedgerEvent {
+  string id          = 1;
+  string ts          = 2;
+  string template    = 3;
+  string profile     = 4;
+  string input_json  = 5;
+  string output_json = 6;
+  string status      = 7;     // "ok" | "error"
+  string error       = 8;
+  string hash        = 9;
+  string sig         = 10;
+}
+
+message LedgerVerifyRequest {
+  string event_id = 1;
+}
+
+message LedgerVerifyResponse {
+  bool   ok     = 1;
+  string reason = 2;          // non-empty when ok == false
+}

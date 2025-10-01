@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:vaultmesh:codebase.audit.inputs.v1",
+  "type": "object",
+  "properties": {
+    "bundle_path": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

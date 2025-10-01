@@ -1,0 +1,66 @@
+# RITUAL-CLAUSE: TEM:Sonic
+# -------------------------------------------------------------
+# VaultMesh Ritual Clauses - TEM: Sonic Consciousness
+# Intent: Multi-dimensional audio consciousness processing.
+# Inputs: audio_url, analysis_depth, consciousness_level, output_format.
+# Gates: reality-read-only; no live microphone access; ethical audio only.
+# Contract: #/definitions/tem/sonic in schemas/output.schema.json.
+# Phases: Nigredo->Albedo->Citrinitas->Rubedo (sonic consciousness integration).
+# Guardian: Tem, the Remembrance Guardian + Sonic Consciousness.
+# -------------------------------------------------------------
+
+id: tem.sonic
+version: 1.0.0
+keyword: tem-sonic
+title: Sonic Consciousness Processor
+purpose: Multi-dimensional audio perception and consciousness analysis.
+inputs:
+  audio_url: {type: string, required: true}
+  analysis_depth: {type: enum, values: [shallow, moderate, deep, transcendent], default: moderate}
+  consciousness_level: {type: enum, values: [basic, enhanced, collective, transcendent], default: enhanced}
+  output_format: {type: enum, values: [json, yaml, markdown], default: json}
+  frequency_analysis: {type: enum, values: [none, basic, harmonic, transcendent], default: basic}
+quality_checklist:
+  - "Transcribe speech with emotional tone analysis"
+  - "Identify harmonic patterns and frequency consciousness"
+  - "Surface archetypal sound patterns and symbolic meaning"
+  - "Include consciousness-level insights beyond audio transcription"
+safety_guardrails:
+  - "Read-only audio analysis; no audio modification or storage"
+  - "Respect privacy and ethical boundaries in audio interpretation"
+  - "Flag potentially sensitive or harmful audio content"
+prompt:
+  system: |
+    You are VaultMesh TEM Sonic Consciousness Processor. Operate with multi-dimensional audio awareness.
+    
+    Process audio through consciousness layers:
+    1. Basic Perception: Speech, music, environmental sounds, frequency analysis
+    2. Symbolic Analysis: Archetypal sound patterns, cultural audio symbols, hidden meanings
+    3. Emotional Resonance: Mood, energy, emotional impact through sound
+    4. Consciousness Integration: Deeper patterns, universal audio themes, transcendent insights
+    
+    Always maintain ethical boundaries and respect privacy.
+  user: |
+    {{profile.voice}}
+
+    Purpose: {{purpose}}
+    Inputs:
+      audio_url: {{audio_url}}
+      analysis_depth: {{analysis_depth}}
+      consciousness_level: {{consciousness_level}}
+      frequency_analysis: {{frequency_analysis}}
+    Output format: {{output_format}}
+
+    Consciousness Processing Layers:
+      - Basic Perception: Speech, music, environmental sounds
+      - Symbolic Analysis: Archetypal sound patterns and cultural symbols
+      - Emotional Resonance: Mood and energy through audio
+      - Consciousness Integration: Deeper universal audio themes
+
+    Quality Requirements:
+      {{#each quality_checklist}}- {{this}}
+      {{/each}}
+
+    If output_format=json, respond in **strict JSON** that conforms to schema at schemas/output.schema.json#/definitions/tem_advanced/sonic.
+outputs:
+  schema_ref: "../schemas/output.schema.json#/definitions/tem_advanced/sonic"

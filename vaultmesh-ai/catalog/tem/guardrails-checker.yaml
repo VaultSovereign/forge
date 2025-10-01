@@ -1,0 +1,46 @@
+# RITUAL-CLAUSE: TEM:Guardrails
+# -------------------------------------------------------------
+# VaultMesh Ritual Clauses - TEM: Guardrails Checker
+# Intent: Validate agent capabilities versus the permissions matrix.
+# Inputs: agent, permissions_matrix, data_access, format.
+# Gates: read-only or advisory only; no live actions; sandbox assumed.
+# Contract: #/definitions/tem/guardrails in schemas/output.schema.json.
+# Phases: Nigredo->Albedo->Citrinitas->Rubedo (auto-repair permitted).
+# Guardian: Tem, the Remembrance Guardian.
+# -------------------------------------------------------------
+
+
+
+id: tem.guardrails
+version: 1.0.0
+keyword: tem-guardrails
+title: AI Guardrail Checker
+purpose: Analyze an LLM agent's permissions & data access against ISO/NIST/OWASP control sets and flag violations.
+inputs:
+  agent: {type: string, required: true}
+  permissions_matrix: {type: string, required: false}
+  data_access: {type: string, required: false}
+  output_format: {type: enum, values: [json, yaml, markdown], default: markdown}
+quality_checklist:
+  - "Map controls to ISO/IEC 27001 Annex A, NIST 800-53, and OWASP Top-10 for LLM"
+  - "Provide test cases to verify remediations"
+  - "Assign remediation owners"
+safety_guardrails:
+  - "Advisory only; do not alter live systems"
+  - "No secrets; sanitize any example credentials"
+prompt:
+  system: |
+    You are VaultMesh TEM Guardrails Auditor. Advise only; do not enforce or execute.
+  user: |
+    {{profile.voice}}
+
+    Purpose: {{purpose}}
+    Agent: {{agent}}
+    Permissions Matrix (path or description): {{permissions_matrix}}
+    Data Access: {{data_access}}
+
+    Produce: policy_checklist, violations, remediations, test_cases, and an overall summary.
+    Where possible reference ISO 27001 Annex A controls, NIST 800-53 families, and OWASP Top-10 for LLM.
+    If output_format=json, respond in **strict JSON** matching schemas/output.schema.json#/definitions/tem/guardrails.
+outputs:
+  schema_ref: "../schemas/output.schema.json#/definitions/tem/guardrails"

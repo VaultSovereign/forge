@@ -1,0 +1,4 @@
+asset_id,owner,class,criticality
+db-prod-01,platform,db,high
+gw-payments-01,network,gateway,high
+svc-trade-01,app,service,medium

@@ -1,0 +1,16 @@
+{
+  "artifact_id": "artifact-efb2d5905d5600fb",
+  "ore_id": "ore-236afa0dc65d512f",
+  "product_hash": "efb2d5905d5600fb722d45cc232771bfc0c7129305bc17cc9e9d2a86f6f44e64",
+  "lineage_hash": "735d292d596b48a9160666fbcd195a157f66dda57e7a1d02987008ad3d914ea6",
+  "receipts": [
+    {
+      "artifact_id": "artifact-efb2d5905d5600fb",
+      "event": "quench",
+      "gas": 271828,
+      "result_hash": "fb6415fb9b1e3f118953e6cff0533b56b9ccd010202acb729549ef289ec77594",
+      "time": 1759222901
+    }
+  ],
+  "height": 1
+}

@@ -1,0 +1,125 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:vaultmesh:audit.scroll.v1",
+  "type": "object",
+  "required": ["map", "modules", "top_risks", "top_opportunities", "verdict", "meta"],
+  "properties": {
+    "map": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "role"],
+        "properties": {
+          "path": { "type": "string" },
+          "role": { "type": "string" },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "modules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "purpose",
+          "strengths",
+          "weaknesses",
+          "integration_points",
+          "tests",
+          "governance",
+          "evolution"
+        ],
+        "properties": {
+          "path": { "type": "string" },
+          "purpose": { "type": "string" },
+          "dependencies": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "strengths": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "weaknesses": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "integration_points": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "tests": { "type": "object" },
+          "governance": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "evolution": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "file": { "type": "string" },
+                "lines": { "type": "string" },
+                "hash": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "top_risks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["title", "severity", "why", "where", "fix"],
+        "properties": {
+          "title": { "type": "string" },
+          "severity": {
+            "type": "string",
+            "enum": ["P0", "P1", "P2", "P3"]
+          },
+          "why": { "type": "string" },
+          "where": { "type": "string" },
+          "fix": { "type": "string" }
+        }
+      }
+    },
+    "top_opportunities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["title", "value", "effort", "steps"],
+        "properties": {
+          "title": { "type": "string" },
+          "value": { "type": "string" },
+          "effort": {
+            "type": "string",
+            "enum": ["S", "M", "L"]
+          },
+          "steps": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "verdict": {
+      "type": "string",
+      "enum": ["production-ready", "pilot-ready", "research-only"]
+    },
+    "meta": {
+      "type": "object",
+      "required": ["auditor", "timestamp"],
+      "properties": {
+        "auditor": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "repo_hash": { "type": "string" }
+      }
+    }
+  }
+}

@@ -1,0 +1,129 @@
+{
+  "index_version": 1,
+  "generated_at": "2025-09-30T09:31:49.555Z",
+  "repo_hash": "2c4fa98",
+  "templates": [
+    {
+      "template_path": "catalog/codebase/codebase.audit.v1.yaml",
+      "id": "codebase.audit.v1",
+      "keyword": "codebase-audit",
+      "version": "1.0.0",
+      "checksum_sha256": "8997fdbcaf03d02be0cf500c4b441619dfa9a761017cf23976320b74ed013c35"
+    },
+    {
+      "template_path": "catalog/consciousness/template.yaml",
+      "id": "consciousness.template",
+      "keyword": "consciousness-template",
+      "version": "1.0.0",
+      "checksum_sha256": "98175847a3ad349e2f5ee9f9f8db61418ec3f813dbfc30f1346a66ac917109b1"
+    },
+    {
+      "template_path": "catalog/cyber/ai-guardrail-checker.yaml",
+      "id": "cyber.ai_guardrail_checker.v1",
+      "keyword": "cyber-ai-guardrail-checker",
+      "version": "1.0.0",
+      "checksum_sha256": "9db8db3233ccdfca4873791066c26850cb4446ceb7cce8e23b17e7be42262fca"
+    },
+    {
+      "template_path": "catalog/cyber/code-security-reviewer.yaml",
+      "id": "cyber.code_security_reviewer.v1",
+      "keyword": "cyber-code-security-reviewer",
+      "version": "1.0.0",
+      "checksum_sha256": "ecdc26bd15f52c34d6a2c401436b2bcc0c8b8a2a19eea585486ef6876c8f08db"
+    },
+    {
+      "template_path": "catalog/cyber/compliance-gap-analyzer.yaml",
+      "id": "cyber.compliance_gap_analyzer.v1",
+      "keyword": "cyber-compliance-gap-analyzer",
+      "version": "1.0.0",
+      "checksum_sha256": "d0be61b1f2b3bb6ebe83c57dea3d58e22bd50842112e9298be7728bdf4e94b65"
+    },
+    {
+      "template_path": "catalog/cyber/container-security-scanner.yaml",
+      "id": "cyber.container_security_scanner.v1",
+      "keyword": "cyber-container-security-scanner",
+      "version": "1.0.0",
+      "checksum_sha256": "93abc7cbae7e6a9ea86817b5bc964837e54d5519d7a475d36e9afbf2bdef0b07"
+    },
+    {
+      "template_path": "catalog/cyber/dora.ict_risk_framework.v1.yaml",
+      "id": "dora.ict_risk_framework.v1",
+      "keyword": "cyber-dora-ict-risk",
+      "version": "1.1.1",
+      "checksum_sha256": "777178c61fe2da7702e98e8872d0cdcd979f805ded37f52d8b38886a41ceafbe",
+      "last_evolution": {
+        "proposal_id": "TEO-2025-0001",
+        "from_version": "1.1.0",
+        "to_version": "1.1.1",
+        "applied_at": "2025-09-30T09:30:43.102Z",
+        "repo_hash": "2c4fa98",
+        "receipt_path": "artifacts/evolution/template_evolution_receipt.json",
+        "artifact_id": "artifact-efb2d5905d5600fb",
+        "proof_root": "f6801f54fad1c00ce32fc03dfa15d178df3056c4dd390a500520718fc43ac5c2"
+      }
+    },
+    {
+      "template_path": "catalog/cyber/dora.tprm.v1.yaml",
+      "id": "dora.tprm.v1",
+      "keyword": "cyber-dora-tprm",
+      "version": "1.0.0",
+      "checksum_sha256": "49754e09c9d91b1ea918d2d88965d572fbbb5c7ed2234ab1b34d2e0e270be7f6"
+    },
+    {
+      "template_path": "catalog/cyber/pci_dss_misconfiguration_checker.v1.yaml",
+      "id": "cyber.pci_dss_misconfiguration_checker.v1",
+      "keyword": "pci-check",
+      "version": "1.0.0",
+      "checksum_sha256": "8efda24a617372e72ab13035356a92448c3f121fddb42995e1202076aa974963"
+    },
+    {
+      "template_path": "catalog/cyber/secrets-audit.yaml",
+      "id": "cyber.secrets_audit.v1",
+      "keyword": "cyber-secrets-audit",
+      "version": "1.0.0",
+      "checksum_sha256": "65bc5f7bbf5ac107221f7996a6b658be356a25d1a6595888d5f8d89825283682"
+    },
+    {
+      "template_path": "catalog/cyber/security-metrics-dashboard.yaml",
+      "id": "cyber.security_metrics_dashboard.v1",
+      "keyword": "cyber-security-metrics-dashboard",
+      "version": "1.0.0",
+      "checksum_sha256": "3e91e387214b7b9e533f32b2e7e9573a9a8c829c57407e2d4fe72154ce83d656"
+    },
+    {
+      "template_path": "catalog/deck/fintech-strike-deck.yaml",
+      "id": "deck.fintech",
+      "keyword": "deck-fintech",
+      "version": "1.0.0",
+      "checksum_sha256": "917869494ab053d38b5e0d48e4fc6970df2127b15bf92ce42e9770088381e814"
+    },
+    {
+      "template_path": "catalog/tem/guardrails-checker.yaml",
+      "id": "tem.guardrails",
+      "keyword": "tem-guardrails",
+      "version": "1.0.0",
+      "checksum_sha256": "0233c12288f942a19750dda6232d4934dd8b87f76a562c0d573ad1bed7609719"
+    },
+    {
+      "template_path": "catalog/tem/reconnaissance.yaml",
+      "id": "tem.recon",
+      "keyword": "tem-recon",
+      "version": "1.1.0",
+      "checksum_sha256": "afaf496b909fa8c3c220e78bb5feccb7f9d6bec7e29f2828c11d65b8ba31c95a"
+    },
+    {
+      "template_path": "catalog/tem/sonic.yaml",
+      "id": "tem.sonic",
+      "keyword": "tem-sonic",
+      "version": "1.0.0",
+      "checksum_sha256": "40789bdbe55845df4a0bf13d5f76c08afba92a60bbe7ebf3a17a8bee687fc1c1"
+    },
+    {
+      "template_path": "catalog/tem/vision.yaml",
+      "id": "tem.vision",
+      "keyword": "tem-vision",
+      "version": "1.0.0",
+      "checksum_sha256": "5a2e4c7d3b6e0725664878e5235d4f6b7383cce3e7c353148089c7f123e5b621"
+    }
+  ]
+}

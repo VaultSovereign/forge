@@ -1,0 +1,86 @@
+{
+  "mesh": "Unforged-Forge",
+  "version": "0.1",
+  "sovereignty": {
+    "domain": "vaultmesh://earth/civilization-ledger",
+    "guardians": [
+      {
+        "name": "Tem",
+        "duties": [
+          "immutability",
+          "lineage",
+          "audit",
+          "recovery"
+        ]
+      }
+    ]
+  },
+  "consensus": {
+    "type": "BFT",
+    "validators": [
+      {
+        "id": "node-a",
+        "stake_weight": 1
+      },
+      {
+        "id": "node-b",
+        "stake_weight": 1
+      },
+      {
+        "id": "node-c",
+        "stake_weight": 1
+      }
+    ],
+    "commit_rule": ">=2/3",
+    "leader_rotation": {
+      "blocks": 314
+    }
+  },
+  "executor": {
+    "vm": "deterministic-wasm (placeholder)",
+    "gas_limit_per_block": 10000000
+  },
+  "memory": {
+    "archive_merkle": "sha256-merkle",
+    "chunk_size": 1048576,
+    "checkpoints_every": 1618
+  },
+  "entropy": {
+    "sources": [
+      "os_rng",
+      "verifiable_beacon"
+    ],
+    "usage": "non-cryptographic scheduling only"
+  },
+  "governance": {
+    "hammer": {
+      "proposal_min_period_blocks": 89,
+      "quorum": ">=2/3"
+    },
+    "roles": [
+      {
+        "name": "smith",
+        "can": [
+          "forge",
+          "temper",
+          "quench"
+        ]
+      },
+      {
+        "name": "archivist",
+        "can": [
+          "etch",
+          "restore",
+          "attest"
+        ]
+      }
+    ]
+  },
+  "tem": {
+    "invariants": [
+      "no-deletion",
+      "lineage-required",
+      "quench-before-etch"
+    ]
+  }
+}
