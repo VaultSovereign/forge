@@ -61,13 +61,12 @@ curl http://localhost:8787/v1/api/ledger/events?limit=10
 
 **Expected**: JSON array showing recent events, including your template execution.
 
-## Package Manager Fallback
+## Package Manager
 
-The system automatically uses pnpm if available, otherwise falls back to npm:
-- ✅ Tries pnpm first (faster, uses workspace features)
-- ✅ Falls back to npm if pnpm setup fails (sandbox restrictions)
-
-You don't need to do anything - this is handled automatically.
+The system uses **npm** exclusively to avoid Replit's Nix environment restrictions with corepack:
+- ✅ Uses npm with `--no-audit --no-fund` flags for faster installs
+- ✅ No corepack/pnpm conflicts or permission errors
+- ✅ BFF runs TypeScript directly with `tsx watch` (no build step needed in dev)
 
 ## Port Configuration
 
