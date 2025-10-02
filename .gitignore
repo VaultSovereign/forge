@@ -28,6 +28,14 @@ reality_ledger/*.idx
 # OS generated files
 .DS_Store
 .DS_Store?
+
+# Analysis and backup artifacts (local only)
+_backups/*.txt
+_backups/diffs/
+_backups/vaultmesh-ai-remote/
+_backups/*_dirlist.txt
+_backups/*_filelist.txt
+_backups/*_topdirs.txt
 ._*
 .Spotlight-V100
 .Trashes
