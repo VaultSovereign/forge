@@ -21,14 +21,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [20, 22]
-        include:
-          - node-version: 22
-            allow_failure: true
+        node-version: [22]
     steps:
       - uses: actions/checkout@v4
 
-      - name: Node & pnpm setup
+      - name: Node & pnpm setup (Node 22)
         uses: ./.github/actions/node-pnpm-setup
         with:
           node-version: ${{ matrix.node-version }}
@@ -51,18 +48,9 @@ jobs:
           restore-keys: eslint-${{ runner.os }}-${{ matrix.node-version }}-
 
       - name: Lint & Format
-        continue-on-error: ${{ matrix.allow_failure || false }}
         run: |
           pnpm format:check
           pnpm exec eslint -c .eslintrc.json . --ext .ts,.tsx --quiet --cache
-
-      - name: Mark soft-fail result
-        if: ${{ matrix.allow_failure }}
-        run: echo "⚠️ Node ${{ matrix.node-version }} - failures allowed during transition period"
-
-      - name: Job summary
-        if: ${{ matrix.allow_failure }}
-        run: echo "⚠️ Node ${{ matrix.node-version }} is soft-fail for this job during transition period." >> $GITHUB_STEP_SUMMARY
 
   build-test:
     needs: lint
@@ -70,7 +58,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20, 22]
+        node-version: [22]
 
     steps:
       - name: Checkout code
@@ -78,7 +66,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Node & pnpm setup
+      - name: Node & pnpm setup (Node 22)
         uses: ./.github/actions/node-pnpm-setup
         with:
           node-version: ${{ matrix.node-version }}
@@ -263,10 +251,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Node & pnpm setup
+      - name: Node & pnpm setup (Node 22)
         uses: ./.github/actions/node-pnpm-setup
         with:
-          node-version: 20
+          node-version: 22
           pnpm-version: 10.17.0
 
       - name: Cache pnpm store
@@ -338,11 +326,11 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Setup Node.js
+      - name: Setup Node.js (Node 22)
         if: steps.changes.outputs.catalog == 'true' || steps.changes.outputs.ore == 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'pnpm'
       - name: Setup pnpm
         if: steps.changes.outputs.catalog == 'true' || steps.changes.outputs.ore == 'true'
@@ -395,10 +383,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Node & pnpm setup
+      - name: Node & pnpm setup (Node 22)
         uses: ./.github/actions/node-pnpm-setup
         with:
-          node-version: 20
+          node-version: 22
           pnpm-version: 10.17.0
 
       - name: Cache pnpm store
@@ -844,16 +832,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [20, 22]
-        include:
-          - node-version: 22
-            allow_failure: true
+        node-version: [22]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Node & pnpm setup
+      - name: Node & pnpm setup (Node 22)
         uses: ./.github/actions/node-pnpm-setup
         with:
           node-version: ${{ matrix.node-version }}
@@ -883,7 +868,6 @@ jobs:
         run: pnpm run build
 
       - name: Validate template schemas
-        continue-on-error: ${{ matrix.allow_failure || false }}
         run: |
           for file in catalog/**/*.yaml; do
             echo "Validating $file"
@@ -908,29 +892,23 @@ jobs:
           done
 
       - name: Test template loading
-        continue-on-error: ${{ matrix.allow_failure || false }}
         run: |
           echo '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | timeout 10s node dist/mcp/vaultmesh-mcp-server.js | grep -q "tools" || echo "MCP server test failed"
 
-      - name: Mark soft-fail result
-        if: ${{ matrix.allow_failure }}
-        run: echo "⚠️ Node ${{ matrix.node-version }} - failures allowed during transition period"
+      # No soft-fail matrix; single Node 22 target
 
   licensing-check:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        node-version: [20, 22]
-        include:
-          - node-version: 22
-            allow_failure: true
+        node-version: [22]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Node & pnpm setup
+      - name: Node & pnpm setup (Node 22)
         uses: ./.github/actions/node-pnpm-setup
         with:
           node-version: ${{ matrix.node-version }}
@@ -959,13 +937,10 @@ jobs:
           }
 
       - name: Check licenses
-        continue-on-error: ${{ matrix.allow_failure || false }}
         run: |
           pnpm dlx license-checker --onlyAllow 'Apache-2.0;MIT;BSD-2-Clause;BSD-3-Clause;ISC' --excludePrivatePackages || echo "License check warnings"
 
-      - name: Mark soft-fail result
-        if: ${{ matrix.allow_failure }}
-        run: echo "⚠️ Node ${{ matrix.node-version }} - failures allowed during transition period"
+      # Single Node 22 target; no soft-fail
 
   security-templates:
     runs-on: ubuntu-latest
@@ -975,10 +950,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Node & pnpm setup
+      - name: Node & pnpm setup (Node 22)
         uses: ./.github/actions/node-pnpm-setup
         with:
-          node-version: 20
+          node-version: 22
           pnpm-version: 10.17.0
 
       - name: Cache pnpm store
@@ -1086,10 +1061,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js (Node 22)
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'pnpm'
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
