@@ -14,6 +14,7 @@ import {
 } from 'crypto';
 import { promises as fs, constants as FS_CONSTANTS } from 'fs';
 import * as path from 'path';
+/* eslint-disable import/no-named-as-default */
 import stringify from 'safe-stable-stringify';
 
 export interface LedgerEvent {

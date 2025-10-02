@@ -1,3 +1,4 @@
+/* eslint-disable import/no-named-as-default */
 import OpenAI from 'openai';
 
 export type ProviderName = 'openai' | 'openrouter' | 'local_ollama';

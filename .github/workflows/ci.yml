@@ -48,7 +48,7 @@ jobs:
       - name: Lint & Format
         run: |
           pnpm format:check
-          pnpm lint
+          pnpm exec eslint -c .eslintrc.json . --ext .ts,.tsx --quiet
   build-test:
     needs: lint
     runs-on: ubuntu-latest

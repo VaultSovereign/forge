@@ -10,7 +10,6 @@ const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '..');
 
 function help() {
-  // eslint-disable-next-line no-console
   console.log(`
 Forge — minimal Prompt OS
 
@@ -60,21 +59,15 @@ async function main() {
   try {
     const out = await runKeyword({ projectRoot, keyword, profileName: profile, flags, notes });
     if (typeof out === 'string') {
-      // eslint-disable-next-line no-console
       console.log(out);
     } else {
       const fmt = typeof flags.format === 'string' ? flags.format.toLowerCase() : '';
-      // eslint-disable-next-line no-console
       if (fmt === 'json') console.log(JSON.stringify(out, null, 2));
-      // eslint-disable-next-line no-console
       else if (out && typeof out === 'object' && 'markdown' in out)
-        // eslint-disable-next-line no-console
         console.log((out as any).markdown);
-      // eslint-disable-next-line no-console
       else console.log(JSON.stringify(out, null, 2));
     }
   } catch (e: any) {
-    // eslint-disable-next-line no-console
     console.error('[forge] ERROR:', e?.message || e);
     process.exit(1);
   }

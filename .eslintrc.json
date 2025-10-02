@@ -12,7 +12,10 @@
   "parserOptions": {
     "ecmaVersion": 2021,
     "sourceType": "module",
-    "tsconfigRootDir": "."
+    "tsconfigRootDir": ".",
+    "EXPERIMENTAL_useProjectService": {
+      "maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING": 200
+    }
   },
   "env": {
     "node": true,
@@ -98,6 +101,12 @@
           "warn",
           { "ts-ignore": true, "ts-expect-error": "allow-with-description" }
         ]
+      }
+    },
+    {
+      "files": ["cli/**/*.ts"],
+      "rules": {
+        "no-console": "off"
       }
     },
     {
