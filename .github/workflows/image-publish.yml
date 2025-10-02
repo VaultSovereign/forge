@@ -18,7 +18,6 @@ concurrency:
   cancel-in-progress: true
 jobs:
   build-push:
-    if: ${{ hashFiles('Dockerfile') != '' || hashFiles('docker/Dockerfile') != '' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
