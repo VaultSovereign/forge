@@ -64,17 +64,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.17.0
-          run_install: false
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Node & pnpm setup
+        uses: ./.github/actions/node-pnpm-setup
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Install workspace deps
-        run: pnpm -w install --frozen-lockfile || pnpm -w install
+          pnpm-version: 10.17.0
 
       # Ensure base exists for PRs so changed-only tests can diff against origin/<base>
       - name: Fetch base branch (PR only)
@@ -766,17 +760,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.17.0
-          run_install: false
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Node & pnpm setup
+        uses: ./.github/actions/node-pnpm-setup
         with:
           node-version: 20
-      - name: Install workspace deps
-        run: pnpm -w install --frozen-lockfile || pnpm -w install
+          pnpm-version: 10.17.0
       - name: Generate OPENAPI.md from spec
         run: node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md
 
@@ -858,16 +846,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Node & pnpm setup
+        uses: ./.github/actions/node-pnpm-setup
         with:
           node-version: 20
-          cache: 'pnpm'
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.17.0
-          run_install: false
+          pnpm-version: 10.17.0
       - name: Generate OPENAPI.md from spec
         run: node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md
 
