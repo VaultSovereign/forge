@@ -34,7 +34,7 @@
     "LICENSE"
   ],
   "engines": {
-    "node": ">=20.11.1",
+    "node": ">=20 <23",
     "pnpm": ">=10.17.0"
   },
   "scripts": {

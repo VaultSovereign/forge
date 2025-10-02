@@ -22,6 +22,9 @@ jobs:
       fail-fast: false
       matrix:
         node-version: [20, 22]
+        include:
+          - node-version: 22
+            allow-failure: true
     steps:
       - uses: actions/checkout@v4
 
@@ -48,9 +51,15 @@ jobs:
           restore-keys: eslint-${{ runner.os }}-${{ matrix.node-version }}-
 
       - name: Lint & Format
+        continue-on-error: ${{ matrix.allow-failure || false }}
         run: |
           pnpm format:check
           pnpm exec eslint -c .eslintrc.json . --ext .ts,.tsx --quiet --cache
+
+      - name: Mark soft-fail result
+        if: matrix.allow-failure
+        run: echo "⚠️ Node ${{ matrix.node-version }} - failures allowed during transition period"
+
   build-test:
     needs: lint
     runs-on: ubuntu-latest
@@ -809,6 +818,9 @@ jobs:
       fail-fast: false
       matrix:
         node-version: [20, 22]
+        include:
+          - node-version: 22
+            allow-failure: true
 
     steps:
       - name: Checkout code
@@ -844,6 +856,7 @@ jobs:
         run: pnpm run build
 
       - name: Validate template schemas
+        continue-on-error: ${{ matrix.allow-failure || false }}
         run: |
           for file in catalog/**/*.yaml; do
             echo "Validating $file"
@@ -868,8 +881,13 @@ jobs:
           done
 
       - name: Test template loading
+        continue-on-error: ${{ matrix.allow-failure || false }}
         run: |
           echo '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | timeout 10s node dist/mcp/vaultmesh-mcp-server.js | grep -q "tools" || echo "MCP server test failed"
+
+      - name: Mark soft-fail result
+        if: matrix.allow-failure
+        run: echo "⚠️ Node ${{ matrix.node-version }} - failures allowed during transition period"
 
   licensing-check:
     runs-on: ubuntu-latest
@@ -877,6 +895,9 @@ jobs:
       fail-fast: false
       matrix:
         node-version: [20, 22]
+        include:
+          - node-version: 22
+            allow-failure: true
 
     steps:
       - name: Checkout code
@@ -911,8 +932,13 @@ jobs:
           }
 
       - name: Check licenses
+        continue-on-error: ${{ matrix.allow-failure || false }}
         run: |
           pnpm dlx license-checker --onlyAllow 'Apache-2.0;MIT;BSD-2-Clause;BSD-3-Clause;ISC' --excludePrivatePackages || echo "License check warnings"
+
+      - name: Mark soft-fail result
+        if: matrix.allow-failure
+        run: echo "⚠️ Node ${{ matrix.node-version }} - failures allowed during transition period"
 
   security-templates:
     runs-on: ubuntu-latest

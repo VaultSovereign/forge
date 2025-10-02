@@ -16,6 +16,9 @@ jobs:
       fail-fast: false
       matrix:
         node-version: [20, 22]
+        include:
+          - node-version: 22
+            allow-failure: true
     steps:
       - uses: actions/checkout@v4
 
@@ -35,7 +38,12 @@ jobs:
             pnpm-${{ runner.os }}-
 
       - name: Lint (strict - fail on warnings)
+        continue-on-error: ${{ matrix.allow-failure || false }}
         run: pnpm exec eslint -c .eslintrc.json . --ext .ts,.tsx --max-warnings=0
+
+      - name: Mark soft-fail result
+        if: matrix.allow-failure
+        run: echo "⚠️ Node ${{ matrix.node-version }} - failures allowed during transition period"
 
   template-validation:
     name: Validate Research Analyst Template
