@@ -6,12 +6,8 @@
  * to pass into the dora.tprm.v1 template.
  */
 
-import fs from 'fs';
-import path from 'path';
-
-import fg from 'fast-glob';
-
-// @ts-ignore - fast-glob doesn't have separate types package
+import { sync as globSync } from 'fast-glob';
+import fs from 'node:fs';
 import YAML from 'yaml';
 
 interface Args {
@@ -38,7 +34,7 @@ const args: Args = JSON.parse(raw);
 function collectEvidence(patterns: string[]): Record<string, string> {
   const results: Record<string, string> = {};
   for (const pat of patterns) {
-    const files = fg.sync(pat, { dot: true });
+    const files = globSync(pat, { dot: true });
     for (const f of files) {
       try {
         const content = fs.readFileSync(f, 'utf8');
@@ -54,8 +50,8 @@ function collectEvidence(patterns: string[]): Record<string, string> {
 }
 
 // Load questionnaires (JSON or YAML)
-function collectQuestionnaires(files: string[]): Record<string, any> {
-  const results: Record<string, any> = {};
+function collectQuestionnaires(files: string[]): Record<string, unknown> {
+  const results: Record<string, unknown> = {};
   for (const f of files) {
     try {
       const text = fs.readFileSync(f, 'utf8');
@@ -88,4 +84,4 @@ const bundle = {
   collected_at: new Date().toISOString(),
 };
 
-console.log(JSON.stringify(bundle, null, 2));
+process.stdout.write(`${JSON.stringify(bundle, null, 2)}\n`);

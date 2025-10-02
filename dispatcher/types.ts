@@ -2,7 +2,7 @@ export interface TemplateInputSpec {
   type: 'string' | 'enum';
   required?: boolean;
   values?: string[];
-  default?: any;
+  default?: unknown;
 }
 
 export interface Template {
@@ -20,14 +20,16 @@ export interface Template {
 
 export interface Profile {
   voice?: string;
-  defaults?: Record<string, any>;
-  style?: Record<string, any>;
+  defaults?: Record<string, unknown>;
+  style?: Record<string, unknown>;
 }
 
 export interface RunArgs {
-  [k: string]: any;
+  [k: string]: unknown;
+  brief?: string;
   output_format?: 'json' | 'yaml' | 'markdown';
   scope?: string;
   lab?: boolean;
   variant?: string;
+  model?: string;
 }

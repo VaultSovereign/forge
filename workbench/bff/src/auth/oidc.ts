@@ -72,8 +72,11 @@ export async function verifyJWT(token: string): Promise<AuthContext> {
 
 export async function authPreHandler(req: FastifyRequest, reply: FastifyReply) {
   if (process.env.AUTH_DEV_BYPASS === '1') {
-    // @ts-ignore
-    req.user = { sub: 'dev-bypass', roles: ['operator'], raw: {} } as AuthContext;
+    (req as FastifyRequest & { user?: AuthContext }).user = {
+      sub: 'dev-bypass',
+      roles: ['operator'],
+      raw: {},
+    };
     return;
   }
   const hdr = req.headers.authorization || '';
@@ -84,10 +87,10 @@ export async function authPreHandler(req: FastifyRequest, reply: FastifyReply) {
   const token = hdr.slice('Bearer '.length);
   try {
     const ctx = await verifyJWT(token);
-    // @ts-ignore
-    req.user = ctx;
-  } catch (err: any) {
-    reply.code(401).send({ ok: false, error: 'invalid_token', detail: err?.message });
+    (req as FastifyRequest & { user?: AuthContext }).user = ctx;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : undefined;
+    reply.code(401).send({ ok: false, error: 'invalid_token', detail: message });
   }
 }
 

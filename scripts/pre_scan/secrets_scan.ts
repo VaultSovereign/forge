@@ -1,7 +1,6 @@
 #!/usr/bin/env ts-node
-import path from 'node:path';
-
 import minimist from 'minimist';
+import path from 'node:path';
 
 import { preScan } from '../../tools/secrets_prescan.js';
 
@@ -11,7 +10,9 @@ function toArray(input: string | string[] | undefined, fallback: string[]): stri
   try {
     const parsed = JSON.parse(input);
     if (Array.isArray(parsed)) return parsed.map(String);
-  } catch {}
+  } catch {
+    // Ignore JSON parse errors and fall back to comma-split
+  }
   return String(input)
     .split(',')
     .map((s) => s.trim())

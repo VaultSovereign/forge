@@ -1,5 +1,3 @@
-import path from 'node:path';
-
 import { listTemplates, TemplateListing } from '../dispatcher/router.js';
 
 const cache = new Map<string, TemplateListing>();

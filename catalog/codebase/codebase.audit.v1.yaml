@@ -46,14 +46,26 @@ prescan:
         echo "[prescan] Using existing bundle ${TARGET}"
       fi
 
-      printf '%s' "{\"bundle_path\":\"$TARGET\"}" > "$VM_PRESCAN_OUT"
+      # Inline the bundle content for LLM consumption
+      BUNDLE_CONTENT=$(cat "$TARGET" 2>/dev/null || echo '{"bundle_unavailable":true}')
+      jq -n --arg path "$TARGET" --argjson content "$BUNDLE_CONTENT" '{bundle_path: $path, bundle_content: $content}' > "$VM_PRESCAN_OUT"
   merge: merge_args
 inputs:
   bundle_path:
     type: string
     description: >
       Optional path to a pre-collected bundle (artifacts/audit/audit_bundle.json).
-      If provided, ingest and cite it for evidence.
+      If provided, it will be inlined into bundle_content automatically.
+  bundle_content:
+    type: string
+    required: false
+    description: >
+      Inline JSON audit bundle (capped ~200KB). Contains keys like files, modules,
+      deps, vitest, pytest, ci_index, commit, workbench.
+  bundle_truncated:
+    type: boolean
+    required: false
+    description: 'If true, bundle_content is an excerpt (truncated for size).'
 outputs:
   result:
     type: object
@@ -167,11 +179,25 @@ prompt:
       "meta": {"auditor": "VaultMesh Auditor", "timestamp": "2025-09-30T12:00:00Z"}
     }
   user: |
-    Optional bundle path: {{bundle_path}}
+    Evidence Bundle (inline JSON excerpt). If truncated, treat as partial evidence:
+    {{bundle_truncated}}
 
-    If the bundle path string above is non-empty, ingest and cite its contents
-    when producing evidence. Otherwise proceed with direct repository inspection
-    and mark the bundle as unavailable in module weaknesses.
+    ```json
+    {{bundle_content}}
+    ```
+
+    The bundle typically contains:
+    - files: Key source files with paths and hashes
+    - modules: Directory structure and module metadata
+    - deps: Dependencies from package.json and requirements.txt
+    - vitest/pytest: Test coverage and results
+    - ci_index: CI configuration details
+    - commit: Current commit SHA and branch
+    - workbench: CLI and tool metadata
+
+    Use this evidence to produce a deterministic audit with concrete file citations.
+    If bundle_content is missing or shows {bundle_unavailable:true}, proceed with
+    limited analysis and note the limitation in module weaknesses.
   post:
     - type: 'validate_schema'
     - type: 'module_fn'

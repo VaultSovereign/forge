@@ -1,7 +1,6 @@
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import fs from 'node:fs';
 import path from 'node:path';
-
-import type { FastifyReply, FastifyRequest } from 'fastify';
 import YAML from 'yaml';
 
 type RbacDoc = {
@@ -33,9 +32,8 @@ export function loadRbacMatrix() {
 // Accepts either a list of actions (e.g., 'templates:read') or legacy role names
 export function rbac(required: string[]) {
   return async (req: FastifyRequest, reply: FastifyReply) => {
-    // @ts-ignore
-    const user = (req.user as { roles?: string[] }) || { roles: [] };
-    const roles = new Set(user.roles ?? []);
+    const userRoles = (req as FastifyRequest & { user?: { roles?: string[] } }).user?.roles ?? [];
+    const roles = new Set(userRoles);
 
     // If all required items look like roles (no ':'), check role presence
     const looksLikeRoles = required.every((r) => !r.includes(':'));

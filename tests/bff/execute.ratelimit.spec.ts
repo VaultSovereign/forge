@@ -1,5 +1,6 @@
 import rateLimit from '@fastify/rate-limit';
 import Fastify from 'fastify';
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 
 // Bypass core execution implementation for tests
@@ -11,7 +12,7 @@ import { loadRbacMatrix } from '../../workbench/bff/src/auth/rbac.ts';
 import executeRoutes from '../../workbench/bff/src/routes/execute.ts';
 
 describe('execute route rate limit', () => {
-  let app: any;
+  let app: FastifyInstance;
 
   beforeAll(async () => {
     process.env.NODE_ENV = 'test';
@@ -26,30 +27,38 @@ describe('execute route rate limit', () => {
     // Register rate limit plugin (per-route configs are defined in execute.ts)
     await app.register(rateLimit, {
       global: false,
-      keyGenerator: (req) => req.ip,
+      keyGenerator: (req: FastifyRequest) => req.ip,
       addHeaders: {
         'x-ratelimit-limit': false,
         'x-ratelimit-remaining': false,
         'x-ratelimit-reset': false,
         'retry-after': false,
       },
-      errorResponseBuilder: function (_req: any, context: any) {
-        const retrySec = Math.ceil((context?.timeWindow as number) / 1000) || 60;
+      errorResponseBuilder: function (_req: FastifyRequest, context: unknown) {
+        const ttl =
+          typeof (context as { ttl?: number }).ttl === 'number'
+            ? (context as { ttl: number }).ttl
+            : 60000;
+        const retrySec = Math.ceil(ttl / 1000) || 60;
         return {
           statusCode: 429,
           error: 'Too Many Requests',
           code: 'rate_limited',
           message: 'Rate limit exceeded. Please retry later.',
-          limit: context?.max,
+          limit: (context as { max?: number }).max,
           windowSeconds: retrySec,
         };
       },
-      // @ts-ignore runtime-provided
-      onExceeded: function (this: any, _req: any, res: any) {
-        const tw = (this && this.timeWindow) || 60000;
-        const retrySec = Math.ceil(Number(tw) / 1000) || 60;
-        if (typeof res?.header === 'function') res.header('Retry-After', String(retrySec));
-        else if (typeof res?.setHeader === 'function')
+      // @ts-expect-error fastify-rate-limit injects reply argument at runtime
+      onExceeded: function (
+        this: { timeWindow?: number },
+        _req: FastifyRequest,
+        res: FastifyReply
+      ) {
+        const windowMs = typeof this.timeWindow === 'number' ? this.timeWindow : 60000;
+        const retrySec = Math.ceil(windowMs / 1000) || 60;
+        if (typeof res.header === 'function') res.header('Retry-After', String(retrySec));
+        else if (typeof res.setHeader === 'function')
           res.setHeader('Retry-After', String(retrySec));
       },
     });

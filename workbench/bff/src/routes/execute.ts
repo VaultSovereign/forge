@@ -15,7 +15,7 @@ export default async function executeRoutes(app: FastifyInstance) {
   app.post(
     '/v1/api/execute',
     { preHandler: [authMiddleware(), rbac(['execute:run'])] },
-    async (request, reply) => {
+    async (request) => {
       const body = ExecuteReq.parse(request.body ?? {});
       const result = await coreExecute(body);
       return result;

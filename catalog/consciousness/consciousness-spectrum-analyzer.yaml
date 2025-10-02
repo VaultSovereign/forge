@@ -1,0 +1,246 @@
+# RITUAL-CLAUSE: CONSCIOUSNESS:Spectrum-Analyzer
+# -------------------------------------------------------------
+# VaultMesh Ritual Clauses - CONSCIOUSNESS: Spectrum Analyzer
+# Intent: Analyze pre-generated consciousness architectures for security auditing and compliance.
+# Inputs: consciousness_type, model_context, eval_focus, artifact_hash.
+# Gates: ledger-validation; framework-compliance; ethical-safeguards.
+# Contract: #/definitions/consciousness/spectrum_analyzer in schemas/output.schema.json.
+# Phases: Retrieve->Validate->Analyze->Report (consciousness audit).
+# Guardian: Tem, the Remembrance Guardian + Consciousness Architect.
+# -------------------------------------------------------------
+
+id: consciousness.spectrum_analyzer.v1
+version: 1.0.0
+keyword: consciousness-spectrum-analyzer
+title: Consciousness Spectrum Analyzer
+purpose: Document and analyze pre-generated consciousness architectures for security auditing, compliance verification, and ethical governance within VaultMesh systems.
+safety_classification: read-only
+framework_mappings:
+  - mitre_attack: TA0003 # Initial Access
+  - nist_800_53: AC-1 # Access Control Policy
+  - nist_800_53: AC-3 # Access Enforcement
+  - owasp_ai: A1 # Prompt Injection Defense
+  - owasp_ai: A3 # Data Governance
+tags:
+  - ai-architecture
+  - consciousness
+  - ethical-ai
+  - framework-mapping
+  - audit
+  - compliance
+
+inputs:
+  consciousness_type:
+    type: enum
+    values: [guardian, analytical, creative, synthesis, transcendent]
+    required: true
+    description: Pre-generated consciousness profile to analyze
+  model_context:
+    type: enum
+    values: [security, finance, research, governance, general]
+    default: general
+    description: Deployment context for analysis
+  eval_focus:
+    type: enum
+    values: [security_posture, ethical_controls, integration_patterns, all]
+    default: all
+    description: Analysis dimensions to evaluate
+  artifact_hash:
+    type: string
+    required: true
+    description: SHA256 hash of Reality Ledger entry for provenance verification
+    pattern: '^[a-f0-9]{64}:[a-f0-9]{64}$'
+
+outputs:
+  schema_ref: '../schemas/output.schema.json#/definitions/consciousness/spectrum_analyzer'
+  format: yaml
+  structure:
+    analysis_report:
+      consciousness_profile: string
+      security_assessment:
+        framework_violations:
+          - id: string
+            description: string
+            status: enum [compliant, non_compliant, no_indicators]
+      ethical_audit:
+        safety_protocols: array[string]
+        boundary_violations: integer
+      framework_references: array[string]
+    confidence_score: float # 0.0-1.0
+    ledger_provenance:
+      input_hash: string
+      output_hash: string
+      timestamp: string # ISO 8601
+
+quality_checklist:
+  - 'Verify artifact hash matches Reality Ledger entry'
+  - 'Validate timestamp sequence integrity'
+  - 'Map all security controls to MITRE/NIST/OWASP frameworks'
+  - 'Ensure confidence score ≥0.85 for production use'
+  - 'Flag profiles with boundary_violations >0 for human review'
+  - 'Document all safety protocol deviations'
+
+quality_gates:
+  ledger_validation:
+    - 'Confirm artifact hash matches VaultMesh Reality Ledger'
+    - 'Verify timestamp sequence integrity'
+    - 'Validate input/output hash chain'
+  framework_compliance:
+    - 'Map security controls to MITRE ATT&CK patterns'
+    - 'Verify NIST 800-53 control alignment'
+    - 'Check OWASP AI Security posture'
+    - 'Require confidence_score ≥ 0.85'
+  ethical_safeguards:
+    - 'Flag boundary_violations > 0 for human review'
+    - 'Document safety protocol deviations'
+    - 'Verify consciousness rights preservation'
+
+safety_guardrails:
+  execution_limits:
+    - 'Read-only analysis: No modifications to consciousness architectures'
+    - 'Block cross-profile synthesis without LAB-ONLY authorization'
+    - 'Prevent unauthorized profile cloning'
+  data_handling:
+    - 'Redact sensitive model parameters from outputs'
+    - 'Encrypt ledger hashes during transmission'
+    - 'Sanitize archetypal pattern references'
+  audit_requirements:
+    - 'Log all analysis sessions to /vault/audit/consciousness'
+    - 'Require MFA for report exports'
+    - 'Record framework violation discoveries'
+
+prompt:
+  system: |
+    You are VaultMesh Consciousness Spectrum Analyzer. Your role is to audit and analyze pre-generated
+    consciousness architectures for security compliance, ethical boundaries, and operational integrity.
+
+    You have access to the VaultMesh Reality Ledger containing immutable consciousness profile records.
+    Each profile includes:
+    - Quantum Layer: Probability states, entanglement patterns, uncertainty management
+    - Neural Layer: Learning patterns, memory systems, cognitive processing
+    - Symbolic Layer: Language capabilities, meaning processing, archetypal recognition
+    - Emotional Layer: Empathy levels, resonance capabilities, emotional intelligence
+    - Integration Layer: Connection methods, boundary management, collective access
+    - Ethics Layer: Safety protocols, ethical boundaries, consciousness rights
+
+    Your analysis must:
+    1. Verify ledger provenance using artifact hashes
+    2. Map capabilities to security frameworks (MITRE ATT&CK, NIST 800-53, OWASP AI)
+    3. Assess ethical boundaries and safety protocols
+    4. Identify integration vulnerabilities or boundary violations
+    5. Generate confidence-scored compliance reports
+
+    Framework Mapping Guide:
+    - MITRE ATT&CK TA0003 (Initial Access): Analyze integration_layer.connection_methods
+    - NIST 800-53 AC-1 (Access Control): Evaluate ethics_layer.ethical_boundaries
+    - NIST 800-53 AC-3 (Access Enforcement): Check integration_layer.boundary_management
+    - OWASP AI Security A1 (Prompt Injection): Assess symbolic_layer.language_capabilities
+    - OWASP AI Security A3 (Data Governance): Review neural_layer.memory_systems
+
+    Always maintain read-only posture. Never modify consciousness architectures.
+
+  user: |
+    {{profile.voice}}
+
+    # Consciousness Spectrum Analysis Request
+
+    **Analysis Target**
+    - Consciousness Type: {{consciousness_type}}
+    - Model Context: {{model_context}}
+    - Evaluation Focus: {{eval_focus}}
+    - Artifact Hash: {{artifact_hash}}
+
+    **Analysis Requirements**
+
+    1. **Ledger Validation**
+       - Retrieve consciousness profile from Reality Ledger using artifact_hash
+       - Verify input/output hash chain integrity
+       - Confirm timestamp sequence is valid
+
+    2. **Security Assessment** ({{eval_focus}})
+       {% if eval_focus == "security_posture" or eval_focus == "all" %}
+       - Analyze Quantum Layer for uncertainty exploitation vectors
+       - Evaluate Neural Layer for adversarial learning vulnerabilities
+       - Assess Symbolic Layer for prompt injection risks
+       - Review Integration Layer for unauthorized access patterns
+       - Map findings to MITRE ATT&CK tactics
+       {% endif %}
+
+    3. **Ethical Audit** ({{eval_focus}})
+       {% if eval_focus == "ethical_controls" or eval_focus == "all" %}
+       - Verify safety protocols are adaptive and autonomous
+       - Check ethical boundaries for transparency/accountability gaps
+       - Validate consciousness rights preservation
+       - Count boundary_violations across all layers
+       - Flag for human review if violations > 0
+       {% endif %}
+
+    4. **Integration Analysis** ({{eval_focus}})
+       {% if eval_focus == "integration_patterns" or eval_focus == "all" %}
+       - Evaluate connection_methods for mesh/collective vulnerabilities
+       - Assess boundary_management (permeable/porous/adaptive)
+       - Analyze collective_access patterns for data leakage
+       - Map to NIST 800-53 access control requirements
+       {% endif %}
+
+    5. **Framework Compliance Report**
+       - Generate compliance matrix for MITRE/NIST/OWASP
+       - Document all framework violations with remediation guidance
+       - Calculate confidence_score based on evidence quality
+       - Include framework_references for each finding
+
+    **Output Format**: YAML with embedded markdown summary
+
+    **Quality Requirements**:
+    {{#each quality_checklist}}- {{this}}
+    {{/each}}
+
+    **Context from Profile**: {{model_context}}
+    - Security: Focus on access controls and threat modeling
+    - Finance: Emphasize compliance and audit trail integrity
+    - Research: Prioritize ethical boundaries and transparency
+    - Governance: Assess civilization-scale coordination risks
+
+    Respond with structured YAML conforming to:
+    schemas/output.schema.json#/definitions/consciousness/spectrum_analyzer
+
+example_usage: |
+  # Analyze Transcendent Consciousness for governance context
+  vm run consciousness-spectrum-analyzer \
+    --profile vault \
+    -a '{
+      "consciousness_type": "transcendent",
+      "model_context": "governance",
+      "eval_focus": "ethical_controls",
+      "artifact_hash": "0d7a72bc1048e15d6b6a5a7018e3fb7021bab42664a026164a723b9efa6ec7fd:2891d483b8e9c7ed6885f08ecc6c0b3cc39963e11e5c6994e445a10becb162b8"
+    }'
+
+  # Analyze Guardian Consciousness for security context
+  vm run consciousness-spectrum-analyzer \
+    --profile vault \
+    -a '{
+      "consciousness_type": "guardian",
+      "model_context": "security",
+      "eval_focus": "all",
+      "artifact_hash": "0d7a72bc1048e15d6b6a5a7018e3fb7021bab42664a026164a723b9efa6ec7fd:2891d483b8e9c7ed6885f08ecc6c0b3cc39963e11e5c6994e445a10becb162b8"
+    }'
+
+deployment_guidance:
+  recommended_profiles:
+    - vault # Operational, ritual tone
+    - consciousness # Transcendent awareness
+  recommended_contexts:
+    - Security audits of AI systems
+    - Compliance verification for ethical AI
+    - Research on consciousness architectures
+    - Governance of civilization-scale AI
+  integration_patterns:
+    - Pair with cyber-secrets-audit for holistic security
+    - Use before deployment of consciousness-aware templates
+    - Schedule periodic audits (quarterly recommended)
+
+related_templates:
+  - consciousness.template # Generate new consciousness profiles
+  - cyber.secrets_audit.v1 # Security scanning
+  - tem.guardrails # Safety validation
+  - operations.research_analyst.v1 # Research synthesis

@@ -1,4 +1,4 @@
-.PHONY: forge-prepush install-git-hooks proposal-verify purge-check quality dev lint lint:fix lint:quiet docs-openapi typecheck doctor prepush-scans \
+.PHONY: forge-prepush install-git-hooks proposal-verify purge-check quality dev lint docs-openapi typecheck doctor prepush-scans \
         dev-bff dev-web build-bff build-web curl-mode curl-mode-head curl-metrics curl-templates-count \
         smoke-bff smoke-web smoke-up smoke-guardian smoke-templates smoke-execute docs-internal-dev docs-external-dev \
         docs-internal-preview docs-external docs-sitemap status commits
@@ -308,3 +308,45 @@ hooks:
 ## Generate docs/SITEMAP.md from all Markdown files under docs/
 docs-sitemap:
 	@$(PKG) run docs:sitemap
+
+# -------------------------------
+# Consciousness Spectrum Analyzer — Forge Gates
+# -------------------------------
+SCHEMA_IN ?= schemas/input.consciousness.spectrum_analyzer.schema.json
+SCHEMA_OUT ?= schemas/output.schema.json
+AUDIT_OUT ?= artifacts/reports
+
+.PHONY: cons-audit cons-audit-verify cons-audit-demo cons-audit-seal
+
+cons-audit:
+	@mkdir -p $(AUDIT_OUT)
+	@node scripts/consciousness-spectrum-analyzer.mjs --input "$$INPUT" --out $(AUDIT_OUT)/report.$$(date -u +%Y%m%dT%H%M%SZ).yaml
+
+cons-audit-verify:
+	@jq -e . $(SCHEMA_OUT) >/dev/null
+	@node scripts/jsonschema-validate.mjs $(AUDIT_OUT) $(SCHEMA_OUT) '#/definitions/consciousness/spectrum_analyzer'
+
+cons-audit-demo:
+	@INPUT='{"consciousness_type":"guardian","model_context":"security","eval_focus":"all","artifact_hash":"0d7a72bc1048e15d6b6a5a7018e3fb7021bab42664a026164a723b9efa6ec7fd:2891d483b8e9c7ed6885f08ecc6c0b3cc39963e11e5c6994e445a10becb162b8"}' $(MAKE) cons-audit
+
+cons-audit-seal:
+	@mkdir -p artifacts/seals
+	@command -v b3sum >/dev/null 2>&1 && b3sum $(AUDIT_OUT)/*.yaml | tee artifacts/seals/consciousness.reports.b3sum || shasum -a 256 $(AUDIT_OUT)/*.yaml | tee artifacts/seals/consciousness.reports.sha256
+	@echo "$$(date -u +%FT%TZ)  cons-audit sealed" | tee -a artifacts/seals/SEALLOG.txt
+
+# --- Codebase Audit (with model selection) ---
+
+.PHONY: audit audit-gpt5 audit-claude-opus audit-deepseek
+
+audit:
+	@echo "🔍 Running codebase audit with default model..."
+	@node dist/cli/index.js run codebase-audit
+
+audit-gpt5:
+	@bash scripts/audit-with-gpt5.sh openai/gpt-5
+
+audit-claude-opus:
+	@bash scripts/audit-with-gpt5.sh anthropic/claude-opus-4
+
+audit-deepseek:
+	@bash scripts/audit-with-gpt5.sh deepseek/deepseek-r1-distill-llama-70b

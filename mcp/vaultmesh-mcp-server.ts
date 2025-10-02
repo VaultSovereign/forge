@@ -4,12 +4,11 @@
  * Provides template execution, ledger queries, and metadata tools to Claude Code
  */
 
-import path from 'path';
-import { fileURLToPath } from 'url';
-
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { ListToolsRequestSchema, CallToolRequestSchema } from '@modelcontextprotocol/sdk/types.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { z } from 'zod';
 
 // Dynamic imports to avoid provider initialization issues
@@ -115,10 +114,12 @@ async function listTemplates() {
 /**
  * Run template with given parameters
  */
+type RunTemplateArgs = Record<string, unknown>;
+
 async function runTemplate(
   templateId: string,
   profile: string = 'vault',
-  args: any = {},
+  args: RunTemplateArgs = {},
   format: string = 'markdown'
 ) {
   try {
@@ -166,7 +167,15 @@ async function runTemplate(
 /**
  * Query Reality Ledger
  */
-async function queryLedger(filters: any = {}) {
+interface LedgerQueryFilters {
+  template?: string;
+  profile?: string;
+  since?: string;
+  limit?: number;
+  stats?: boolean;
+}
+
+async function queryLedger(filters: LedgerQueryFilters = {}) {
   try {
     const { queryLedger, getLedgerStats } = await import('../reality_ledger/node.js');
 

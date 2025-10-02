@@ -1,7 +1,7 @@
 import { stdin as In, stdout as Out } from 'node:process';
 import { createInterface } from 'node:readline';
 
-import { executePlan } from '../agent/execute.js';
+import { executePlan, type PlannerPlan } from '../agent/execute.js';
 import { planTask } from '../agent/plan.js';
 import { searchCodex, getDoc, buildIndex } from '../tools/codex.js';
 import { runForge } from '../tools/forge.js';
@@ -84,7 +84,10 @@ async function handle(req: RequestPayload): Promise<void> {
           tokens: Number(budget?.tokens ?? 16000),
           seconds: Number(budget?.seconds ?? 60),
         };
-        const report = await executePlan(plan as any, { budget: normalizedBudget, runLevel });
+        const report = await executePlan(plan as PlannerPlan, {
+          budget: normalizedBudget,
+          runLevel,
+        });
         send({ id, jsonrpc: '2.0', result: report });
         return;
       }

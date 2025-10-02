@@ -142,6 +142,28 @@ jobs:
       - name: Build project
         run: pnpm run build
 
+      - name: Consciousness Spectrum — fabricate report (advisory)
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          IN=$(printf '%064d' 0)
+          OUT=$(printf '%064d' 0)
+          node scripts/consciousness-spectrum-analyzer.mjs \
+            --input "{\"artifact_hash\":\"${IN}:${OUT}\",\"eval_focus\":\"all\",\"consciousness_type\":\"guardian\"}" \
+            --out artifacts/reports/ci-smoke.yaml
+          node scripts/jsonschema-validate.mjs \
+            artifacts/reports schemas/output.schema.json \
+            "#/definitions/consciousness/spectrum_analyzer"
+
+      - name: Codebase Audit (advisory, inline bundle)
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/audit
+          echo '{"files":["README.md"],"commit":"'"${GITHUB_SHA}"'","ci":{"run_id":"'"${GITHUB_RUN_ID}"'"},"notes":"ci smoke bundle"}' > artifacts/audit/audit_bundle.json
+          MODEL="openai/gpt-5" node dist/cli/index.js run codebase-audit \
+            --args "$(jq -n --rawfile bc artifacts/audit/audit_bundle.json '{bundle_content:$bc}')" || true
+
       - name: Generate OpenAPI (Workbench)
         run: node scripts/generate-openapi.mjs
 

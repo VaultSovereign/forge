@@ -1,12 +1,11 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { pathToFileURL } from 'node:url';
-
 import cors from '@fastify/cors';
 import rateLimit from '@fastify/rate-limit';
 import fastifyStatic from '@fastify/static';
 import Fastify, { type FastifyInstance } from 'fastify';
 import type { ZodTypeProvider } from 'fastify-type-provider-zod';
+import fs from 'node:fs';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { Counter } from 'prom-client';
 
 import { authPreHandler } from './auth/oidc.js';
@@ -82,24 +81,39 @@ export async function buildServer(): Promise<FastifyInstance> {
         windowSeconds: retrySec,
       };
     },
-    // @ts-ignore - this is provided by plugin at runtime
-    onExceeded: function (this: any, req: any, res: any) {
+    // @ts-expect-error fastify-rate-limit augments this handler at runtime
+    onExceeded: function (this: { timeWindow?: number }, req: unknown, res: unknown) {
       // Ensure Retry-After is present for clients/backoff logic
-      const tw = (this && this.timeWindow) || 60000; // default 60s
+      const tw = typeof this?.timeWindow === 'number' ? this.timeWindow : 60000; // default 60s
       const retrySec = Math.ceil(Number(tw) / 1000) || 60;
       try {
-        if (typeof res?.header === 'function') res.header('Retry-After', String(retrySec));
-        else if (typeof res?.setHeader === 'function')
-          res.setHeader('Retry-After', String(retrySec));
-      } catch {}
+        if (typeof (res as { header?: (k: string, v: string) => unknown })?.header === 'function') {
+          (res as { header: (k: string, v: string) => unknown }).header(
+            'Retry-After',
+            String(retrySec)
+          );
+        } else if (
+          typeof (res as { setHeader?: (k: string, v: string) => unknown })?.setHeader ===
+          'function'
+        ) {
+          (res as { setHeader: (k: string, v: string) => unknown }).setHeader(
+            'Retry-After',
+            String(retrySec)
+          );
+        }
+      } catch {
+        // Ignore header failures on mocks or non-Fastify replies
+      }
       try {
         const routeLabel =
-          (req as any).routerPath ||
-          (req.routeOptions && req.routeOptions.url) ||
-          req.url ||
+          (req as { routerPath?: string }).routerPath ||
+          (req as { routeOptions?: { url?: string } }).routeOptions?.url ||
+          (req as { url?: string }).url ||
           'unknown';
         rateLimitExceeded.labels({ route: String(routeLabel) }).inc();
-      } catch {}
+      } catch {
+        // Metrics update best-effort only
+      }
     },
   });
 

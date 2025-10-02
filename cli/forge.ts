@@ -1,8 +1,7 @@
 #!/usr/bin/env node
+import minimist from 'minimist';
 import path from 'path';
 import { fileURLToPath } from 'url';
-
-import minimist from 'minimist';
 
 import { runKeyword } from '../dispatcher/router.js';
 
@@ -64,14 +63,25 @@ async function main() {
     } else {
       const fmt = typeof flags.format === 'string' ? flags.format.toLowerCase() : '';
       if (fmt === 'json') console.log(JSON.stringify(out, null, 2));
-      else if (out && typeof out === 'object' && 'markdown' in out)
-        console.log((out as any).markdown);
-      else console.log(JSON.stringify(out, null, 2));
+      else if (hasMarkdown(out)) {
+        console.log(out.markdown);
+      } else console.log(JSON.stringify(out, null, 2));
     }
-  } catch (e: any) {
-    console.error('[forge] ERROR:', e?.message || e);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('[forge] ERROR:', message);
     process.exit(1);
   }
 }
 
 main();
+
+type MarkdownResult = { markdown: string };
+
+function hasMarkdown(value: unknown): value is MarkdownResult {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof (value as MarkdownResult).markdown === 'string'
+  );
+}

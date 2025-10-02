@@ -1,28 +1,35 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // --- Mock the OpenAI Agents SDK so we don't call the network ---
+type AgentTool = { name?: string; [key: string]: unknown };
+type AgentRunArgs = Record<string, unknown>;
+type AgentRunResult = { outputText: string; events?: Array<Record<string, unknown>> };
+
 vi.mock('@openai/agents', () => {
   // Define all mocks inside the factory to avoid TDZ (Temporal Dead Zone) issues
   class FakeAgent {
     public name: string;
     public instructions: string;
-    public tools: any[];
-    public handoffs: any[];
-    constructor(cfg: any) {
+    public tools: AgentTool[];
+    public handoffs: AgentTool[];
+    public run: (args: AgentRunArgs) => Promise<AgentRunResult>;
+
+    constructor(cfg: {
+      name: string;
+      instructions: string;
+      tools?: AgentTool[];
+      handoffs?: AgentTool[];
+    }) {
       this.name = cfg.name;
       this.instructions = cfg.instructions;
       this.tools = cfg.tools ?? [];
       this.handoffs = cfg.handoffs ?? [];
       // Let tests replace run implementation:
-      // @ts-ignore
-      this.run = vi.fn().mockResolvedValue({ outputText: '[fake-output]' });
-    }
-    run(_args: any): Promise<any> {
-      throw new Error('should be mocked');
+      this.run = vi.fn(async () => ({ outputText: '[fake-output]' }));
     }
   }
-  const fakeTool = (def: any) => def; // pass-through, we only read shape
-  const fakeHandoff = (def: any) => def; // pass-through
+  const fakeTool = <T>(def: T) => def; // pass-through, we only read shape
+  const fakeHandoff = <T>(def: T) => def; // pass-through
 
   return {
     Agent: FakeAgent,
@@ -34,6 +41,24 @@ vi.mock('@openai/agents', () => {
 // Now import the module under test (it will see the mocked SDK)
 import { triageAgent, runnerAgent, askGuardian } from '../../agents/index.ts';
 
+type MockedAgent = {
+  run: (args: AgentRunArgs) => Promise<AgentRunResult>;
+  tools: AgentTool[];
+  handoffs?: AgentTool[];
+};
+
+function asMockedAgent(value: unknown): MockedAgent {
+  if (
+    value &&
+    typeof value === 'object' &&
+    typeof (value as MockedAgent).run === 'function' &&
+    Array.isArray((value as MockedAgent).tools)
+  ) {
+    return value as MockedAgent;
+  }
+  throw new Error('Agent mock not initialized correctly');
+}
+
 describe('VaultMesh Agent skeleton', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -41,35 +66,45 @@ describe('VaultMesh Agent skeleton', () => {
 
   it('constructs Guardian (triage) with expected metadata and tools', () => {
     // Check it's an instance of the mocked Agent class (has expected structure)
-    expect(triageAgent).toBeDefined();
-    expect(typeof (triageAgent as any).run).toBe('function');
+    const triage = asMockedAgent(triageAgent);
+    expect(triage).toBeDefined();
+    expect(typeof triage.run).toBe('function');
     expect(triageAgent.name).toBe('VaultMesh Guardian');
-    expect((triageAgent as any).tools).toBeTruthy();
+    expect(triage.tools).toBeTruthy();
     // Guardian tools: listTemplates, listLedger, verifyStatus
-    const toolNames = (triageAgent as any).tools.map((t: any) => t?.name).sort();
+    const toolNames = triage.tools
+      .map((t) => (typeof t.name === 'string' ? t.name : ''))
+      .filter(Boolean)
+      .sort();
     expect(toolNames).toEqual(['list_ledger', 'list_templates', 'verify_status'].sort());
   });
 
   it('constructs Runner with run_template and list_ledger tools', () => {
-    expect(runnerAgent).toBeDefined();
-    expect(typeof (runnerAgent as any).run).toBe('function');
-    const toolNames = (runnerAgent as any).tools.map((t: any) => t?.name).sort();
+    const runner = asMockedAgent(runnerAgent);
+    expect(runner).toBeDefined();
+    expect(typeof runner.run).toBe('function');
+    const toolNames = runner.tools
+      .map((t) => (typeof t.name === 'string' ? t.name : ''))
+      .filter(Boolean)
+      .sort();
     expect(toolNames).toEqual(['list_ledger', 'run_template'].sort());
   });
 
   it('askGuardian delegates to triageAgent.run with given input', async () => {
     // Spy on the instance method created in constructor
-    const spy = vi.spyOn(triageAgent as any, 'run').mockResolvedValue({
+    const triage = asMockedAgent(triageAgent);
+    const spy = vi.spyOn(triage, 'run').mockResolvedValue({
       outputText: 'Latest: 3 events; 1 error.',
       events: [{ type: 'tool', name: 'list_ledger' }],
     });
 
     const result = await askGuardian('List latest ledger events');
     expect(spy).toHaveBeenCalledTimes(1);
-    expect((spy as any).mock.calls[0][0]).toMatchObject({
+    const firstCall = spy.mock.calls[0]?.[0] as Record<string, unknown> | undefined;
+    expect(firstCall).toMatchObject({
       model: expect.any(String),
       input: 'List latest ledger events',
     });
-    expect((result as any).outputText).toBe('Latest: 3 events; 1 error.');
+    expect((result as AgentRunResult).outputText).toBe('Latest: 3 events; 1 error.');
   });
 });

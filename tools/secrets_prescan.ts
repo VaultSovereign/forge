@@ -4,12 +4,11 @@
  * Walks a repository, detects candidate secrets using regex + entropy, and prints JSON array of hits.
  */
 
+import minimist from 'minimist';
 import { execSync } from 'node:child_process';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-
-import minimist from 'minimist';
 
 type Hit = {
   file: string;
@@ -27,7 +26,9 @@ function toArray(input: string | string[] | undefined, sep = ','): string[] {
     // allow JSON arrays
     const parsed = JSON.parse(input);
     if (Array.isArray(parsed)) return parsed.map(String);
-  } catch {}
+  } catch {
+    // Ignore parse failures; fall back to delimiter-based parsing
+  }
   return String(input)
     .split(sep)
     .map((s) => s.trim())

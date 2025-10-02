@@ -1,7 +1,6 @@
 import { mkdtempSync, rmSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 
 import { appendEvent, getEvent, verifyEvent } from './node';

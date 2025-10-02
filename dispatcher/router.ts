@@ -1,10 +1,9 @@
 #!/usr/bin/env node
+import type { AnySchema } from 'ajv';
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
+import fsSync from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-import minimist from 'minimist';
 import YAML from 'yaml';
 
 import { ensureConforms } from './ensureConforms.js';
@@ -14,28 +13,34 @@ import { appendRealityEvent } from './realityLedger.js';
 import { safetyPreflight } from './safety.js';
 import type { Template, Profile, RunArgs } from './types.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const providerConfig = createProviderConfig();
 const defaultModelName = providerConfig.model;
 const providerName = providerConfig.provider;
 
-const ledgerEligibleKeywords = new Set(['tem-vision', 'tem-sonic', 'consciousness-template']);
+const ledgerEligibleKeywords = new Set([
+  'tem-vision',
+  'tem-sonic',
+  'consciousness-template',
+  'consciousness-spectrum-analyzer',
+]);
 
 const SENSITIVE_KEY_PATTERN = /(key|secret|token|password)/i;
 
-function redactSensitiveArgs<T>(value: T): T {
-  if (value === null || typeof value !== 'object') {
-    return value;
-  }
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
 
+function redactSensitiveArgs<T>(value: T): T {
   if (Array.isArray(value)) {
     return value.map((item) => redactSensitiveArgs(item)) as unknown as T;
   }
 
+  if (!isRecord(value)) {
+    return value;
+  }
+
   const clone: Record<string, unknown> = {};
-  for (const [key, val] of Object.entries(value as Record<string, unknown>)) {
+  for (const [key, val] of Object.entries(value)) {
     if (SENSITIVE_KEY_PATTERN.test(key)) {
       clone[key] = typeof val === 'string' && val.length ? '***REDACTED***' : null;
       continue;
@@ -50,9 +55,22 @@ function hash(s: string) {
   return crypto.createHash('sha256').update(s).digest('hex');
 }
 
-async function loadYAML(p: string) {
+// --- Prescan helper: safely read small files synchronously (cap ~200KB)
+function readMaybe(p?: unknown, cap = 200_000): { text?: string; truncated?: boolean } {
+  const pathStr = typeof p === 'string' ? p : '';
+  if (!pathStr) return {};
+  try {
+    const raw = fsSync.readFileSync(pathStr, 'utf8');
+    const truncated = raw.length > cap;
+    return { text: truncated ? raw.slice(0, cap) : raw, truncated };
+  } catch {
+    return {};
+  }
+}
+
+async function loadYAML<T>(p: string): Promise<T> {
   const txt = await fs.readFile(p, 'utf8');
-  return YAML.parse(txt);
+  return YAML.parse(txt) as T;
 }
 
 export interface TemplateListing {
@@ -72,8 +90,8 @@ async function findTemplate(
   for (const f of files) {
     if (!f.endsWith('.yaml')) continue;
     const full = path.join(familyDir, f);
-    const y = await loadYAML(full);
-    if (y.keyword === keyword) return { tpl: y, path: full };
+    const candidate = await loadYAML<Template>(full);
+    if (candidate.keyword === keyword) return { tpl: candidate, path: full };
   }
   throw new Error(`Template for keyword '${keyword}' not found in ${familyDir}`);
 }
@@ -90,10 +108,10 @@ async function listTemplatesInternal(projectRoot: string): Promise<TemplateListi
       if (!file.endsWith('.yaml')) continue;
       const absolute = path.join(familyDir, file);
       try {
-        const tpl = (await loadYAML(absolute)) as Template & { id?: string };
+        const tpl = await loadYAML<Template & { id?: string }>(absolute);
         if (!tpl || !tpl.keyword) continue;
         entries.push({
-          id: (tpl as any).id || tpl.keyword,
+          id: typeof tpl.id === 'string' && tpl.id.length ? tpl.id : tpl.keyword,
           keyword: tpl.keyword,
           title: tpl.title,
           path: absolute,
@@ -114,39 +132,54 @@ async function loadProfile(projectRoot: string, name?: string): Promise<Profile>
   const n = name || 'vault';
   const p = path.join(projectRoot, 'profiles', `${n}.yaml`);
   try {
-    const y = await loadYAML(p);
-    return y as Profile;
+    return await loadYAML<Profile>(p);
   } catch (_e) {
     throw new Error(`Profile '${n}' not found at ${p}`);
   }
 }
 
-function normalizeArgs(rawFlags: any, tpl: Template, profile: Profile, notes: string): RunArgs {
+function normalizeArgs(
+  rawFlags: Record<string, unknown> | undefined,
+  tpl: Template,
+  profile: Profile,
+  notes: string
+): RunArgs {
   const args: RunArgs = {};
   // defaults from template
   for (const [k, spec] of Object.entries(tpl.inputs || {})) {
     if (spec && typeof spec === 'object' && 'default' in spec) {
-      // @ts-ignore
       args[k] = spec.default;
     }
   }
   // profile defaults override
   for (const [k, v] of Object.entries(profile.defaults || {})) {
-    // @ts-ignore
     args[k] = v;
   }
-  // flags override
+  // flags override (persist flag as-is; normalize output format aliases)
   for (const [k, v] of Object.entries(rawFlags || {})) {
-    // minimist uses camelCase for long flags sometimes; accept as-is
-    if (k === 'format') args['output_format'] = v as any;
-    else args[k] = v;
+    // Persist provided flag value verbatim
+    args[k] = v;
+
+    // Normalize well-known output format flags
+    const key = String(k).replace(/-/g, '_').toLowerCase();
+    if (key === 'format' || key === 'output_format') {
+      const val = String(v ?? '').toLowerCase();
+      if (val === 'json' || val === 'yaml' || val === 'markdown') {
+        args.output_format = val;
+      }
+    }
   }
-  if (notes && notes.length) args['brief'] = args['brief'] || notes;
+  if (notes && notes.length && (typeof args.brief !== 'string' || !args.brief)) {
+    args.brief = notes;
+  }
 
   // validate enums + required
   for (const [k, spec] of Object.entries(tpl.inputs || {})) {
-    const val = (args as any)[k];
-    if (spec.required && (val === undefined || val === null || val === '')) {
+    const val = args[k];
+    if (
+      spec.required &&
+      (val === undefined || val === null || (typeof val === 'string' && val === ''))
+    ) {
       throw new Error(`Missing required input: ${k}`);
     }
     if (spec.type === 'enum' && spec.values && val != null) {
@@ -159,17 +192,22 @@ function normalizeArgs(rawFlags: any, tpl: Template, profile: Profile, notes: st
   return args;
 }
 
-function enrichContext(tpl: Template, args: RunArgs, profile: Profile) {
-  const ctx = {
+type PromptContext = RunArgs & {
+  purpose: string;
+  quality_checklist: string[];
+  profile: Profile;
+};
+
+function enrichContext(tpl: Template, args: RunArgs, profile: Profile): PromptContext {
+  return {
     ...args,
     purpose: tpl.purpose,
     quality_checklist: tpl.quality_checklist || [],
-    profile: profile,
+    profile,
   };
-  return ctx;
 }
 
-async function expandPrompt(tpl: Template, args: RunArgs, ctx: any) {
+async function expandPrompt(tpl: Template, args: RunArgs, ctx: PromptContext) {
   const sys = expand(tpl.prompt.system, ctx);
   let usr = expand(tpl.prompt.user, ctx);
 
@@ -195,22 +233,23 @@ async function callLLM(system: string, user: string, modelOverride: string): Pro
   return providerConfig.chat(modelOverride, system, user);
 }
 
-async function loadSchema(projectRoot: string, ref: string): Promise<any> {
+async function loadSchema(projectRoot: string, ref: string): Promise<AnySchema> {
   // ref example: "../schemas/output.schema.json#/definitions/tem/recon"
   const [rel, pointer] = ref.split('#');
   const p = path.resolve(projectRoot, 'schemas', path.basename(rel || 'output.schema.json'));
-  const json = JSON.parse(await fs.readFile(p, 'utf8'));
-  if (!pointer) return json;
+  const json = JSON.parse(await fs.readFile(p, 'utf8')) as unknown;
+  if (!pointer) return json as AnySchema;
   const parts = pointer.replace(/^\//, '').split('/');
-  let node: any = json;
-  for (const seg of parts) {
-    if (!(seg in node)) throw new Error(`Schema pointer not found: ${pointer}`);
-    node = node[seg];
-  }
-  return node;
+  const node = parts.reduce<unknown>((acc, seg) => {
+    if (!isRecord(acc) || !(seg in acc)) {
+      throw new Error(`Schema pointer not found: ${pointer}`);
+    }
+    return acc[seg];
+  }, json);
+  return node as AnySchema;
 }
 
-async function writeAudit(projectRoot: string, rec: any) {
+async function writeAudit(projectRoot: string, rec: Record<string, unknown>) {
   const logDir = path.join(projectRoot, 'logs');
   await fs.mkdir(logDir, { recursive: true });
   const line = JSON.stringify(rec);
@@ -221,13 +260,25 @@ export async function runKeyword(opts: {
   projectRoot: string;
   keyword: string;
   profileName?: string | null;
-  flags?: any;
+  flags?: Record<string, unknown>;
   notes?: string;
-}) {
+}): Promise<unknown> {
   const { projectRoot, keyword, profileName, flags = {}, notes = '' } = opts;
   const { tpl } = await findTemplate(projectRoot, keyword);
   const profile = await loadProfile(projectRoot, profileName || undefined);
   const args = normalizeArgs(flags, tpl, profile, notes);
+
+  // Auto-inline bundle_path → bundle_content (size-capped) for audit-like templates
+  if (typeof (args as Record<string, unknown>).bundle_path === 'string' &&
+      !(args as Record<string, unknown>).bundle_content) {
+    const { text, truncated } = readMaybe((args as Record<string, unknown>).bundle_path);
+    if (text) {
+      (args as Record<string, unknown>).bundle_content = text;
+      (args as Record<string, unknown>).bundle_truncated = Boolean(truncated);
+    }
+    // Remove path to avoid leaking filesystem details to the LLM
+    delete (args as Record<string, unknown>).bundle_path;
+  }
   const ctx = enrichContext(tpl, args, profile);
 
   const pre = safetyPreflight(tpl, args);
@@ -239,7 +290,7 @@ export async function runKeyword(opts: {
     typeof args.model === 'string' && args.model.trim() ? args.model.trim() : defaultModelName;
   const llmRaw = await callLLM(prompt.system, prompt.user, requestedModel);
 
-  let output: any = llmRaw;
+  let output: unknown = llmRaw;
   let ok = true;
 
   // Validate if JSON requested
