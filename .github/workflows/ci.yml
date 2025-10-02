@@ -51,6 +51,10 @@ jobs:
 
       - name: Setup toolchain
         uses: ./.github/actions/setup-pnpm
+        with:
+          node-version: ${{ matrix.node-version }}
+          pnpm-version: '10.17.0'
+
       - name: Generate OPENAPI.md from spec
         run: node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md
 
@@ -60,10 +64,6 @@ jobs:
             echo "::error file=docs/OPENAPI.md::docs/OPENAPI.md is out of date. Run 'pnpm -w run docs:openapi:md' and commit.";
             exit 1;
           }
-
-        with:
-          node-version: ${{ matrix.node-version }}
-          pnpm-version: '10.17.0'
 
       - name: Type check
         run: pnpm run typecheck
