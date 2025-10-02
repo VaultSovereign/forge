@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-import minimist from 'minimist';
 import path from 'path';
 import { fileURLToPath } from 'url';
+
+import minimist from 'minimist';
 
 import { runKeyword } from '../dispatcher/router.js';
 

@@ -111,6 +111,16 @@
       }
     },
     {
+      "files": [
+        "dispatcher/modelProvider.ts",
+        "reality_ledger/node.ts",
+        "workbench/bff/src/server.ts"
+      ],
+      "rules": {
+        "import/no-named-as-default": "off"
+      }
+    },
+    {
       "files": ["**/*.d.ts"],
       "rules": {
         "@typescript-eslint/no-explicit-any": "off",

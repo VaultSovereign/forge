@@ -1,6 +1,7 @@
 #!/usr/bin/env ts-node
-import minimist from 'minimist';
 import path from 'node:path';
+
+import minimist from 'minimist';
 
 import { preScan } from '../../tools/secrets_prescan.js';
 

@@ -1,9 +1,10 @@
 import { default as Ajv } from 'ajv';
 
-import { ExecReportSchema } from './schemas.js';
 import { searchCodex, getDoc } from '../tools/codex.js';
 import { runForge } from '../tools/forge.js';
 import { appendRealityEvent } from '../tools/ledger.js';
+
+import { ExecReportSchema } from './schemas.js';
 
 type RunLevel = 'read-only' | 'advisory' | 'lab-only';
 

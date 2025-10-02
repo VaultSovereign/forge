@@ -1,6 +1,7 @@
-import type { FastifyReply, FastifyRequest } from 'fastify';
 import fs from 'node:fs';
 import path from 'node:path';
+
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import YAML from 'yaml';
 
 type RbacDoc = {

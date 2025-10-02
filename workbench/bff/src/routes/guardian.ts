@@ -1,11 +1,13 @@
-import type { FastifyInstance } from 'fastify';
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-import { limitCfg } from './_limits.js';
+import type { FastifyInstance } from 'fastify';
+
 import { askGuardian as askGuardianDirect } from '../../../../agents/index.ts';
 import { fromHere } from '../utils/esm-paths.js';
+
+import { limitCfg } from './_limits.js';
 // Test-only import: used by exported postGuardian handler for unit tests.
 // At runtime, the Fastify route below continues to use dynamic agent resolution.
 // The relative path walks up to repo root from workbench/bff/src/routes.

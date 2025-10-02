@@ -1,9 +1,10 @@
 #!/usr/bin/env node
-import minimist from 'minimist';
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import minimist from 'minimist';
 import YAML from 'yaml';
 
 import { ensureConforms } from './ensureConforms.js';
