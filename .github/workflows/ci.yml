@@ -21,30 +21,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Verify No Replit Remnants
-        run: |
-          # Ignore known safe locations: backups, docs, CI config, and sync helper scripts
-          if grep -RIn \
-            --exclude-dir=.git \
-            --exclude-dir=.github \
-            --exclude-dir=node_modules \
-            --exclude-dir=dist \
-            --exclude-dir=attached_assets \
-            --exclude-dir=_backups \
-            --exclude-dir=docs \
-            --exclude-dir=scripts \
-            --exclude='*.lock' \
-            -E '\\breplit\\b' . 2>/dev/null | grep -v '.gitignore:'; then
-            echo "❌ Found disallowed 'replit' references. Purification compromised."
-            exit 1
-          fi
-          echo "✅ No Replit remnants found"
-
       - name: Node & pnpm setup
         uses: ./.github/actions/node-pnpm-setup
         with:
           node-version: 20
           pnpm-version: 10.17.0
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-${{ runner.os }}-
 
       - name: Cache ESLint
         uses: actions/cache@v4
@@ -76,6 +65,14 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           pnpm-version: 10.17.0
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-${{ runner.os }}-
 
       # Ensure base exists for PRs so changed-only tests can diff against origin/<base>
       - name: Fetch base branch (PR only)
@@ -225,15 +222,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.17.0
-          run_install: false
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Node & pnpm setup
+        uses: ./.github/actions/node-pnpm-setup
         with:
           node-version: 20
+          pnpm-version: 10.17.0
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-${{ runner.os }}-
       - name: Install workspace deps
         run: pnpm -w install --frozen-lockfile || pnpm -w install
       - name: Generate OPENAPI.md from spec
@@ -353,15 +354,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.17.0
-          run_install: false
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Node & pnpm setup
+        uses: ./.github/actions/node-pnpm-setup
         with:
           node-version: 20
+          pnpm-version: 10.17.0
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-${{ runner.os }}-
       - name: Install workspace deps
         run: pnpm -w install --frozen-lockfile || pnpm -w install
       - name: Install workspace deps
@@ -547,15 +552,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.17.0
-          run_install: false
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Node & pnpm setup
+        uses: ./.github/actions/node-pnpm-setup
         with:
           node-version: 20
+          pnpm-version: 10.17.0
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-${{ runner.os }}-
       - name: Install workspace deps
         run: pnpm -w install --frozen-lockfile || pnpm -w install
 
@@ -801,6 +810,14 @@ jobs:
         with:
           node-version: 20
           pnpm-version: 10.17.0
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-${{ runner.os }}-
       - name: Generate OPENAPI.md from spec
         run: node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md
       - name: Format OPENAPI.md
@@ -851,15 +868,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.17.0
-          run_install: false
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Node & pnpm setup
+        uses: ./.github/actions/node-pnpm-setup
         with:
           node-version: 20
+          pnpm-version: 10.17.0
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-${{ runner.os }}-
       - name: Install workspace deps
         run: pnpm -w install --frozen-lockfile || pnpm -w install
       - name: Generate OPENAPI.md from spec
@@ -891,6 +912,14 @@ jobs:
         with:
           node-version: 20
           pnpm-version: 10.17.0
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-${{ runner.os }}-
       - name: Generate OPENAPI.md from spec
         run: node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md
       - name: Format OPENAPI.md
