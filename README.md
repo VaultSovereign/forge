@@ -99,6 +99,23 @@ docker run --rm -p 3000:3000 ghcr.io/vaultsovereign/forge:latest
 # open http://localhost:3000/v1/health
 ```
 
+GHCR package page:
+
+- https://github.com/orgs/VaultSovereign/packages/container/package/forge
+
+Check image tags
+
+- In the UI: open the GHCR package page above → Versions (shows `latest`, `vX.Y.Z`, and `sha` tags)
+- With `crane` (requires installation): `crane ls ghcr.io/vaultsovereign/forge`
+- With `skopeo` (requires installation): `skopeo list-tags docker://ghcr.io/vaultsovereign/forge`
+- Quick runtime check: `docker run --rm -p 3000:3000 ghcr.io/vaultsovereign/forge:latest`
+
+After tagging
+
+- GHCR tags visible at the package page
+- Release created (release-notes workflow)
+- `image-publish` workflow successful on the tag
+
 ⸻
 
 🔌 API
