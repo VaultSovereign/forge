@@ -78,6 +78,8 @@ jobs:
 
       - name: Generate OPENAPI.md from spec
         run: node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md
+      - name: Format OPENAPI.md
+        run: pnpm exec prettier --write docs/OPENAPI.md || npx prettier --write docs/OPENAPI.md
 
       - name: Verify OPENAPI.md is up to date
         run: |
@@ -206,6 +208,8 @@ jobs:
         run: pnpm -w install --frozen-lockfile || pnpm -w install
       - name: Generate OPENAPI.md from spec
         run: node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md
+      - name: Format OPENAPI.md
+        run: pnpm exec prettier --write docs/OPENAPI.md || npx prettier --write docs/OPENAPI.md
 
       - name: Verify OPENAPI.md is up to date
         run: |
@@ -334,6 +338,8 @@ jobs:
         run: pnpm -w install --frozen-lockfile || pnpm -w install
       - name: Generate OPENAPI.md from spec
         run: node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md
+      - name: Format OPENAPI.md
+        run: pnpm exec prettier --write docs/OPENAPI.md || npx prettier --write docs/OPENAPI.md
 
       - name: Verify OPENAPI.md is up to date
         run: |
@@ -767,6 +773,8 @@ jobs:
           pnpm-version: 10.17.0
       - name: Generate OPENAPI.md from spec
         run: node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md
+      - name: Format OPENAPI.md
+        run: pnpm exec prettier --write docs/OPENAPI.md || npx prettier --write docs/OPENAPI.md
 
       - name: Verify OPENAPI.md is up to date
         run: |
@@ -826,6 +834,8 @@ jobs:
         run: pnpm -w install --frozen-lockfile || pnpm -w install
       - name: Generate OPENAPI.md from spec
         run: node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md
+      - name: Format OPENAPI.md
+        run: pnpm exec prettier --write docs/OPENAPI.md || npx prettier --write docs/OPENAPI.md
 
       - name: Verify OPENAPI.md is up to date
         run: |
@@ -853,6 +863,8 @@ jobs:
           pnpm-version: 10.17.0
       - name: Generate OPENAPI.md from spec
         run: node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md
+      - name: Format OPENAPI.md
+        run: pnpm exec prettier --write docs/OPENAPI.md || npx prettier --write docs/OPENAPI.md
 
       - name: Verify OPENAPI.md is up to date
         run: |
