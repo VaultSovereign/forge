@@ -136,8 +136,10 @@ jobs:
           name: sbom
           path: sbom.json
 
-      - name: Secrets scan
-        run: pnpm run scan:secrets
+      - name: Scan secrets (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          args: detect --source=. --redact --no-git --exit-code 1
 
       - name: Security audit
         run: pnpm audit --prod || echo "Audit warnings found"

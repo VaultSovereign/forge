@@ -1,6 +1,7 @@
 id: codebase.audit.v1
 version: '1.0.0'
 keyword: codebase-audit
+purpose: "Continuous security & compliance scan for Forge workspace"
 meta:
   title: 'Codebase Audit (Structured Scroll)'
   description: >
