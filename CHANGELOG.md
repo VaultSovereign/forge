@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
 - (placeholder)
 
+### Docs
+- Document GHCR image workflow and auto release-notes in README, CONTRIBUTING, and PROD_CHECKLIST.
+
 <!--
 Cut a new section on release, e.g.:
 
@@ -31,4 +34,3 @@ Cut a new section on release, e.g.:
 ### Security
 - …
 -->
-
