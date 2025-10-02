@@ -12,7 +12,7 @@ function tryTrivy(image: string): any | null {
 }
 
 const DOCKERFILE = process.env.DOCKERFILE || 'Dockerfile';
-const IMAGE = process.env.IMAGE || 'vaultmesh/forge:ci';
+const IMAGE = process.env.IMAGE || 'ghcr.io/vaultsovereign/forge:ci';
 
 let dockerfileText = '';
 try {

@@ -1,4 +1,6 @@
-# VaultMesh Quickstart Guide
+# Quickstart — VaultMesh Forge
+Earth’s Civilization Ledger; sovereign prompt orchestration for compliance and cybersecurity.
+
 
 ## Installation & Setup
 
@@ -168,14 +170,14 @@ Every template execution creates an immutable audit record:
 Build and run the Forge container with a mounted ledger and outputs folder. Replace the API key with your own secret before running.
 
 ```bash
-docker build -t vaultmesh/forge:1.0.0 .
+docker build -t ghcr.io/vaultsovereign/forge:latest .
 docker run --rm \
   -e MODEL="meta-llama/llama-3.1-70b-instruct" \
   -e OPENROUTER_API_KEY="${OPENROUTER_API_KEY}" \
   -e REALITY_LEDGER_COMPACT=1 \
   -v "$PWD/outputs:/app/outputs" \
   -v "$PWD/reality_ledger:/app/reality_ledger" \
-  vaultmesh/forge:1.0.0 \
+  ghcr.io/vaultsovereign/forge:latest \
   vm run --template dora.ict_risk_framework.v1 --args '{"org_name":"AcmeBank","critical_functions":["Payments"],"threat_scenarios":["DDoS"]}'
 ```
 
@@ -205,3 +207,28 @@ Artifacts will be written to `outputs/AcmeBank/...` and a signed receipt will be
 - MCP Setup: See `/docs/MCP_WIRING.md`
 
 ### VaultMesh - Earth's Civilization Ledger
+
+## Run with Docker (GHCR)
+
+You can use the prebuilt image directly from GitHub Container Registry:
+
+```bash
+
+docker pull ghcr.io/vaultsovereign/forge:latest
+
+docker run --rm -p 3000:3000 ghcr.io/vaultsovereign/forge:latest
+
+# then open http://localhost:3000/v1/health
+
+```
+
+Tags
+
+	•	:latest — built from main
+
+	•	:vX.Y.Z — release tags
+
+	•	:<git-sha> — every push
+
+
+[⬅️ Return to [README](../README.md) (badges, docs index, Docker)]

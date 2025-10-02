@@ -48,7 +48,7 @@
 
   <!-- Core Services -->
   <rect x="620" y="290" width="600" height="250" class="box"/>
-  <text x="640" y="320" class="title">Core vaultmesh-ai (@vaultmesh/ai-core)</text>
+  <text x="640" y="320" class="title">Core forge (@vaultmesh/ai-core)</text>
   <text x="640" y="350" class="small">• Dispatcher (runKeyword, validate, guardrails)</text>
   <text x="640" y="370" class="small">• Reality Ledger (append, verify, query) — append on success &amp; failure</text>
   <text x="640" y="390" class="small">• Programmatic library (TS) + gRPC server</text>

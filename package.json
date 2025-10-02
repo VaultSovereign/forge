@@ -11,19 +11,23 @@
     "mcp",
     "templates"
   ],
-  "homepage": "https://github.com/vaultsovereign/vaultmesh-forge#readme",
+  "homepage": "https://github.com/VaultSovereign/forge#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vaultsovereign/vaultmesh-forge.git"
+    "url": "git+https://github.com/VaultSovereign/forge.git"
   },
   "bugs": {
-    "url": "https://github.com/vaultsovereign/vaultmesh-forge/issues"
+    "url": "https://github.com/VaultSovereign/forge/issues"
   },
   "author": "VaultSovereign",
   "license": "Apache-2.0",
   "type": "module",
   "packageManager": "pnpm@10.17.0",
   "scripts": {
+    "docs:sitemap": "node scripts/generate-docs-sitemap.mjs docs SITEMAP.md",
+    "prepare": "husky install",
+    "image:build": "docker build -t ghcr.io/vaultsovereign/forge:latest .",
+    "image:push": "docker push ghcr.io/vaultsovereign/forge:latest",
     "//": "--- UTILS & AUTOMATION ---",
     "schemas:build": "node -e \"import('yaml').then(()=>import('./scripts/build-schemas.mjs'))\"",
     "build": "tsc -p tsconfig.json",
@@ -34,10 +38,12 @@
     "build:workbench": "npm --prefix workbench/frontend run build && npm --prefix workbench/bff run build && mkdir -p workbench/bff/public && cp -R workbench/frontend/dist/* workbench/bff/public/ || true",
     "build:sales": "npm run sales:deck && npm run sales:onepager",
     "sales:deck": "npx @marp-team/marp-cli docs/SALES/DECK.marp.md -o dist/sales-deck.html --allow-local-files --theme docs/SALES/theme.css && npx @marp-team/marp-cli docs/SALES/DECK.marp.md -o dist/sales-deck.pdf --allow-local-files --pdf --theme docs/SALES/theme.css && cp dist/sales-deck.html dist/index.html || true",
-    "sales:onepager": "npx @marp-team/marp-cli docs/SALES/ONE_PAGER.marp.md -o dist/one-pager.html --allow-local-files --theme docs/SALES/theme.css && npx @marp-team/marp-cli docs/SALES/ONE_PAGER.marp.md -o dist/one-pager.pdf --allow-local-files --pdf --theme docs/SALES/theme.css",
+    "sales:onepager": "npx @marp-team/marp-cli docs/SALES/ONE_PAGER.marp.md -o dist/one-pager.html --allow-local-files --theme docs/SALES/theme.css",
     "watch:deck": "npx @marp-team/marp-cli -w docs/SALES/DECK.marp.md -o dist/sales-deck.html --allow-local-files --theme docs/SALES/theme.css",
-    "lint": "echo 'ESLint not configured yet - TODO'",
-    "format": "echo 'Prettier not configured yet - TODO'",
+    "lint": "eslint --cache --ext .ts,.tsx,.js,.cjs,.mjs .",
+    "lint:fix": "eslint --fix --cache --ext .ts,.tsx,.js,.cjs,.mjs .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "vitest run --coverage --passWithNoTests",
     "test:watch": "vitest",
     "test:forge": "python3 -m pytest -q -rA tests/test_unforged_forge.py",
@@ -48,7 +54,7 @@
     "audit": "npm audit --production",
     "sbom": "npx @cyclonedx/cyclonedx-npm --output-format json --output-file sbom.json",
     "scan:secrets": "npx gitleaks detect --redact --no-git",
-    "scan:container": "trivy image --exit-code 1 vaultmesh/forge:latest || true",
+    "scan:container": "trivy image --exit-code 1 ghcr.io/vaultsovereign/forge:latest || true",
     "vm": "ts-node cli/index.ts",
     "start": "node dist/cli/index.js",
     "mcp:dev": "node dist/mcp/vaultmesh-mcp-server.js",
@@ -73,7 +79,13 @@
     "codex:build": "npx ts-node tools/codex.ts build",
     "codex:search": "npx ts-node tools/codex.ts search",
     "demo:compliance": "bash scripts/demo-compliance.sh",
-    "build:agents": "tsup agents/index.ts --format esm --target node20 --dts=false --splitting=false --out-dir agents/build --clean"
+    "build:agents": "tsup agents/index.ts --format esm --target node20 --dts=false --splitting=false --out-dir agents/build --clean",
+    "dev:npm": "npm --prefix workbench/frontend run dev",
+    "build:web:npm": "npm --prefix workbench/frontend run build && cp -r workbench/frontend/dist workbench/frontend-dist",
+    "build:bff:npm": "npm --prefix workbench/bff run build",
+    "start:bff:npm": "node workbench/bff/dist/server.js",
+    "docs:openapi:md": "node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md",
+    "docs:openapi:check": "node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md && git diff --exit-code -- docs/OPENAPI.md"
   },
   "bin": {
     "vm": "dist/cli/index.js"
@@ -93,6 +105,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "husky": "^9.0.0",
     "@types/glob": "^9.0.0",
     "@types/lunr": "^2.3.7",
     "@types/minimist": "^1.2.5",
@@ -105,6 +118,16 @@
     "typescript": "^5.6.3",
     "tsup": "^8.2.4",
     "vitest": "^1.0.0",
-    "yaml": "^2.5.1"
+    "yaml": "^2.5.1",
+    "eslint": "^8.57.0",
+    "@typescript-eslint/parser": "^7.16.1",
+    "@typescript-eslint/eslint-plugin": "^7.16.1",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "prettier": "^3.3.3"
   }
 }

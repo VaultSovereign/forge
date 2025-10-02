@@ -1,12 +1,12 @@
 import { useMemo } from 'react';
-import TemplateRunner from './components/TemplateRunner.js';
-import LedgerTable from './components/LedgerTable.js';
-import StreamingBadge from './components/StreamingBadge.js';
+import TemplateRunner from './components/TemplateRunner';
+import LedgerTable from './components/LedgerTable';
+import StreamingBadge from './components/StreamingBadge';
 import Panel from './components/dashboard/Panel.js';
 import OverviewStrip, { type OverviewItem } from './components/dashboard/OverviewStrip.js';
 import QuickLinks from './components/dashboard/QuickLinks.js';
 import { useDashboardSnapshot } from './hooks/useDashboardSnapshot.js';
-import type { LedgerRow } from './api.js';
+import type { LedgerRow } from './api';
 import GuardianConsole from './components/GuardianConsole.js';
 import { useGuardianMode } from './hooks/useGuardianMode.js';
 import { useTemplateCount } from './hooks/useTemplateCount.js';
@@ -113,7 +113,7 @@ export default function App() {
       {
         label: 'Workbench README',
         description: 'Follow the setup notes for running the frontend + BFF locally or in Replit.',
-        href: 'https://github.com/vaultsovereign/vaultmesh-forge/blob/main/workbench/README-WORKBENCH.md'
+        href: 'https://github.com/VaultSovereign/forge/blob/main/workbench/README-WORKBENCH.md'
       },
       {
         label: 'Reality Ledger (API)',
@@ -123,7 +123,7 @@ export default function App() {
       {
         label: 'Template Catalog',
         description: 'Browse the source templates shipped with VaultMesh to design new automations.',
-        href: 'https://github.com/vaultsovereign/vaultmesh-forge/tree/main/catalog'
+        href: 'https://github.com/VaultSovereign/forge/tree/main/catalog'
       }
     ],
     []

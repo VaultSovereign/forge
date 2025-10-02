@@ -1,0 +1,68 @@
+name: docs-link-check
+
+# This workflow checks for:
+# 1. Legacy vaultmesh-ai references in all tracked files (.md, .svg, .json, .sh, .yml, .yaml)
+# 2. Broken external links in markdown and SVG files
+# Prevents regressions by catching any reintroduction of old repository names
+
+on:
+  pull_request:
+    paths:
+      - '**/*.md'
+      - '**/*.yml'
+      - '**/*.yaml'
+      - '**/*.svg'
+      - '**/*.json'
+      - '**/*.sh'
+      - '.github/workflows/docs-link-check.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - '**/*.md'
+      - '**/*.yml'
+      - '**/*.yaml'
+      - '**/*.svg'
+      - '**/*.json'
+      - '**/*.sh'
+      - '.github/workflows/docs-link-check.yml'
+
+jobs:
+  linkcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for old repo links
+        run: |
+          set -euo pipefail
+          # Check for legacy references in tracked files
+          if rg -n -S "VaultSovereign/vaultmesh-ai" \
+            --glob '*.md' --glob '*.svg' --glob '*.json' --glob '*.sh' --glob '*.yml' --glob '*.yaml' \
+            --glob '!.husky/**' --glob '!.github/workflows/docs-link-check.yml' .; then
+            echo "::error ::Found legacy links to VaultSovereign/vaultmesh-ai";
+            echo "::error ::Please replace all instances of 'vaultmesh-ai' with 'forge'";
+            echo "Hint: run locally to sweep: rg -n vaultmesh-ai -S .";
+            exit 1;
+          fi
+
+          # Also check for any remaining references (without VaultSovereign prefix)
+          if rg -n -S "vaultmesh-ai" \
+            --glob '*.md' --glob '*.svg' --glob '*.json' --glob '*.sh' --glob '*.yml' --glob '*.yaml' \
+            --glob '!.husky/**' --glob '!.github/workflows/docs-link-check.yml' .; then
+            echo "::error ::Found legacy references to 'vaultmesh-ai'";
+            echo "::error ::Please replace all instances of 'vaultmesh-ai' with 'forge'";
+            echo "Hint: run locally to sweep: rg -n vaultmesh-ai -S .";
+            exit 1;
+          fi
+      - name: Link Check
+        uses: lycheeverse/lychee-action@v1
+        with:
+          args: >-
+            --verbose
+            --no-progress
+            --exclude 'http://127.0.0.1.*'
+            --exclude 'http://localhost.*'
+            --accept 200,206,429
+            "**/*.md"
+            "**/*.svg"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

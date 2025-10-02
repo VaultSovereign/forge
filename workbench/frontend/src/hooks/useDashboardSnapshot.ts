@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { listLedger, listTemplates, type LedgerRow, type TemplateSummary } from '../api.js';
+import { listLedger, listTemplates, type LedgerRow, type TemplateSummary } from '../api';
 
 export type DashboardSnapshot = {
   templates: TemplateSummary[];

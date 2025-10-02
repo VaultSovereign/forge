@@ -69,5 +69,5 @@ CMD ["node", "dist/cli/index.js", "--help"]
 # Labels for metadata
 LABEL org.opencontainers.image.title="VaultMesh"
 LABEL org.opencontainers.image.description="Earth's Civilization Ledger - Sovereign Prompt Orchestration"
-LABEL org.opencontainers.image.source="https://github.com/vaultsovereign/vaultmesh"
+LABEL org.opencontainers.image.source="https://github.com/VaultSovereign/forge"
 LABEL org.opencontainers.image.licenses="Apache-2.0"

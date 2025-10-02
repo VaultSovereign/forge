@@ -1,6 +1,8 @@
-import StreamingBadge from './StreamingBadge.js';
+import StreamingBadge from './StreamingBadge';
 
 export default function Header() {
+  const showApiLink = import.meta.env.DEV || import.meta.env.VITE_EXPOSE_OPENAPI === '1';
+  const showDocsLink = import.meta.env.VITE_EXPOSE_DOCS === '1';
   return (
     <header
       style={{
@@ -19,6 +21,16 @@ export default function Header() {
           <a href="#templates">Templates</a>
           <a href="#run">Run</a>
           <a href="#ledger">Ledger</a>
+          {showApiLink ? (
+            <a href="/v1/openapi.json" target="_blank" rel="noopener noreferrer">
+              API
+            </a>
+          ) : null}
+          {showDocsLink ? (
+            <a href="/docs/OPENAPI.md" target="_blank" rel="noopener noreferrer">
+              Docs
+            </a>
+          ) : null}
         </nav>
         <StreamingBadge />
       </div>

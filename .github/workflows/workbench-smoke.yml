@@ -117,3 +117,60 @@ jobs:
         if: always()
         run: |
           kill "$(cat .bff.pid)" || true
+
+
+  smoke-tokened:
+    name: smoke script (tokened auth)
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: production
+      PORT: 3000
+      AI_CORE_MODE: mock
+      AUTH_DEV_SIGNER: "1"
+      OIDC_ISSUER: "http://127.0.0.1/"
+      OIDC_AUDIENCE: "vaultmesh-dev"
+      OIDC_JWKS_URL: "http://127.0.0.1:3000/dev/jwks.json"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Enable Corepack (respect package.json packageManager)
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.17.0 --activate
+
+      - name: Install
+        run: pnpm -w install --no-frozen-lockfile
+
+      - name: Build web + bff
+        run: pnpm -w run build:web && pnpm -w run build:bff
+
+      - name: Ensure smoke script executable
+        run: chmod +x scripts/smoke-workbench.sh
+
+      - name: Boot BFF (with dev signer)
+        run: |
+          node workbench/bff/dist/server.js & echo $! > .bff.pid
+          for i in {1..30}; do
+            curl -fsS "http://127.0.0.1:${PORT}/v1/health" && break || sleep 0.5
+          done
+
+      - name: Mint dev token
+        id: token
+        run: |
+          TKN=$(curl -fsS -X POST -H 'content-type: application/json'             -d '{"sub":"ci-smoke","roles":["operator","auditor"]}'             "http://127.0.0.1:${PORT}/v1/dev/token" | jq -r .token)
+          echo "token=${TKN}" >> $GITHUB_OUTPUT
+
+      - name: Run smoke script (tokened)
+        env:
+          AUTH_HEADER: "Authorization: Bearer ${{ steps.token.outputs.token }}"
+        run: PORT=${PORT} scripts/smoke-workbench.sh
+
+      - name: Stop BFF
+        if: always()
+        run: kill "$(cat .bff.pid)" || true

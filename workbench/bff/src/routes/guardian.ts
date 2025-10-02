@@ -28,6 +28,12 @@ export async function detectMode(): Promise<GuardianMode> {
   const now = Date.now();
   if (now - modeCache.ts < TTL_MS) return modeCache.mode;
 
+
+  // Explicit stub via env (primarily for dev-mode)
+  if ((process.env.GUARDIAN_MODE || '').toLowerCase() === 'stub') {
+    modeCache = { mode: 'stub', ts: now };
+    return 'stub';
+  }
   for (const candidate of agentCandidates) {
     if (!fs.existsSync(candidate)) continue;
     try {
@@ -117,6 +123,11 @@ export default async function guardianRoutes(app: FastifyInstance) {
             mode: 'stub'
           });
         }
+      }
+
+      if (process.env.NODE_ENV === 'production' && currentMode !== 'agent') {
+        reply.header('x-guardian-mode', currentMode);
+        return reply.code(503).send({ error: 'guardian_unavailable', note: 'Guardian agent not configured in production.' });
       }
 
       reply.header('x-guardian-mode', currentMode);

@@ -42,7 +42,7 @@ gcloud run deploy vaultmesh-workbench \
   --platform=managed \
   --allow-unauthenticated \
   --port=8787 \
-  --set-env-vars="NODE_ENV=production,DEV_NO_AUTH=0" \
+  --set-env-vars="NODE_ENV=production,AUTH_DEV_BYPASS=0" \
   --set-env-vars="CORS_ORIGIN=https://your-domain" \
   --set-env-vars="OPENROUTER_API_KEY=__SET_IN_SECRETS__" \
   --set-env-vars="LEDGER_DIR=/var/ledger" \
@@ -59,7 +59,7 @@ curl -fsSN "https://<run-url>/v1/api/execute/stream?templateId=demo.echo&args=%7
 ```
 
 ## 5) Security & scaling notes
-	•	Auth: enable OIDC; set `DEV_NO_AUTH=0`. Validate JWT in BFF.
+	•	Auth: enable OIDC; set `AUTH_DEV_BYPASS=0`. Validate JWT in BFF.
 	•	SSE: already sets `Cache-Control: no-cache`, `Connection: keep-alive`, retry hints.
 	•	Autoscaling: start with `--max-instances=3`, add later as needed.
 	•	Ledger: store on a durable volume or forward events to a storage backend (GCS bucket) if desired.

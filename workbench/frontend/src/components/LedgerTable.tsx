@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { listLedger, type LedgerRow } from '../api.js';
+import { listLedger, type LedgerRow } from '../api';
 
 type LedgerTableProps = {
   rows?: LedgerRow[];

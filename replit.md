@@ -171,7 +171,7 @@ catalog/
 
 **Key Architectural Decisions**:
 - **SSE for streaming**: Server-Sent Events avoid WebSocket complexity; set `X-Accel-Buffering: no`
-- **Auth bypass in dev**: `DEV_NO_AUTH=1` skips OIDC checks locally
+- **Auth bypass in dev**: `AUTH_DEV_BYPASS=1` skips OIDC checks locally
 - **Static SPA serving**: BFF serves built React assets from `/public` in production
 - **Future gRPC integration**: `CORE_GRPC_ADDR` environment variable reserved for microservice architecture
 

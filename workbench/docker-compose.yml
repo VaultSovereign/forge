@@ -7,7 +7,7 @@ services:
     environment:
       - PORT=8787
       - CORS_ORIGIN=http://localhost:5173
-      - DEV_NO_AUTH=1
+      - AUTH_DEV_BYPASS=1
     ports:
       - '8787:8787'
 

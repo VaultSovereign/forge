@@ -1,6 +1,6 @@
 import { useEffect, useState, type ChangeEvent } from 'react';
-import { executeOnce, listTemplates, streamExecute, type TemplateSummary } from '../api.js';
-import SSEConsole from './SSEConsole.js';
+import { executeOnce, listTemplates, streamExecute, type TemplateSummary } from '../api';
+import SSEConsole from './SSEConsole';
 
 export default function TemplateRunner() {
   const [templates, setTemplates] = useState<TemplateSummary[]>([]);

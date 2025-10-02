@@ -4,10 +4,9 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'docs/SALES/**'
-      - '.github/workflows/pages.yml'
-      - 'package.json'
-  workflow_dispatch: {}
+      - 'docs/**'
+      - 'scripts/generate-docs-sitemap.mjs'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -15,33 +14,29 @@ permissions:
   id-token: write
 
 concurrency:
-  group: 'pages'
+  group: pages
   cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
 
-      - name: Build sales artifacts (deck + one-pager)
-        run: |
-          npm run sales:build
-          # copy demo to dist
-          mkdir -p dist/demo
-          cp -R docs/SALES/demo/* dist/demo/
-          # ensure index exists
-          mkdir -p dist
-          cp dist/sales-deck.html dist/index.html
+      # Keep the sitemap always fresh in docs/ before publishing
+      - name: Generate docs sitemap
+        run: node scripts/generate-docs-sitemap.mjs docs SITEMAP.md
 
-      - name: Upload Pages artifact
+      - name: Upload artifact (docs/)
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: docs
 
   deploy:
     environment:

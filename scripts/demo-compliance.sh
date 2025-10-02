@@ -8,7 +8,7 @@ ART_DIR="${ART_DIR:-artifacts/demo}"
 mkdir -p "$ART_DIR"
 
 # Optional env override (your Pages URL)
-DECK_URL="${DECK_URL:-https://VaultSovereign.github.io/vaultmesh-ai/}"
+DECK_URL="${DECK_URL:-https://VaultSovereign.github.io/forge/}"
 
 echo "[demo] Build…"
 pnpm -s build

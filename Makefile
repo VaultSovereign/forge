@@ -125,3 +125,108 @@ evolution-index:
 evolution-journal:
 	@node scripts/journal_append.mjs
 	@tail -n 5 artifacts/evolution/template_journal.jsonl || true
+
+
+# -------------------------------
+# Developer convenience targets
+# Auto-choose pnpm if available; otherwise npm
+# -------------------------------
+
+SHELL := /bin/bash
+PKG := $(shell command -v pnpm >/dev/null 2>&1 && echo pnpm || echo npm)
+
+PORT ?= 3000
+BFF_PORT ?= 8787
+VITE_DEV_PORT ?= 5173
+AI_CORE_MODE ?= mock
+
+.PHONY: preview dev2 build-all start-bff kill smoke tokened-smoke env
+
+## Build both FE+BFF
+build-all: build-web build-bff
+
+## Single-port preview (builds + BFF serves SPA on PORT)
+preview: build-all
+	@echo "=> Starting single-port BFF on PORT=$(PORT)"
+	@PORT=$(PORT) AI_CORE_MODE=$(AI_CORE_MODE) node workbench/bff/dist/server.js
+
+## Alt dev duo helper (keeps existing 'dev' intact)
+dev2:
+	@echo "=> Dev duo: BFF_PORT=$(BFF_PORT) VITE_DEV_PORT=$(VITE_DEV_PORT)"
+	@echo "   shell A: BFF_PORT=$(BFF_PORT) $(MAKE) start-bff"
+	@echo "   shell B: VITE_DEV_PORT=$(VITE_DEV_PORT) $(PKG) --prefix workbench/frontend run dev"
+
+## Start BFF only (dev mode defaults to BFF_PORT)
+start-bff:
+	@echo "=> Starting BFF on BFF_PORT=$(BFF_PORT)"
+	@NODE_ENV=development PORT=$(BFF_PORT) AI_CORE_MODE=$(AI_CORE_MODE) node workbench/bff/dist/server.js
+
+## Kill stuck BFF/dev processes
+kill:
+	-@pkill -f "workbench/bff.*server" || true
+	-@pkill -f "node .*bff" || true
+
+## Smoke (dev bypass) - requires scripts/smoke-workbench.sh
+smoke: build-all
+	@echo "=> Running smoke with AUTH_DEV_BYPASS=1 on PORT=$(PORT)"
+	@chmod +x scripts/smoke-workbench.sh
+	@AUTH_DEV_BYPASS=1 PORT=$(PORT) node workbench/bff/dist/server.js & echo $$! > .bff.pid
+	@sleep 1
+	@PORT=$(PORT) ./scripts/smoke-workbench.sh || (echo "Smoke failed"; kill `cat .bff.pid` || true; exit 1)
+	@kill `cat .bff.pid` || true
+
+## Tokened smoke with dev signer + JWKS
+tokened-smoke: build-all
+	@echo "=> Running tokened smoke (AUTH_DEV_SIGNER=1, real JWT verify) on PORT=$(PORT)"
+	@chmod +x scripts/smoke-workbench.sh
+	@AUTH_DEV_SIGNER=1 OIDC_ISSUER=http://127.0.0.1/ OIDC_AUDIENCE=vaultmesh-dev OIDC_JWKS_URL=http://127.0.0.1:$(PORT)/dev/jwks.json PORT=$(PORT) node workbench/bff/dist/server.js & echo $$! > .bff.pid
+	@sleep 1
+	@TOKEN=$$(curl -fsS -X POST -H 'content-type: application/json' -d '{"sub":"local-ci","roles":["operator","auditor"]}' http://127.0.0.1:$(PORT)/v1/dev/token | jq -r .token); 	  AUTH_HEADER="Authorization: Bearer $$TOKEN" PORT=$(PORT) ./scripts/smoke-workbench.sh || (echo "Tokened smoke failed"; kill `cat .bff.pid` || true; exit 1)
+	@kill `cat .bff.pid` || true
+
+## Show selected toolchain
+env:
+	@echo "PKG=$(PKG)"
+	@node -v || true
+	@$(PKG) -v || true
+
+# -------------------------------
+# Docs convenience targets
+# -------------------------------
+
+## Dev duo (HMR) with docs served by BFF at /docs
+docs:internal-dev:
+	@echo "=> Dev duo: internal docs via /docs (BFF) | BFF_PORT=$(BFF_PORT) VITE_DEV_PORT=$(VITE_DEV_PORT)"
+	@echo "   shell A: EXPOSE_DOCS=1 PORT=$(BFF_PORT) $(PKG) --prefix workbench/bff run dev"
+	@echo "   shell B: VITE_EXPOSE_DOCS=1 VITE_DEV_PORT=$(VITE_DEV_PORT) VITE_BFF_PORT=$(BFF_PORT) $(PKG) --prefix workbench/frontend run dev"
+
+## Dev duo (HMR) with external docs URL
+# Usage: make docs:external-dev DOCS_URL=https://mydomain/docs [BFF_PORT=8787 VITE_DEV_PORT=5173]
+docs:external-dev:
+	@[ -n "$(DOCS_URL)" ] || (echo "DOCS_URL is required, e.g. make docs:external-dev DOCS_URL=https://mydomain/docs"; exit 2)
+	@echo "=> Dev duo: external docs at $(DOCS_URL) | BFF_PORT=$(BFF_PORT) VITE_DEV_PORT=$(VITE_DEV_PORT)"
+	@echo "   shell A: PORT=$(BFF_PORT) $(PKG) --prefix workbench/bff run dev"
+	@echo "   shell B: VITE_EXPOSE_DOCS=1 VITE_DOCS_URL=$(DOCS_URL) VITE_DEV_PORT=$(VITE_DEV_PORT) VITE_BFF_PORT=$(BFF_PORT) $(PKG) --prefix workbench/frontend run dev"
+
+## Single-port preview with docs served by BFF at /docs
+docs:internal-preview: build-all
+	@echo "=> Single-port preview with internal docs at /docs on PORT=$(PORT)"
+	@EXPOSE_DOCS=1 PORT=$(PORT) AI_CORE_MODE=$(AI_CORE_MODE) node workbench/bff/dist/server.js
+
+## Single-port preview with external docs URL
+# Usage: make docs:external DOCS_URL=https://mydomain/docs [PORT=3000]
+docs:external: build-all
+	@[ -n "$(DOCS_URL)" ] || (echo "DOCS_URL is required, e.g. make docs:external DOCS_URL=https://mydomain/docs"; exit 2)
+	@echo "=> Single-port preview; Docs link points to $(DOCS_URL) on PORT=$(PORT)"
+	@PORT=$(PORT) AI_CORE_MODE=$(AI_CORE_MODE) node workbench/bff/dist/server.js
+
+
+.PHONY: hooks
+hooks:
+	@$(PKG) -w run prepare || $(PKG) run prepare
+	@npx husky add .husky/pre-commit "bash .husky/_precommit_legacy_guard.sh" || true
+
+.PHONY: docs:sitemap
+## Generate docs/SITEMAP.md from all Markdown files under docs/
+docs:sitemap:
+	@$(PKG) run docs:sitemap

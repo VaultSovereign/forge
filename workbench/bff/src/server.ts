@@ -60,6 +60,26 @@ export async function buildServer(): Promise<FastifyInstance> {
     app.log.warn({ staticRoot }, 'Static assets directory not found; SPA responses will return placeholder JSON.');
   }
 
+
+  // Optionally expose repo docs as static files under /docs when EXPOSE_DOCS=1
+  if (process.env.EXPOSE_DOCS === '1') {
+    try {
+      const docsRoot = path.resolve(process.cwd(), 'docs');
+      if (fs.existsSync(docsRoot)) {
+        await app.register(fastifyStatic, {
+          root: docsRoot,
+          prefix: '/docs/',
+          decorateReply: false
+        } as any);
+        app.log.info({ docsRoot }, 'docs exposed under /docs');
+      } else {
+        app.log.warn({ docsRoot }, 'EXPOSE_DOCS=1 set but docs directory not found');
+      }
+    } catch (err) {
+      app.log.warn({ err }, 'failed to expose /docs static route');
+    }
+  }
+
   const { default: healthRoutes } = await import('./routes/health.js');
   const { default: templatesRoutes } = await import('./routes/templates.js');
   const { default: shimsRoute } = await import('./routes/shims.js');
@@ -68,6 +88,8 @@ export async function buildServer(): Promise<FastifyInstance> {
   const { default: tickRoutes } = await import('./routes/tick.js');
   const { default: guardianRoute } = await import('./routes/guardian.js');
   const { default: metricsRoutes } = await import('./routes/metrics.js');
+  const { default: openapiRoutes } = await import('./routes/openapi.js');
+  const { default: devRoutes } = await import('./routes/dev.js');
 
   await app.register(healthRoutes);
   await app.register(templatesRoutes);
@@ -77,6 +99,15 @@ export async function buildServer(): Promise<FastifyInstance> {
   await app.register(tickRoutes);
   await app.register(guardianRoute);
   await app.register(metricsRoutes);
+  // Expose OpenAPI JSON only in dev unless explicitly enabled
+  if (process.env.NODE_ENV !== 'production' || process.env.EXPOSE_OPENAPI === '1') {
+    await app.register(openapiRoutes);
+  }
+
+  // Enable dev signer (JWKS + token mint) only when explicitly requested
+  if (process.env.AUTH_DEV_SIGNER === '1') {
+    await app.register(devRoutes);
+  }
 
   app.setNotFoundHandler((req, reply) => {
     if (req.method === 'GET' && !req.url.startsWith('/v1/api/')) {
@@ -105,8 +136,12 @@ export async function buildServer(): Promise<FastifyInstance> {
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   const app = await buildServer();
   const port = env.PORT;
-  if (process.env.NODE_ENV === 'production' && env.DEV_NO_AUTH === '1') {
-    app.log.warn({ env: 'production' }, 'DEV_NO_AUTH=1 — auth bypass is active. Configure OIDC before production.');
+  if (process.env.NODE_ENV === 'production' && process.env.AUTH_DEV_BYPASS === '1') {
+    app.log.warn({ env: 'production' }, 'AUTH_DEV_BYPASS=1 — auth bypass is active. Configure OIDC before production.');
+  }
+  if (process.env.NODE_ENV === 'production' && !process.env.CORE_GRPC_ADDR) {
+    app.log.error('CORE_GRPC_ADDR is required in production. Set the gRPC Core address or switch to a non-production environment.');
+    process.exit(1);
   }
   app
     .listen({ port, host: '0.0.0.0' })
