@@ -3,8 +3,8 @@
 .env.local
 .env.*.local
 
-# Claude MCP configuration (may contain sensitive paths)
-.claude/mcp_servers.json
+# Claude configs (keep local only)
+.claude/
 
 # Dependencies
 node_modules/
