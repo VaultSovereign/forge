@@ -5,6 +5,7 @@ The Workbench pairs a Fastify Backend-for-Frontend (BFF) with a Vite + React SPA
 ## Dev Workflow
 
 ### Backend (BFF)
+
 ```bash
 cd workbench/bff
 cp .env.example .env
@@ -14,6 +15,7 @@ pnpm dev || npm run dev
 ```
 
 ### Frontend (SPA)
+
 ```bash
 cd workbench/frontend
 pnpm install || npm install
@@ -24,6 +26,7 @@ pnpm dev || npm run dev
 Set `VITE_API_BASE=http://localhost:8787` so the SPA targets the running BFF.
 
 ## Docker
+
 ```bash
 cd workbench
 docker build -t vaultmesh/workbench:dev .
@@ -32,12 +35,14 @@ docker run -p 8787:8787 vaultmesh/workbench:dev
 ```
 
 ## Notes
+
 - Auth: `AUTH_DEV_BYPASS=1` bypass in dev; wire real OIDC in `src/auth/oidc.ts` when ready.
 - Secrets: `src/core/secrets.ts` reads environment vars today; swap to Vault/KMS provider for prod.
 - Core: `src/core/client.ts` simulates dispatcher + ledger; set `CORE_GRPC_ADDR` once the gRPC service ships.
 - Streaming: `/v1/api/execute/stream` uses Server-Sent Events for log delivery.
 
 ## Roadmap Hooks
+
 - Add Monaco + JSON Schema editing in the Templates section.
 - Implement gRPC clients for execute + ledger query.
 - Harden RBAC by sourcing roles from verified JWT claims.

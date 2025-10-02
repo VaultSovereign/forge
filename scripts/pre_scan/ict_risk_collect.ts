@@ -12,9 +12,9 @@
  * - Counts items; attempts to classify "major" incidents when JSON has { severity: "major" }
  */
 
-import fs from "fs";
-import path from "path";
-import fg from "fast-glob";
+import fs from 'fs';
+import path from 'path';
+import fg from 'fast-glob';
 
 type Input = {
   org_name: string;
@@ -22,7 +22,7 @@ type Input = {
   regions?: string[];
   assets?: string[];
   policies?: string[];
-  incidents?: string[];       // file patterns
+  incidents?: string[]; // file patterns
   third_parties?: string[];
   tests?: string[];
   notes?: string;
@@ -30,14 +30,14 @@ type Input = {
 
 const argsPath = process.argv[2];
 if (!argsPath) {
-  console.error("Usage: ict_risk_collect.ts <args.json>");
+  console.error('Usage: ict_risk_collect.ts <args.json>');
   process.exit(1);
 }
-const input: Input = JSON.parse(fs.readFileSync(argsPath, "utf8"));
+const input: Input = JSON.parse(fs.readFileSync(argsPath, 'utf8'));
 
 function applicability(orgType?: string) {
-  if (orgType === "microenterprise") return { applicable: true, micro: true };
-  if (!orgType || orgType === "other") return { applicable: false, micro: false };
+  if (orgType === 'microenterprise') return { applicable: true, micro: true };
+  if (!orgType || orgType === 'other') return { applicable: false, micro: false };
   return { applicable: true, micro: false };
 }
 
@@ -54,13 +54,13 @@ function classifyIncidents(patterns?: string[]) {
   for (const f of files) {
     incidents_count += 1;
     try {
-      if (path.extname(f).toLowerCase() === ".json") {
-        const raw = fs.readFileSync(f, "utf8");
+      if (path.extname(f).toLowerCase() === '.json') {
+        const raw = fs.readFileSync(f, 'utf8');
         const data = JSON.parse(raw);
         // Allow both single-object and array-of-objects incident files
         const entries = Array.isArray(data) ? data : [data];
         for (const e of entries) {
-          if (e && typeof e === "object" && String(e.severity || "").toLowerCase() === "major") {
+          if (e && typeof e === 'object' && String(e.severity || '').toLowerCase() === 'major') {
             major_incidents += 1;
           }
         }

@@ -13,7 +13,7 @@ const agentCandidates: string[] = (() => {
   const roots = [
     process.cwd(),
     path.resolve(process.cwd(), '.'),
-    fromHere(import.meta.url, '../../..', '..', '..')
+    fromHere(import.meta.url, '../../..', '..', '..'),
   ];
   const rels = ['agents/build/index.js', 'agents/index.js'];
   const acc = new Set<string>();
@@ -27,7 +27,6 @@ let modeCache: { mode: GuardianMode; ts: number } = { mode: 'unknown', ts: 0 };
 export async function detectMode(): Promise<GuardianMode> {
   const now = Date.now();
   if (now - modeCache.ts < TTL_MS) return modeCache.mode;
-
 
   // Explicit stub via env (primarily for dev-mode)
   if ((process.env.GUARDIAN_MODE || '').toLowerCase() === 'stub') {
@@ -58,7 +57,7 @@ async function resolveAgent() {
     path.resolve(process.cwd(), 'agents/build/index.js'),
     path.resolve(process.cwd(), 'agents/index.js'),
     fromHere(import.meta.url, '../../..', '..', '..', 'agents/build/index.js'),
-    fromHere(import.meta.url, '../../..', '..', '..', 'agents/index.js')
+    fromHere(import.meta.url, '../../..', '..', '..', 'agents/index.js'),
   ];
 
   for (const spec of candidates) {
@@ -84,7 +83,7 @@ export default async function guardianRoutes(app: FastifyInstance) {
         body: {
           type: 'object',
           required: ['input'],
-          properties: { input: { type: 'string', minLength: 1 } }
+          properties: { input: { type: 'string', minLength: 1 } },
         },
         response: {
           200: {
@@ -92,11 +91,11 @@ export default async function guardianRoutes(app: FastifyInstance) {
             properties: {
               text: { type: 'string' },
               events: { type: 'array', items: { type: 'object' } },
-              mode: { type: 'string' }
-            }
-          }
-        }
-      }
+              mode: { type: 'string' },
+            },
+          },
+        },
+      },
     },
     async (req, reply) => {
       const { input } = (req.body ?? {}) as { input?: string };
@@ -113,26 +112,29 @@ export default async function guardianRoutes(app: FastifyInstance) {
           return reply.send({
             text: result?.outputText ?? 'Agent responded.',
             events: Array.isArray(result?.events) ? result.events : [],
-            mode: 'agent'
+            mode: 'agent',
           });
         } catch (e: any) {
           reply.header('x-guardian-mode', 'stub');
           return reply.send({
             text: `Guardian (stub due to agent error): ${String(e?.message || e)}. Echo: ${input}`,
             events: [],
-            mode: 'stub'
+            mode: 'stub',
           });
         }
       }
 
       if (process.env.NODE_ENV === 'production' && currentMode !== 'agent') {
         reply.header('x-guardian-mode', currentMode);
-        return reply.code(503).send({ error: 'guardian_unavailable', note: 'Guardian agent not configured in production.' });
+        return reply.code(503).send({
+          error: 'guardian_unavailable',
+          note: 'Guardian agent not configured in production.',
+        });
       }
 
       reply.header('x-guardian-mode', currentMode);
       return reply.send({ text: `Guardian (stub): ${input}`, events: [], mode: 'stub' });
-    }
+    },
   );
 
   // Lightweight mode probe for dashboards

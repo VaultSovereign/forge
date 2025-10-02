@@ -17,7 +17,7 @@ export default function SSEConsole({ logs }: { logs: string[] }) {
         overflow: 'auto',
         padding: 8,
         fontFamily: 'ui-monospace,Menlo,monospace',
-        fontSize: 12
+        fontSize: 12,
       }}
     >
       {logs.map((line, idx) => (

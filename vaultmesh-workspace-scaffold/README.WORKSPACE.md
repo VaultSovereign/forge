@@ -1,6 +1,7 @@
 # VaultMesh — Workspace Layout (Option B)
 
 This scaffolds a Cargo **workspace**:
+
 - `vaultmesh/` — main binary/library (move your current `src/` here).
 - `polis/controller/` — optional Axum microservice (stub here; wire up if used).
 
@@ -13,6 +14,7 @@ git mv src vaultmesh/ || mv src vaultmesh/
 ```
 
 Then ensure the vaultmesh crate compiles:
+
 ```bash
 cargo build -p vaultmesh
 ```

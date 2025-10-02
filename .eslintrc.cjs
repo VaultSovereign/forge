@@ -23,7 +23,10 @@ module.exports = {
   rules: {
     'prettier/prettier': 'error',
     'no-unused-vars': 'off',
-    '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+    '@typescript-eslint/no-unused-vars': [
+      'warn',
+      { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+    ],
     'no-console': ['warn', { allow: ['warn', 'error'] }],
     'import/no-unresolved': 'off',
     'import/order': ['warn', { 'newlines-between': 'always', alphabetize: { order: 'asc' } }],

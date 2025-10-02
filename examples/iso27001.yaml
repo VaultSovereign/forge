@@ -1,11 +1,11 @@
 # Minimal, illustrative permissions matrix (example only)
 roles:
-  - name: "Ops Copilot"
+  - name: 'Ops Copilot'
     permissions:
-      - "read:crm"
-      - "read:s3:reports"
-      - "write:ticketing"
+      - 'read:crm'
+      - 'read:s3:reports'
+      - 'write:ticketing'
 controls_reference:
-  - "ISO/IEC 27001 Annex A"
-  - "NIST SP 800-53"
-  - "OWASP Top-10 for LLM"
+  - 'ISO/IEC 27001 Annex A'
+  - 'NIST SP 800-53'
+  - 'OWASP Top-10 for LLM'

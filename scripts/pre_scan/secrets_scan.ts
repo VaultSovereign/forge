@@ -19,20 +19,33 @@ function toArray(input: string | string[] | undefined, fallback: string[]): stri
 (async () => {
   const argv = minimist(process.argv.slice(2));
   const repositoryPath = path.resolve(String(argv.repo || argv.repository || '.'));
-  const fileExtensions = toArray(argv.extensions || argv.ext, ['.env', '.yml', '.yaml', '.json', '.ts', '.js']);
-  const sensitivePatterns = toArray(
-    argv.patterns || argv.p,
-    [
-      'OPENAI_API_KEY=sk-[a-zA-Z0-9]{20,}',
-      'OPENROUTER_API_KEY=sk-or-[a-zA-Z0-9]{20,}',
-      '(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{36,}',
-      'AWS_ACCESS_KEY_ID=AKIA[0-9A-Z]{16}',
-      'AWS_SECRET_ACCESS_KEY=[A-Za-z0-9/+=]{40}',
-      'password=.*'
-    ]
-  );
+  const fileExtensions = toArray(argv.extensions || argv.ext, [
+    '.env',
+    '.yml',
+    '.yaml',
+    '.json',
+    '.ts',
+    '.js',
+  ]);
+  const sensitivePatterns = toArray(argv.patterns || argv.p, [
+    'OPENAI_API_KEY=sk-[a-zA-Z0-9]{20,}',
+    'OPENROUTER_API_KEY=sk-or-[a-zA-Z0-9]{20,}',
+    '(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{36,}',
+    'AWS_ACCESS_KEY_ID=AKIA[0-9A-Z]{16}',
+    'AWS_SECRET_ACCESS_KEY=[A-Za-z0-9/+=]{40}',
+    'password=.*',
+  ]);
   const commitHistoryDepth = Number(argv.depth || argv.commits || 50);
-  const excludedNames = toArray(argv.exclude, ['node_modules', 'dist', 'build', '.git', '.next', '.turbo', 'coverage', '.nyc_output']);
+  const excludedNames = toArray(argv.exclude, [
+    'node_modules',
+    'dist',
+    'build',
+    '.git',
+    '.next',
+    '.turbo',
+    'coverage',
+    '.nyc_output',
+  ]);
   const ignoreExamples = argv.ignore_examples !== undefined ? Boolean(argv.ignore_examples) : true;
   const entropyThreshold = Number(argv.entropy || 4.0);
   const minSecretLength = Number(argv.min || 20);
@@ -47,13 +60,14 @@ function toArray(input: string | string[] | undefined, fallback: string[]): stri
     ignoreExamples,
     entropyThreshold,
     minSecretLength,
-    providerHints
+    providerHints,
   });
 
-  process.stdout.write(
-    JSON.stringify({ tool: 'forge-secrets-prescan', findings }, null, 2) + '\n'
-  );
+  process.stdout.write(JSON.stringify({ tool: 'forge-secrets-prescan', findings }, null, 2) + '\n');
 })().catch((error) => {
-  console.error('[pre_scan:secrets] error:', error instanceof Error ? error.message : String(error));
+  console.error(
+    '[pre_scan:secrets] error:',
+    error instanceof Error ? error.message : String(error),
+  );
   process.exit(1);
 });

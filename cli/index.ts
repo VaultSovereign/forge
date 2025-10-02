@@ -77,14 +77,16 @@ async function runTemplate(argv: RunArgs): Promise<void> {
     // Import dynamically to avoid provider initialization issues
     const [{ runKeyword }, { resolveTemplateMeta }] = await Promise.all([
       import('../dispatcher/router.js'),
-      import('./templateResolver.js')
+      import('./templateResolver.js'),
     ]);
 
     const meta = await resolveTemplateMeta(projectRoot, argv.template);
     const args = loadArgs(argv.args);
     const profile = argv.profile || 'vault';
 
-    console.error(`[vm] Running template: ${meta.keyword} (input: ${argv.template}) with profile: @${profile}`);
+    console.error(
+      `[vm] Running template: ${meta.keyword} (input: ${argv.template}) with profile: @${profile}`,
+    );
 
     const result = await runKeyword({
       projectRoot,
@@ -92,8 +94,8 @@ async function runTemplate(argv: RunArgs): Promise<void> {
       profileName: profile,
       flags: {
         output_format: argv.format || 'json',
-        ...args
-      }
+        ...args,
+      },
     });
 
     // Append to Reality Ledger
@@ -102,7 +104,7 @@ async function runTemplate(argv: RunArgs): Promise<void> {
       profile: `@${profile}`,
       args,
       result,
-      operator: 'cli'
+      operator: 'cli',
     });
 
     const output = {
@@ -110,7 +112,7 @@ async function runTemplate(argv: RunArgs): Promise<void> {
       result: typeof result === 'string' ? result : result,
       template: argv.template,
       profile: `@${profile}`,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     console.log(JSON.stringify(output, null, 2));
@@ -135,7 +137,10 @@ async function verifyLedgerEvent(argv: { eventId: string }): Promise<void> {
       process.exit(1);
     }
   } catch (error) {
-    console.error(`[vm] Verification error:`, error instanceof Error ? error.message : String(error));
+    console.error(
+      `[vm] Verification error:`,
+      error instanceof Error ? error.message : String(error),
+    );
     process.exit(1);
   }
 }
@@ -148,19 +153,25 @@ async function queryLedgerEvents(argv: LedgerQueryArgs): Promise<void> {
       template: argv.template,
       profile: argv.profile,
       since: argv.since,
-      limit: argv.limit || 10
+      limit: argv.limit || 10,
     });
 
-    console.log(JSON.stringify({
-      query: {
-        template: argv.template,
-        profile: argv.profile,
-        since: argv.since,
-        limit: argv.limit || 10
-      },
-      results: events.length,
-      events
-    }, null, 2));
+    console.log(
+      JSON.stringify(
+        {
+          query: {
+            template: argv.template,
+            profile: argv.profile,
+            since: argv.since,
+            limit: argv.limit || 10,
+          },
+          results: events.length,
+          events,
+        },
+        null,
+        2,
+      ),
+    );
   } catch (error) {
     console.error(`[vm] Query error:`, error instanceof Error ? error.message : String(error));
     process.exit(1);
@@ -173,10 +184,16 @@ async function showLedgerStats(): Promise<void> {
 
     const stats = await getLedgerStats();
 
-    console.log(JSON.stringify({
-      ledger: 'VaultMesh Reality Ledger',
-      ...stats
-    }, null, 2));
+    console.log(
+      JSON.stringify(
+        {
+          ledger: 'VaultMesh Reality Ledger',
+          ...stats,
+        },
+        null,
+        2,
+      ),
+    );
   } catch (error) {
     console.error(`[vm] Stats error:`, error instanceof Error ? error.message : String(error));
     process.exit(1);
@@ -190,28 +207,28 @@ async function runDoctor(argv: DoctorArgs): Promise<void> {
   const providerEnv = {
     ollama: process.env.OLLAMA_HOST,
     openrouter: process.env.OPENROUTER_API_KEY,
-    openai: process.env.OPENAI_API_KEY
+    openai: process.env.OPENAI_API_KEY,
   };
 
   const configuredProvider = providerEnv.ollama
     ? 'local_ollama'
     : providerEnv.openrouter
-    ? 'openrouter'
-    : providerEnv.openai
-    ? 'openai'
-    : null;
+      ? 'openrouter'
+      : providerEnv.openai
+        ? 'openai'
+        : null;
 
   if (configuredProvider) {
     checks.push({
       name: 'provider_env',
       status: 'pass',
-      detail: `Detected provider configuration for ${configuredProvider}`
+      detail: `Detected provider configuration for ${configuredProvider}`,
     });
   } else {
     checks.push({
       name: 'provider_env',
       status: 'fail',
-      detail: 'No provider configured. Set OLLAMA_HOST, OPENROUTER_API_KEY, or OPENAI_API_KEY.'
+      detail: 'No provider configured. Set OLLAMA_HOST, OPENROUTER_API_KEY, or OPENAI_API_KEY.',
     });
     ok = false;
   }
@@ -223,27 +240,29 @@ async function runDoctor(argv: DoctorArgs): Promise<void> {
       checks.push({
         name: 'provider_config',
         status: 'pass',
-        detail: `Resolved provider ${config.provider} with default model ${config.model}`
+        detail: `Resolved provider ${config.provider} with default model ${config.model}`,
       });
 
       try {
         const probe = await config.chat(
           config.model,
           'You are VaultMesh Forge doctor. Reply with a short affirmation.',
-          'Respond with the word OK.'
+          'Respond with the word OK.',
         );
         const healthy = typeof probe === 'string' && probe.trim().length > 0;
         checks.push({
           name: 'provider_reachability',
           status: healthy ? 'pass' : 'fail',
-          detail: healthy ? 'Provider responded successfully.' : 'Provider returned empty response.'
+          detail: healthy
+            ? 'Provider responded successfully.'
+            : 'Provider returned empty response.',
         });
         if (!healthy) ok = false;
       } catch (error) {
         checks.push({
           name: 'provider_reachability',
           status: 'fail',
-          detail: `Provider call failed: ${error instanceof Error ? error.message : String(error)}`
+          detail: `Provider call failed: ${error instanceof Error ? error.message : String(error)}`,
         });
         ok = false;
       }
@@ -251,7 +270,7 @@ async function runDoctor(argv: DoctorArgs): Promise<void> {
       checks.push({
         name: 'provider_config',
         status: 'fail',
-        detail: `Provider configuration error: ${error instanceof Error ? error.message : String(error)}`
+        detail: `Provider configuration error: ${error instanceof Error ? error.message : String(error)}`,
       });
       ok = false;
     }
@@ -259,7 +278,7 @@ async function runDoctor(argv: DoctorArgs): Promise<void> {
     checks.push({
       name: 'provider_reachability',
       status: 'skip',
-      detail: 'Provider reachability test skipped by flag.'
+      detail: 'Provider reachability test skipped by flag.',
     });
   }
 
@@ -272,13 +291,13 @@ async function runDoctor(argv: DoctorArgs): Promise<void> {
     checks.push({
       name: 'ledger_write',
       status: 'pass',
-      detail: `Write access confirmed for ${ledgerDir}`
+      detail: `Write access confirmed for ${ledgerDir}`,
     });
   } catch (error) {
     checks.push({
       name: 'ledger_write',
       status: 'fail',
-      detail: `Ledger write check failed: ${error instanceof Error ? error.message : String(error)}`
+      detail: `Ledger write check failed: ${error instanceof Error ? error.message : String(error)}`,
     });
     ok = false;
   }
@@ -315,14 +334,18 @@ async function scaffoldTemplate(argv: ScaffoldArgs): Promise<void> {
   try {
     await fs.mkdir(catalogDir, { recursive: true });
   } catch (error) {
-    console.error(`[vm] Failed to ensure catalog directory: ${error instanceof Error ? error.message : String(error)}`);
+    console.error(
+      `[vm] Failed to ensure catalog directory: ${error instanceof Error ? error.message : String(error)}`,
+    );
     process.exit(1);
   }
 
   if (!argv.force) {
     try {
       await fs.access(targetPath);
-      console.error(`[vm] Refusing to overwrite existing file at ${targetPath}. Use --force to override.`);
+      console.error(
+        `[vm] Refusing to overwrite existing file at ${targetPath}. Use --force to override.`,
+      );
       process.exit(1);
     } catch {
       // File does not exist, proceed
@@ -363,13 +386,17 @@ prompt:
     If output_format=json, respond in **strict JSON** that conforms to ${schemaPointer}.
 outputs:
   schema_ref: "${schemaPointer}"
-`
+`;
 
   try {
     await fs.writeFile(targetPath, scaffold, 'utf8');
-    console.log(JSON.stringify({ created: targetPath, id: rawId, keyword, schema: schemaPointer }, null, 2));
+    console.log(
+      JSON.stringify({ created: targetPath, id: rawId, keyword, schema: schemaPointer }, null, 2),
+    );
   } catch (error) {
-    console.error(`[vm] Failed to write scaffold: ${error instanceof Error ? error.message : String(error)}`);
+    console.error(
+      `[vm] Failed to write scaffold: ${error instanceof Error ? error.message : String(error)}`,
+    );
     process.exit(1);
   }
 }
@@ -385,28 +412,28 @@ yargs(hideBin(process.argv))
         .positional('template', {
           describe: 'Template identifier (e.g., tem-recon, dora.ict_risk)',
           type: 'string',
-          demandOption: true
+          demandOption: true,
         })
         .option('profile', {
           alias: 'p',
           describe: 'Profile to use (vault, blue, exec)',
           type: 'string',
-          default: 'vault'
+          default: 'vault',
         })
         .option('args', {
           alias: 'a',
           describe: 'JSON arguments for template',
           type: 'string',
-          default: '{}'
+          default: '{}',
         })
         .option('format', {
           alias: 'f',
           describe: 'Output format',
           choices: ['json', 'yaml', 'markdown'],
-          default: 'json'
+          default: 'json',
         });
     },
-    runTemplate
+    runTemplate,
   )
   .command(
     'ledger verify <eventId>',
@@ -415,10 +442,10 @@ yargs(hideBin(process.argv))
       return yargs.positional('eventId', {
         describe: 'Event ID to verify',
         type: 'string',
-        demandOption: true
+        demandOption: true,
       });
     },
-    verifyLedgerEvent
+    verifyLedgerEvent,
   )
   .command(
     'ledger query',
@@ -427,30 +454,25 @@ yargs(hideBin(process.argv))
       return yargs
         .option('template', {
           describe: 'Filter by template ID',
-          type: 'string'
+          type: 'string',
         })
         .option('profile', {
           describe: 'Filter by profile',
-          type: 'string'
+          type: 'string',
         })
         .option('since', {
           describe: 'Filter events since timestamp (ISO 8601)',
-          type: 'string'
+          type: 'string',
         })
         .option('limit', {
           describe: 'Maximum number of events to return',
           type: 'number',
-          default: 10
+          default: 10,
         });
     },
-    queryLedgerEvents
+    queryLedgerEvents,
   )
-  .command(
-    'ledger stats',
-    'Show ledger statistics',
-    () => {},
-    showLedgerStats
-  )
+  .command('ledger stats', 'Show ledger statistics', () => {}, showLedgerStats)
   .command(
     'doctor',
     'Run environment diagnostics for VaultMesh Forge',
@@ -459,14 +481,14 @@ yargs(hideBin(process.argv))
         .option('skip-provider', {
           describe: 'Skip live provider reachability probe',
           type: 'boolean',
-          default: false
+          default: false,
         })
         .option('json', {
           describe: 'Emit machine-readable JSON only',
           type: 'boolean',
-          default: false
+          default: false,
         }),
-    (argv) => runDoctor({ skipProvider: Boolean(argv['skip-provider']), json: Boolean(argv.json) })
+    (argv) => runDoctor({ skipProvider: Boolean(argv['skip-provider']), json: Boolean(argv.json) }),
   )
   .command(
     'scaffold template <id>',
@@ -476,22 +498,27 @@ yargs(hideBin(process.argv))
         .positional('id', {
           describe: 'Template identifier (family.name)',
           type: 'string',
-          demandOption: true
+          demandOption: true,
         })
         .option('force', {
           describe: 'Overwrite existing file if present',
           type: 'boolean',
-          default: false
+          default: false,
         }),
-    (argv) => scaffoldTemplate({ id: String(argv.id), force: Boolean(argv.force) })
+    (argv) => scaffoldTemplate({ id: String(argv.id), force: Boolean(argv.force) }),
   )
-  .example('$0 run tem-recon -p blue -a \'{"target":"example.org","depth":"shallow"}\'', 'Run reconnaissance template')
-  .example('$0 run dora.ict_risk -a \'{"org_name":"Acme","critical_functions":["Payments"]}\'', 'Run DORA ICT Risk template')
+  .example(
+    '$0 run tem-recon -p blue -a \'{"target":"example.org","depth":"shallow"}\'',
+    'Run reconnaissance template',
+  )
+  .example(
+    '$0 run dora.ict_risk -a \'{"org_name":"Acme","critical_functions":["Payments"]}\'',
+    'Run DORA ICT Risk template',
+  )
   .example('$0 ledger verify a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Verify a specific event')
   .example('$0 ledger query --template tem-recon --limit 5', 'Query recent recon events')
   .demandCommand(1, 'You must specify a command')
   .help()
   .alias('h', 'help')
   .version('1.0.0')
-  .alias('v', 'version')
-  .argv;
+  .alias('v', 'version').argv;

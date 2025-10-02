@@ -6,12 +6,7 @@
     "guardians": [
       {
         "name": "Tem",
-        "duties": [
-          "immutability",
-          "lineage",
-          "audit",
-          "recovery"
-        ]
+        "duties": ["immutability", "lineage", "audit", "recovery"]
       }
     ]
   },
@@ -46,10 +41,7 @@
     "checkpoints_every": 1618
   },
   "entropy": {
-    "sources": [
-      "os_rng",
-      "verifiable_beacon"
-    ],
+    "sources": ["os_rng", "verifiable_beacon"],
     "usage": "non-cryptographic scheduling only"
   },
   "governance": {
@@ -60,27 +52,15 @@
     "roles": [
       {
         "name": "smith",
-        "can": [
-          "forge",
-          "temper",
-          "quench"
-        ]
+        "can": ["forge", "temper", "quench"]
       },
       {
         "name": "archivist",
-        "can": [
-          "etch",
-          "restore",
-          "attest"
-        ]
+        "can": ["etch", "restore", "attest"]
       }
     ]
   },
   "tem": {
-    "invariants": [
-      "no-deletion",
-      "lineage-required",
-      "quench-before-etch"
-    ]
+    "invariants": ["no-deletion", "lineage-required", "quench-before-etch"]
   }
 }

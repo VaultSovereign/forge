@@ -14,7 +14,11 @@ export default function OverviewStrip({ items }: OverviewStripProps) {
     <div className="overview-grid">
       {items.map((item) => {
         const toneClass =
-          item.tone === 'ok' ? 'overview-card overview-card--ok' : item.tone === 'alert' ? 'overview-card overview-card--alert' : 'overview-card';
+          item.tone === 'ok'
+            ? 'overview-card overview-card--ok'
+            : item.tone === 'alert'
+              ? 'overview-card overview-card--alert'
+              : 'overview-card';
 
         return (
           <article key={item.label} className={toneClass}>

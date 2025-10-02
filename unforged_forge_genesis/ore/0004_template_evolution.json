@@ -21,12 +21,8 @@
     }
   ],
   "acceptance": {
-    "must_pass": [
-      "pnpm build"
-    ],
-    "must_emit": [
-      "dist/catalog/cyber/dora.ict_risk_framework.v1.yaml"
-    ]
+    "must_pass": ["pnpm build"],
+    "must_emit": ["dist/catalog/cyber/dora.ict_risk_framework.v1.yaml"]
   },
   "signatures": []
 }

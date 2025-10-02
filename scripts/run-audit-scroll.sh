@@ -22,35 +22,32 @@ set -e
 printf '%s\n' "$OUTPUT"
 
 if [ $STATUS -ne 0 ]; then
+  echo "[audit] command failed with status $STATUS"
   exit $STATUS
 fi
 
-export AUDIT_RAW_OUTPUT="$OUTPUT"
-JSON=$(
-python3 - <<'PY'
-import json, os, sys
+# Prefer jq; be explicit about the first top-level JSON object
+if ! command -v jq >/dev/null 2>&1; then
+  echo "[audit] jq not found; please install jq (https://stedolan.github.io/jq/) or run: brew install jq / apt-get install jq" >&2
+  exit 1
+fi
 
-text = os.environ.get('AUDIT_RAW_OUTPUT', '')
-start = text.find('{')
-if start == -1:
-    sys.exit(1)
-content = text[start:]
-depth = 0
-end = 0
-for i, ch in enumerate(content):
-    if ch == '{':
-        depth += 1
-    elif ch == '}':
-        depth -= 1
-        if depth == 0:
-            end = i + 1
-            break
-snippet = content[:end] if end else content
-obj = json.loads(snippet)
-print(json.dumps(obj, indent=2))
-PY
-) || { echo "[audit] failed to extract JSON output"; exit 1; }
-unset AUDIT_RAW_OUTPUT
+# Extract the first complete JSON object by balancing braces with awk
+JSON="$(printf '%s' "$OUTPUT" | awk '
+  BEGIN{depth=0; injson=0}
+  {
+    for(i=1;i<=length($0);i++){
+      c=substr($0,i,1)
+      if(c=="{"){depth++; if(depth==1) injson=1}
+      if(injson) buf=buf c
+      if(c=="}"){depth--; if(depth==0 && injson){print buf; exit}}
+    }
+  }')" || true
+
+if [ -z "$JSON" ]; then
+  echo "[audit] failed to extract JSON output from command" >&2
+  exit 1
+}
 
 commit=$(git rev-parse --short HEAD 2>/dev/null || echo unknown)
 if [ "$commit" != "unknown" ] && command -v jq >/dev/null 2>&1; then

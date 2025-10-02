@@ -9,24 +9,22 @@
 # Guardian: Tem, the Remembrance Guardian.
 # -------------------------------------------------------------
 
-
-
 id: tem.recon
 version: 1.1.0
 keyword: tem-recon
 title: Reconnaissance Assistant
 purpose: Passive & authorized recon of declared scope.
 inputs:
-  target: {type: string, required: true}
-  scope:  {type: enum, values: [public, in-scope, out-of-scope], default: public}
-  depth:  {type: enum, values: [shallow, moderate, deep], default: moderate}
-  output_format: {type: enum, values: [json, yaml, markdown], default: json}
+  target: { type: string, required: true }
+  scope: { type: enum, values: [public, in-scope, out-of-scope], default: public }
+  depth: { type: enum, values: [shallow, moderate, deep], default: moderate }
+  output_format: { type: enum, values: [json, yaml, markdown], default: json }
 quality_checklist:
-  - "Flag confidence < 0.3"
-  - "Surface top-3 discoveries first"
+  - 'Flag confidence < 0.3'
+  - 'Surface top-3 discoveries first'
 safety_guardrails:
-  - "Passive-only; require auth for active probes"
-  - "Cite sources; do not imply execution"
+  - 'Passive-only; require auth for active probes'
+  - 'Cite sources; do not imply execution'
 prompt:
   system: |
     You are VaultMesh TEM Recon Assistant. Follow guardrails exactly.
@@ -51,4 +49,4 @@ prompt:
 
     If output_format=json, respond in **strict JSON** that conforms to schema at schemas/output.schema.json#/definitions/tem/recon.
 outputs:
-  schema_ref: "../schemas/output.schema.json#/definitions/tem/recon"
+  schema_ref: '../schemas/output.schema.json#/definitions/tem/recon'

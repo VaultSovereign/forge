@@ -7,15 +7,15 @@ export default async function security(app: FastifyInstance) {
     contentSecurityPolicy: {
       useDefaults: true,
       directives: {
-        "default-src": ["'self'"],
-        "script-src": ["'self'", isDev ? "'unsafe-eval'" : "'self'"],
-        "style-src": ["'self'", "'unsafe-inline'"],
-        "img-src": ["'self'", 'data:'],
-        "connect-src": ["'self'"],
-        "frame-ancestors": ["'none'"]
-      }
+        'default-src': ["'self'"],
+        'script-src': ["'self'", isDev ? "'unsafe-eval'" : "'self'"],
+        'style-src': ["'self'", "'unsafe-inline'"],
+        'img-src': ["'self'", 'data:'],
+        'connect-src': ["'self'"],
+        'frame-ancestors': ["'none'"],
+      },
     },
-    crossOriginEmbedderPolicy: false
+    crossOriginEmbedderPolicy: false,
   });
 
   app.addHook('onRequest', async (_req, reply) => {
@@ -24,4 +24,3 @@ export default async function security(app: FastifyInstance) {
     reply.header('Referrer-Policy', 'no-referrer');
   });
 }
-

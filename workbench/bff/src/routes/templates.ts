@@ -15,7 +15,7 @@ export default async function templatesRoutes(app: FastifyInstance) {
       description: z.string().optional(),
       version: z.string().optional(),
       tags: z.array(z.string()).optional(),
-      updatedAt: z.string().optional() // ISO
+      updatedAt: z.string().optional(), // ISO
     })
     .passthrough();
 
@@ -26,7 +26,7 @@ export default async function templatesRoutes(app: FastifyInstance) {
     '/v1/api/templates',
     {
       preHandler: rbac(['templates:read']),
-      schema: { response: { 200: TemplateArrayResponse } }
+      schema: { response: { 200: TemplateArrayResponse } },
     },
     async (request, reply): Promise<TemplateMeta[]> => {
       const q = (request.query ?? {}) as Record<string, string>;
@@ -41,7 +41,7 @@ export default async function templatesRoutes(app: FastifyInstance) {
 
       // Return array of summaries to keep existing UI intact
       return items.map((t) => ({ id: t.id, name: t.name, description: t.description }));
-    }
+    },
   );
 
   // Tiny count endpoint for Overview and dashboards
@@ -49,12 +49,12 @@ export default async function templatesRoutes(app: FastifyInstance) {
     '/v1/api/templates/count',
     {
       preHandler: rbac(['templates:read']),
-      schema: { response: { 200: TemplateCountResponse } }
+      schema: { response: { 200: TemplateCountResponse } },
     },
     async (request): Promise<TemplateCount> => {
       const q = (request.query ?? {}) as Record<string, string>;
       const filter = (q.filter as string | undefined) ?? null;
       return { total: countTemplates(filter) };
-    }
+    },
   );
 }

@@ -1,10 +1,10 @@
-import Ajv from "ajv";
-import { ExecReportSchema } from "./schemas.js";
-import { runForge } from "../tools/forge.js";
-import { searchCodex, getDoc } from "../tools/codex.js";
-import { appendRealityEvent } from "../tools/ledger.js";
+import Ajv from 'ajv';
+import { ExecReportSchema } from './schemas.js';
+import { runForge } from '../tools/forge.js';
+import { searchCodex, getDoc } from '../tools/codex.js';
+import { appendRealityEvent } from '../tools/ledger.js';
 
-type RunLevel = "read-only" | "advisory" | "lab-only";
+type RunLevel = 'read-only' | 'advisory' | 'lab-only';
 
 type Budget = {
   steps: number;
@@ -19,7 +19,7 @@ type ExecutionConfig = {
 
 type PlanStep = {
   id: string;
-  tool: "codex.search" | "codex.get" | "forge.run" | "ledger.append";
+  tool: 'codex.search' | 'codex.get' | 'forge.run' | 'ledger.append';
   input: Record<string, unknown>;
   if?: string;
   saveAs?: string;
@@ -32,7 +32,7 @@ type PlannerPlan = {
 
 type ExecutionResult = {
   id: string;
-  tool?: PlanStep["tool"];
+  tool?: PlanStep['tool'];
   result?: unknown;
   skipped?: boolean;
   reason?: string;
@@ -41,13 +41,23 @@ type ExecutionResult = {
 const ajv = new Ajv({ allErrors: true });
 const validateReport = ajv.compile(ExecReportSchema);
 
-const SCROLL_ALLOWLIST = new Set(["tem-recon", "tem-vision", "tem-sonic", "consciousness-template"]);
+const SCROLL_ALLOWLIST = new Set([
+  'tem-recon',
+  'tem-vision',
+  'tem-sonic',
+  'consciousness-template',
+]);
 
 export async function executePlan(plan: PlannerPlan, cfg: ExecutionConfig) {
   const start = Date.now();
   const results: ExecutionResult[] = [];
   const bag: Record<string, unknown> = {};
-  const allowedTools = new Set<PlanStep["tool"]>(["codex.search", "codex.get", "forge.run", "ledger.append"]);
+  const allowedTools = new Set<PlanStep['tool']>([
+    'codex.search',
+    'codex.get',
+    'forge.run',
+    'ledger.append',
+  ]);
 
   for (const [index, step] of plan.steps.entries()) {
     if (index >= cfg.budget.steps) break;
@@ -61,31 +71,31 @@ export async function executePlan(plan: PlannerPlan, cfg: ExecutionConfig) {
     if (step.if) {
       const snapshot = JSON.stringify(results);
       if (!snapshot.includes(step.if)) {
-        results.push({ id: step.id, skipped: true, reason: "condition false" });
+        results.push({ id: step.id, skipped: true, reason: 'condition false' });
         continue;
       }
     }
 
     let outcome: unknown;
 
-    if (step.tool === "codex.search") {
-      const query = String(step.input?.query ?? "");
+    if (step.tool === 'codex.search') {
+      const query = String(step.input?.query ?? '');
       const k = Number(step.input?.k ?? 8);
       outcome = await searchCodex(query, k);
-    } else if (step.tool === "codex.get") {
-      const docId = String(step.input?.id ?? "");
+    } else if (step.tool === 'codex.get') {
+      const docId = String(step.input?.id ?? '');
       outcome = await getDoc(docId);
-    } else if (step.tool === "forge.run") {
-      const scroll = String(step.input?.scroll ?? "");
+    } else if (step.tool === 'forge.run') {
+      const scroll = String(step.input?.scroll ?? '');
       if (!scroll) throw new Error(`forge.run requires scroll (step ${step.id})`);
       if (!SCROLL_ALLOWLIST.has(scroll)) throw new Error(`scroll not allowed: ${scroll}`);
-      const profile = String(step.input?.profile ?? "@blue");
+      const profile = String(step.input?.profile ?? '@blue');
       const args = {
-        ...(step.input?.args || {})
+        ...(step.input?.args || {}),
       } as Record<string, unknown> & { run_level?: string };
       args.run_level ??= cfg.runLevel;
       outcome = await runForge(scroll, profile, args);
-    } else if (step.tool === "ledger.append") {
+    } else if (step.tool === 'ledger.append') {
       const payload = { ...(step.input ?? {}), run_level: cfg.runLevel } as Record<string, unknown>;
       await appendRealityEvent(process.cwd(), payload);
       outcome = { ok: true };
@@ -101,7 +111,7 @@ export async function executePlan(plan: PlannerPlan, cfg: ExecutionConfig) {
 
   const report = { goal: plan.goal, ok: true, results };
   if (!validateReport(report)) {
-    const firstError = ajv.errorsText(validateReport.errors, { separator: "; " });
+    const firstError = ajv.errorsText(validateReport.errors, { separator: '; ' });
     throw new Error(`Execution report failed schema validation: ${firstError}`);
   }
 

@@ -2,7 +2,7 @@ name: pages
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'docs/**'
       - 'scripts/generate-docs-sitemap.mjs'

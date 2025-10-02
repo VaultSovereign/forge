@@ -278,4 +278,3 @@ paths:
                   ts:
                     type: number
                 required: [mode]
-

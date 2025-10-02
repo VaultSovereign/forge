@@ -14,11 +14,11 @@ Validates template definition files (YAML):
 {
   "required": ["id", "version", "keyword", "purpose", "inputs", "prompt", "outputs"],
   "properties": {
-    "id": {"type": "string"},
-    "version": {"type": "string"},
-    "keyword": {"type": "string"},
-    "purpose": {"type": "string"},
-    "inputs": {"type": "object"},
+    "id": { "type": "string" },
+    "version": { "type": "string" },
+    "keyword": { "type": "string" },
+    "purpose": { "type": "string" },
+    "inputs": { "type": "object" },
     "prompt": {
       "type": "object",
       "required": ["system", "user"]
@@ -26,7 +26,7 @@ Validates template definition files (YAML):
     "outputs": {
       "type": "object",
       "properties": {
-        "schema_ref": {"type": "string"}
+        "schema_ref": { "type": "string" }
       }
     }
   }
@@ -38,18 +38,21 @@ Validates template definition files (YAML):
 Validates template execution results:
 
 #### DORA Templates
+
 - `#/definitions/dora/ict_risk` - ICT Risk Management Framework
 - `#/definitions/dora/tprm` - Third-Party Risk Management
 - `#/definitions/dora/incident` - Incident Reporting
 - `#/definitions/dora/resilience` - Operational Resilience Testing
 
 #### Cybersecurity Templates
+
 - `#/definitions/cyber/iso27001` - ISO 27001 Compliance
 - `#/definitions/cyber/pci_dss` - PCI DSS Assessment
 - `#/definitions/cyber/swift_csp` - SWIFT CSP Compliance
 - `#/definitions/cyber/pci_dss_misconfiguration_checker` - PCI DSS Misconfiguration Checker
 
 #### TEM Templates
+
 - `#/definitions/tem/recon` - Reconnaissance
 - `#/definitions/tem_advanced/vision` - Visual Analysis
 - `#/definitions/tem_advanced/sonic` - Audio Analysis
@@ -62,14 +65,14 @@ Validates Reality Ledger events:
 {
   "required": ["id", "ts", "template", "profile", "input", "output", "hash"],
   "properties": {
-    "id": {"type": "string", "pattern": "UUID v4"},
-    "ts": {"type": "string", "format": "date-time"},
-    "template": {"type": "string"},
-    "profile": {"type": "string"},
-    "input": {"type": "object"},
-    "output": {"type": "object"},
-    "hash": {"type": "string", "pattern": "SHA-256 hex"},
-    "sig": {"type": "string", "pattern": "Ed25519 signature"}
+    "id": { "type": "string", "pattern": "UUID v4" },
+    "ts": { "type": "string", "format": "date-time" },
+    "template": { "type": "string" },
+    "profile": { "type": "string" },
+    "input": { "type": "object" },
+    "output": { "type": "object" },
+    "hash": { "type": "string", "pattern": "SHA-256 hex" },
+    "sig": { "type": "string", "pattern": "Ed25519 signature" }
   }
 }
 ```
@@ -81,23 +84,24 @@ Validates Reality Ledger events:
 ```yaml
 inputs:
   # Required string
-  org_name: {type: string, required: true}
+  org_name: { type: string, required: true }
 
   # Enum with default
-  depth: {type: enum, values: [shallow, moderate, deep], default: moderate}
+  depth: { type: enum, values: [shallow, moderate, deep], default: moderate }
 
   # Array of strings
-  critical_functions: {type: array, items: {type: string}}
+  critical_functions: { type: array, items: { type: string } }
 
   # Optional object
-  metadata: {type: object, required: false}
+  metadata: { type: object, required: false }
 ```
 
 ### Output Format Control
 
 All templates support:
+
 ```yaml
-output_format: {type: enum, values: [json, yaml, markdown], default: json}
+output_format: { type: enum, values: [json, yaml, markdown], default: json }
 ```
 
 ## Schema Validation Flow
@@ -114,7 +118,7 @@ Templates reference output schemas using JSON Pointer syntax:
 
 ```yaml
 outputs:
-  schema_ref: "../schemas/output.schema.json#/definitions/dora/ict_risk"
+  schema_ref: '../schemas/output.schema.json#/definitions/dora/ict_risk'
 ```
 
 ## Extending Schemas
@@ -122,6 +126,7 @@ outputs:
 ### Adding New Output Schema
 
 1. Add definition to `/schemas/output.schema.json`:
+
 ```json
 "definitions": {
   "my_category": {
@@ -138,9 +143,10 @@ outputs:
 ```
 
 2. Reference in template:
+
 ```yaml
 outputs:
-  schema_ref: "../schemas/output.schema.json#/definitions/my_category/my_template"
+  schema_ref: '../schemas/output.schema.json#/definitions/my_category/my_template'
 ```
 
 ### Schema Evolution
@@ -152,7 +158,9 @@ outputs:
 ## Common Patterns
 
 ### Confidence Scoring
+
 All templates should include:
+
 ```json
 "confidence_scores": {
   "type": "object",
@@ -164,7 +172,9 @@ All templates should include:
 ```
 
 ### Error Handling
+
 Failed validations return:
+
 ```json
 {
   "error": "Schema validation failed",

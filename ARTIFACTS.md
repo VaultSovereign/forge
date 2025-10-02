@@ -4,13 +4,13 @@ This repository generates security and quality artifacts on every CI run. These 
 
 ## Artifact Overview
 
-| Artifact | Purpose | Critical Thresholds | Location |
-|----------|---------|-------------------|----------|
-| **secrets_audit.json** | Scans for exposed secrets, API keys, tokens | `critical: 0` | `artifacts/prepush/` |
-| **code_review.json** | Static analysis for security vulnerabilities, code quality | `high: 0` | `artifacts/prepush/` |
-| **container_security.json** | Docker image vulnerability scan | `critical: 0, high: 0` | `artifacts/prepush/` |
-| **compliance_gaps.json** | ISO 27001 compliance gap analysis | `high: 0` | `artifacts/prepush/` |
-| **sbom.json** | Software Bill of Materials (dependencies) | Informational | `artifacts/prepush/` |
+| Artifact                    | Purpose                                                    | Critical Thresholds    | Location             |
+| --------------------------- | ---------------------------------------------------------- | ---------------------- | -------------------- |
+| **secrets_audit.json**      | Scans for exposed secrets, API keys, tokens                | `critical: 0`          | `artifacts/prepush/` |
+| **code_review.json**        | Static analysis for security vulnerabilities, code quality | `high: 0`              | `artifacts/prepush/` |
+| **container_security.json** | Docker image vulnerability scan                            | `critical: 0, high: 0` | `artifacts/prepush/` |
+| **compliance_gaps.json**    | ISO 27001 compliance gap analysis                          | `high: 0`              | `artifacts/prepush/` |
+| **sbom.json**               | Software Bill of Materials (dependencies)                  | Informational          | `artifacts/prepush/` |
 
 ## Gate Behavior
 
@@ -66,9 +66,9 @@ Customize thresholds via environment variables in CI:
 
 ```yaml
 env:
-  FORGE_MAX_CRITICAL: 0    # Never allow critical findings
-  FORGE_MAX_HIGH: 0        # Default: fail on high severity
-  FORGE_MAX_MEDIUM: 10     # Optional: limit medium findings
+  FORGE_MAX_CRITICAL: 0 # Never allow critical findings
+  FORGE_MAX_HIGH: 0 # Default: fail on high severity
+  FORGE_MAX_MEDIUM: 10 # Optional: limit medium findings
 ```
 
 ## Signed Receipts

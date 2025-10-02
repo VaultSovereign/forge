@@ -9,18 +9,18 @@ keyword: cyber-ai-guardrail-checker
 title: AI Guardrail Checker
 purpose: Validate AI guardrails (authz, approvals, logging) against policy and NIST controls.
 inputs:
-  agent_description: {type: string, required: true}
-  permissions_matrix: {type: string, required: false}
-  data_access: {type: string, required: false}
-  safety_policies: {type: string, required: false}
-  ledger_expectations: {type: string, required: false}
-  output_format: {type: enum, values: [json, yaml, markdown], default: json}
+  agent_description: { type: string, required: true }
+  permissions_matrix: { type: string, required: false }
+  data_access: { type: string, required: false }
+  safety_policies: { type: string, required: false }
+  ledger_expectations: { type: string, required: false }
+  output_format: { type: enum, values: [json, yaml, markdown], default: json }
 quality_checklist:
-  - "Deny-by-default, least privilege, approval flows present"
-  - "Audit logging includes inputs/outputs/hash/signature?"
-  - "Provide numeric score (0–100) and remediation"
+  - 'Deny-by-default, least privilege, approval flows present'
+  - 'Audit logging includes inputs/outputs/hash/signature?'
+  - 'Provide numeric score (0–100) and remediation'
 safety_guardrails:
-  - "Read-only; advisory"
+  - 'Read-only; advisory'
 prompt:
   system: |
     Validate AI guardrails: deny-by-default, least privilege, approvals, audit logging.
@@ -38,5 +38,4 @@ prompt:
     Ledger expectations (JSON):
     {{ledger_expectations}}
 outputs:
-  schema_ref: "../schemas/output.schema.json#/definitions/cyber/ai_guardrail_checker"
-
+  schema_ref: '../schemas/output.schema.json#/definitions/cyber/ai_guardrail_checker'

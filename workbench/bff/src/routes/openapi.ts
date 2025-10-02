@@ -14,7 +14,9 @@ export default async function openapiRoutes(app: FastifyInstance) {
       const repoRoot = fromHere(import.meta.url, '../../..', '..', '..');
       const p = path.resolve(repoRoot, 'docs', 'openapi', 'workbench.json');
       if (!fs.existsSync(p)) {
-        return reply.code(404).send({ error: 'openapi_not_found', note: 'Generate via scripts/generate-openapi.mjs' });
+        return reply
+          .code(404)
+          .send({ error: 'openapi_not_found', note: 'Generate via scripts/generate-openapi.mjs' });
       }
       const text = await fs.promises.readFile(p, 'utf8');
       reply.header('cache-control', 'no-cache, max-age=0');
@@ -25,4 +27,3 @@ export default async function openapiRoutes(app: FastifyInstance) {
     }
   });
 }
-

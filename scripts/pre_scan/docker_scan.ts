@@ -4,7 +4,9 @@ import fs from 'node:fs';
 
 function tryTrivy(image: string): any | null {
   try {
-    const out = execFileSync('trivy', ['image', '--quiet', '--format', 'json', image], { encoding: 'utf8' });
+    const out = execFileSync('trivy', ['image', '--quiet', '--format', 'json', image], {
+      encoding: 'utf8',
+    });
     return JSON.parse(out);
   } catch {
     return null;
@@ -21,6 +23,9 @@ try {
 
 const trivy = tryTrivy(IMAGE);
 process.stdout.write(
-  JSON.stringify({ dockerfile_path: DOCKERFILE, dockerfile_text: dockerfileText, trivy_report: trivy }, null, 2) + '\n'
+  JSON.stringify(
+    { dockerfile_path: DOCKERFILE, dockerfile_text: dockerfileText, trivy_report: trivy },
+    null,
+    2,
+  ) + '\n',
 );
-

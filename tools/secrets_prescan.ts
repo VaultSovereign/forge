@@ -56,7 +56,8 @@ function redact(line: string, hints: string[]): string {
   // provider-aware redaction
   if (hints.includes('openrouter')) line = line.replace(/(sk-or-)[A-Za-z0-9]+/g, '$1****');
   if (hints.includes('openai')) line = line.replace(/(sk-)[A-Za-z0-9]{20,}/g, '$1****');
-  if (hints.includes('github')) line = line.replace(/((ghp|gho|ghu|ghs|ghr)_)[A-Za-z0-9]{24,}/g, '$1****');
+  if (hints.includes('github'))
+    line = line.replace(/((ghp|gho|ghu|ghs|ghr)_)[A-Za-z0-9]{24,}/g, '$1****');
   if (hints.includes('aws')) {
     line = line.replace(/(AKIA[0-9A-Z]{16})/g, '$1****');
     line = line.replace(/=[A-Za-z0-9/+=]{40}/g, '=****');
@@ -104,7 +105,11 @@ export async function preScan(opts: {
     const ext = path.extname(file).toLowerCase();
     const allowed = allowedExts.has(ext) || allowedExts.has(base); // allow ".env" by name
     if (!allowed) continue;
-    if (opts.ignoreExamples && (base === '.env.example' || rel.includes(`${path.sep}examples${path.sep}`))) continue;
+    if (
+      opts.ignoreExamples &&
+      (base === '.env.example' || rel.includes(`${path.sep}examples${path.sep}`))
+    )
+      continue;
 
     let raw: Buffer;
     try {
@@ -160,17 +165,23 @@ export async function preScan(opts: {
 
   // Commit history (best-effort, skip if not a git repo)
   try {
-    const commits = execSync(`git -C ${opts.repositoryPath} log -n ${opts.commitHistoryDepth} --pretty=%H`, {
-      stdio: ['ignore', 'pipe', 'ignore']
-    })
+    const commits = execSync(
+      `git -C ${opts.repositoryPath} log -n ${opts.commitHistoryDepth} --pretty=%H`,
+      {
+        stdio: ['ignore', 'pipe', 'ignore'],
+      },
+    )
       .toString()
       .split(/\r?\n/)
       .filter(Boolean);
 
     for (const c of commits) {
-      const filesChanged = execSync(`git -C ${opts.repositoryPath} show ${c} --name-only --pretty=format:`, {
-        stdio: ['ignore', 'pipe', 'ignore']
-      })
+      const filesChanged = execSync(
+        `git -C ${opts.repositoryPath} show ${c} --name-only --pretty=format:`,
+        {
+          stdio: ['ignore', 'pipe', 'ignore'],
+        },
+      )
         .toString()
         .split(/\r?\n/)
         .filter(Boolean);
@@ -184,7 +195,7 @@ export async function preScan(opts: {
         let content = '';
         try {
           content = execSync(`git -C ${opts.repositoryPath} show ${c}:${f}`, {
-            stdio: ['ignore', 'pipe', 'ignore']
+            stdio: ['ignore', 'pipe', 'ignore'],
           }).toString();
         } catch {
           continue;
@@ -220,8 +231,17 @@ export async function preScan(opts: {
               snippet = redact(trimmed, opts.providerHints);
             }
           }
-          if (match && opts.providerHints.some((h) => trimmed.toLowerCase().includes(h))) score += 0.1;
-          if (match) hits.push({ file: f, line: i + 1, kind, snippet, score: Math.min(1, score), commit_hash: c });
+          if (match && opts.providerHints.some((h) => trimmed.toLowerCase().includes(h)))
+            score += 0.1;
+          if (match)
+            hits.push({
+              file: f,
+              line: i + 1,
+              kind,
+              snippet,
+              score: Math.min(1, score),
+              commit_hash: c,
+            });
         }
       }
     }
@@ -237,10 +257,14 @@ async function main() {
   const repositoryPath = path.resolve(String(argv.repo || argv.repository || '.'));
   const fileExtensions = toArray(argv.extensions || argv.ext || '.env,.yml,.yaml,.json,.ts,.js');
   const sensitivePatterns = toArray(
-    argv.patterns || argv.p || '["OPENAI_API_KEY=sk-[a-zA-Z0-9]{20,}","OPENROUTER_API_KEY=sk-or-[a-zA-Z0-9]{20,}","GITHUB_TOKEN=(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{36,}","AWS_ACCESS_KEY_ID=AKIA[0-9A-Z]{16}","AWS_SECRET_ACCESS_KEY=[A-Za-z0-9/+=]{40}","password=.*"]'
+    argv.patterns ||
+      argv.p ||
+      '["OPENAI_API_KEY=sk-[a-zA-Z0-9]{20,}","OPENROUTER_API_KEY=sk-or-[a-zA-Z0-9]{20,}","GITHUB_TOKEN=(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{36,}","AWS_ACCESS_KEY_ID=AKIA[0-9A-Z]{16}","AWS_SECRET_ACCESS_KEY=[A-Za-z0-9/+=]{40}","password=.*"]',
   );
   const commitHistoryDepth = Number(argv.depth || argv.commits || 50);
-  const excludedNames = toArray(argv.exclude || 'node_modules,dist,build,.git,.next,.turbo,coverage,.nyc_output');
+  const excludedNames = toArray(
+    argv.exclude || 'node_modules,dist,build,.git,.next,.turbo,coverage,.nyc_output',
+  );
   const ignoreExamples = argv.ignore_examples !== undefined ? Boolean(argv.ignore_examples) : true;
   const entropyThreshold = Number(argv.entropy || 4.0);
   const minSecretLength = Number(argv.min || 20);
@@ -255,7 +279,7 @@ async function main() {
     ignoreExamples,
     entropyThreshold,
     minSecretLength,
-    providerHints
+    providerHints,
   });
 
   if (argv.json || argv.ndjson === false) {

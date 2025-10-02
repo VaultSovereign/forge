@@ -49,14 +49,19 @@ python3 --version >/dev/null || die "python3 missing."
 say "Installing deps (frozen lockfile)..."
 pnpm install --frozen-lockfile >/dev/null
 
+echo "[prepush] lint & format check (pnpm)"
+if ! command -v pnpm >/dev/null 2>&1; then
+  echo "[prepush] pnpm not found; enabling via corepack"
+  corepack enable && corepack prepare pnpm@10.17.0 --activate
+fi
+
 say "Typecheck..."
 pnpm run -s typecheck
 
-say "Lint..."
-pnpm run -s lint
-
 say "Format check..."
-pnpm run -s format
+pnpm format:check || { echo "[prepush] prettier check failed — run pnpm format"; exit 1; }
+say "Lint..."
+pnpm lint || { echo "[prepush] eslint failed — run pnpm lint:fix"; exit 1; }
 
 say "Tests (record status to reuse later)..."
 if pnpm test; then

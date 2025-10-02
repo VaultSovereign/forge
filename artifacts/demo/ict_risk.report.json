@@ -10,9 +10,7 @@
         "status": "Non-Compliant",
         "risk_score": 4,
         "risk_rationale": "Lack of documented ICT policies to guide governance.",
-        "evidence_paths": [
-          "examples/evidence/policies/*.md"
-        ]
+        "evidence_paths": ["examples/evidence/policies/*.md"]
       },
       {
         "control_id": "DORA-IRM-01",
@@ -20,9 +18,7 @@
         "status": "Non-Compliant",
         "risk_score": 5,
         "risk_rationale": "No incident register available to track and manage incidents.",
-        "evidence_paths": [
-          "examples/evidence/incidents/*.json"
-        ]
+        "evidence_paths": ["examples/evidence/incidents/*.json"]
       },
       {
         "control_id": "DORA-TPRM-01",
@@ -30,9 +26,7 @@
         "status": "Non-Compliant",
         "risk_score": 5,
         "risk_rationale": "Absence of third-party artefacts to assess risks associated with vendors.",
-        "evidence_paths": [
-          "examples/evidence/tprm/**/*.json"
-        ]
+        "evidence_paths": ["examples/evidence/tprm/**/*.json"]
       }
     ],
     "overall_score": 4.7,

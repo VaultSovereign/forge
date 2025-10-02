@@ -14,6 +14,7 @@
 Instead, please report security vulnerabilities to: security@vaultmesh.io
 
 Please include:
+
 - Type of issue (e.g. buffer overflow, SQL injection, cross-site scripting, etc.)
 - Full paths of source file(s) related to the manifestation of the issue
 - The location of the affected source code (tag/branch/commit or direct URL)
@@ -25,22 +26,26 @@ Please include:
 ## Security Measures
 
 ### Environment Variables
+
 - API keys stored in `.env` files only
 - No secrets in configuration files or code
 - Environment variables validated at startup
 
 ### Dependencies
+
 - Regular `npm audit` checks
 - Pinned dependency versions
 - Supply chain integrity monitoring
 
 ### Template Safety
+
 - Schema validation on all inputs/outputs
 - Guardrails enforcement before LLM execution
 - Read-only operation defaults
 - Audit trail for all template executions
 
 ### Reality Ledger
+
 - Content-addressed storage with SHA-256 hashes
 - Optional cryptographic signatures (ed25519)
 - Immutable event log with verification capabilities
@@ -49,11 +54,13 @@ Please include:
 ## Development Security
 
 ### Code Review
+
 - All changes require code review
 - Security-sensitive areas require additional review
 - Automated security scanning in CI/CD
 
 ### Testing
+
 - Security test cases in test suite
 - Fuzzing for input validation
 - Property-based testing for cryptographic functions

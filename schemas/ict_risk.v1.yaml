@@ -21,7 +21,7 @@ input_schema:
         type: string
       type: array
     critical_functions:
-      description: "Critical business functions in scope for the assessment."
+      description: 'Critical business functions in scope for the assessment.'
       items:
         type: string
       type: array
@@ -42,21 +42,21 @@ input_schema:
 
         '
       enum:
-      - bank
-      - insurance_company
-      - investment_firm
-      - credit_institution
-      - payment_institution
-      - electronic_money_institution
-      - crypto_asset_service_provider
-      - central_counterparty
-      - trading_venue
-      - central_securities_depository
-      - data_reporting_service_provider
-      - management_company
-      - deposit_taking_credit
-      - microenterprise
-      - other
+        - bank
+        - insurance_company
+        - investment_firm
+        - credit_institution
+        - payment_institution
+        - electronic_money_institution
+        - crypto_asset_service_provider
+        - central_counterparty
+        - trading_venue
+        - central_securities_depository
+        - data_reporting_service_provider
+        - management_company
+        - deposit_taking_credit
+        - microenterprise
+        - other
       type: string
     policies:
       description: 'Paths/identifiers to policies, strategies, procedures (e.g., ICT
@@ -70,8 +70,8 @@ input_schema:
       description: Jurisdictions in scope for the assessment.
       items:
         enum:
-        - EU
-        - EEA
+          - EU
+          - EEA
         type: string
       minItems: 1
       type: array
@@ -90,12 +90,12 @@ input_schema:
         type: string
       type: array
   required:
-  - org_name
-  - assessment_date
-  - org_type
-  - assets
-  - policies
-  - incidents
+    - org_name
+    - assessment_date
+    - org_type
+    - assets
+    - policies
+    - incidents
   title: ICT Risk Assessment (Inputs)
   type: object
 kind: spec
@@ -116,11 +116,11 @@ output_schema:
         properties:
           control_id:
             enum:
-            - DORA-IRM-01
-            - DORA-INC-01
-            - DORA-TRT-01
-            - DORA-TPRM-01
-            - DORA-GOV-01
+              - DORA-IRM-01
+              - DORA-INC-01
+              - DORA-TRT-01
+              - DORA-TPRM-01
+              - DORA-GOV-01
             type: string
           evidence_paths:
             items:
@@ -128,11 +128,11 @@ output_schema:
             type: array
           pillar:
             enum:
-            - ICT_Risk_Management
-            - Incident_Management
-            - Resilience_Testing
-            - Third_Party_Risk
-            - Governance
+              - ICT_Risk_Management
+              - Incident_Management
+              - Resilience_Testing
+              - Third_Party_Risk
+              - Governance
             type: string
           risk_rationale:
             type: string
@@ -142,15 +142,15 @@ output_schema:
             type: number
           status:
             enum:
-            - Compliant
-            - Partial
-            - Non-Compliant
+              - Compliant
+              - Partial
+              - Non-Compliant
             type: string
         required:
-        - control_id
-        - pillar
-        - status
-        - risk_score
+          - control_id
+          - pillar
+          - status
+          - risk_score
         type: object
       type: array
     org_name:
@@ -167,9 +167,9 @@ output_schema:
         '
       type: string
   required:
-  - org_name
-  - assessment_date
-  - controls
+    - org_name
+    - assessment_date
+    - controls
   title: ICT Risk Assessment (Outputs)
   type: object
 owner: platform
@@ -180,8 +180,8 @@ summary: 'Schema for digital operational resilience assessments under Regulation
 
   '
 tags:
-- dora
-- ict
-- compliance
-- risk
+  - dora
+  - ict
+  - compliance
+  - risk
 title: ICT Risk Assessment for DORA

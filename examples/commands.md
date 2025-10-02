@@ -106,3 +106,4 @@ Every invocation appends a JSONL trace under ./logs/:
 	•	timestamp · profile · scroll · args · hash · validation status
 
 This is the Civilization Ledger of Actions.
+```

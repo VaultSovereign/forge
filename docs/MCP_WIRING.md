@@ -49,6 +49,7 @@ Create or update `~/.claude/mcp_servers.json`:
 ### 3. Test MCP Connection
 
 In Claude Code, run:
+
 ```
 /mcp
 ```
@@ -74,33 +75,40 @@ Use the ledger_query tool to show the last 3 template executions
 ## Available MCP Tools
 
 ### `list_templates`
+
 Lists all available VaultMesh templates with descriptions.
 
 **Parameters**: None
 
 **Example**:
+
 ```
 Please list all available VaultMesh templates
 ```
 
 ### `run_template`
+
 Executes a VaultMesh template with specified parameters.
 
 **Parameters**:
+
 - `template` (required): Template ID (e.g., "tem-recon", "deck-fintech")
 - `profile` (optional): Profile to use ("vault", "blue", "exec") - defaults to "vault"
 - `args` (optional): Template arguments as object - defaults to {}
 - `format` (optional): Output format ("json", "yaml", "markdown") - defaults to "markdown"
 
 **Example**:
+
 ```
 Run the deck-fintech template with brief "Dubai DORA compliance check" for founders audience
 ```
 
 ### `ledger_query`
+
 Queries the VaultMesh Reality Ledger for audit records.
 
 **Parameters**:
+
 - `template` (optional): Filter by template ID
 - `profile` (optional): Filter by profile
 - `since` (optional): ISO 8601 timestamp to filter from
@@ -108,6 +116,7 @@ Queries the VaultMesh Reality Ledger for audit records.
 - `stats` (optional): Return statistics instead of events (default false)
 
 **Examples**:
+
 ```
 Query the ledger for the last 5 template executions
 ```
@@ -121,13 +130,16 @@ Query ledger for all tem-recon executions in the last day
 ```
 
 ### `render_report`
+
 Generates compliance reports from ledger events.
 
 **Parameters**:
+
 - `template` (optional): Template ID for aggregate report
 - `eventId` (optional): Specific event ID for single report
 
 **Example**:
+
 ```
 Generate a compliance report for all deck-fintech executions
 ```
@@ -135,23 +147,27 @@ Generate a compliance report for all deck-fintech executions
 ## Troubleshooting
 
 ### MCP Server Not Listed
+
 1. Check file path in `mcp_servers.json` is absolute and correct
 2. Ensure VaultMesh is built: `npm run build`
 3. Verify environment variables are exported
 4. Restart Claude Code
 
 ### Template Execution Fails
+
 1. Check API key is valid and has credits
 2. Verify model name is correct for your provider
 3. Check VaultMesh logs for error details
 4. Ensure template exists: use `list_templates` first
 
 ### Ledger Issues
+
 1. Check `reality_ledger/` directory exists
 2. Verify write permissions
 3. Check disk space
 
 ### Environment Variables Not Found
+
 1. Make sure variables are exported in your shell profile
 2. Restart terminal and Claude Code
 3. Test with: `echo $OPENROUTER_API_KEY`
@@ -159,18 +175,21 @@ Generate a compliance report for all deck-fintech executions
 ## Security Considerations
 
 ### API Key Safety
+
 - ✅ Store keys in environment variables only
 - ✅ Never commit keys to version control
 - ✅ Use MCP environment variable substitution
 - ❌ Never hardcode keys in MCP config files
 
 ### Template Safety
+
 - All templates run with built-in guardrails
 - Read-only operations by default
 - Schema validation on all outputs
 - Complete audit trail in Reality Ledger
 
 ### Network Security
+
 - MCP server runs locally only
 - No external network access required for core operation
 - API calls only to configured LLM providers
@@ -178,22 +197,25 @@ Generate a compliance report for all deck-fintech executions
 ## Advanced Usage
 
 ### Custom Profiles
+
 Create custom profiles in `/profiles/` directory:
 
 ```yaml
 # profiles/mycompany.yaml
-voice: "MyCompany Compliance Officer - precise, regulatory-focused"
+voice: 'MyCompany Compliance Officer - precise, regulatory-focused'
 defaults:
   output_format: json
-  footer: "- MyCompany Internal Use Only"
+  footer: '- MyCompany Internal Use Only'
 ```
 
 Use with: `run_template template="dora.ict_risk" profile="mycompany"`
 
 ### Template Development
+
 Add custom templates in `/catalog/` subdirectories following the YAML schema. See existing templates for examples.
 
 ### Reality Ledger Integration
+
 All template executions are automatically logged. Use programmatic access via CLI:
 
 ```bash

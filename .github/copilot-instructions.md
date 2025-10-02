@@ -14,7 +14,7 @@ The system is architected as a "Prompt Operating System."
 
 - **Dispatcher (`/dispatcher`):** The brain. It orchestrates template execution.
   - `router.ts`: Resolves and runs templates.
-  - `safety.ts`: Enforces security guardrails *before* an LLM call.
+  - `safety.ts`: Enforces security guardrails _before_ an LLM call.
   - `ensureConforms.ts`: Validates LLM output against a JSON schema and performs a single auto-repair pass if needed.
 - **Reality Ledger (`/reality_ledger`):** The heart. An immutable, append-only audit trail.
   - Every action is recorded as a content-addressed (hashed) event in a `.jsonl` file.
@@ -28,7 +28,7 @@ The system is architected as a "Prompt Operating System."
 
 ## 3. Critical Workflow: The `forge-prepush` Gate
 
-**This is the most important convention.** All contributions *must* pass the local security and quality gate before pushing.
+**This is the most important convention.** All contributions _must_ pass the local security and quality gate before pushing.
 
 ```bash
 # Run the full gate before creating a pull request

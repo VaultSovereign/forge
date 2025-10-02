@@ -21,7 +21,11 @@ export default function App() {
     (Array.isArray(snapshot?.templates) ? snapshot.templates.length : undefined) ??
     0;
 
-  const derived = useMemo<{ profileCount: number; errorCount: number; latest: LedgerRow | null }>(() => {
+  const derived = useMemo<{
+    profileCount: number;
+    errorCount: number;
+    latest: LedgerRow | null;
+  }>(() => {
     const profiles = new Set<string>();
     let errorCount = 0;
     let latest: LedgerRow | null = null;
@@ -43,7 +47,7 @@ export default function App() {
     return {
       profileCount: profiles.size,
       errorCount,
-      latest
+      latest,
     };
   }, [snapshot.ledger]);
 
@@ -55,7 +59,7 @@ export default function App() {
         { label: 'Templates', value: '—', hint: 'Loading templates' },
         { label: 'Active Profiles', value: '—', hint: 'Awaiting ledger activity' },
         { label: 'Last Event', value: 'Loading…', hint: 'Streaming heartbeat pending' },
-        { label: 'Alerts', value: '—', hint: 'Initializing dashboard' }
+        { label: 'Alerts', value: '—', hint: 'Initializing dashboard' },
       ];
     }
 
@@ -63,25 +67,34 @@ export default function App() {
       {
         label: 'Templates',
         value: templateCount.toString(),
-        hint: `${templateCount} template${templateCount === 1 ? '' : 's'} ${templateCount === 0 ? 'available' : 'ready'}`
+        hint: `${templateCount} template${templateCount === 1 ? '' : 's'} ${templateCount === 0 ? 'available' : 'ready'}`,
       },
       {
         label: 'Active Profiles',
         value: profileCount.toString(),
-        hint: profileCount > 0 ? 'Profiles seen in recent ledger activity' : 'No ledger traffic yet'
+        hint:
+          profileCount > 0 ? 'Profiles seen in recent ledger activity' : 'No ledger traffic yet',
       },
       {
         label: 'Last Event',
-        value: latest ? new Date(latest.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'None yet',
-        hint: latest ? `${latest.template} → ${latest.profile ?? 'default profile'}` : 'Awaiting first execution',
-        tone: latest && latest.status && latest.status !== 'ok' ? 'alert' : latest ? 'ok' : 'neutral'
+        value: latest
+          ? new Date(latest.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          : 'None yet',
+        hint: latest
+          ? `${latest.template} → ${latest.profile ?? 'default profile'}`
+          : 'Awaiting first execution',
+        tone:
+          latest && latest.status && latest.status !== 'ok' ? 'alert' : latest ? 'ok' : 'neutral',
       },
       {
         label: 'Alerts',
         value: errorCount > 0 ? String(errorCount) : '0',
-        hint: errorCount > 0 ? 'Review ledger entries flagged as non-ok' : 'All recent executions nominal',
-        tone: errorCount > 0 ? 'alert' : 'ok'
-      }
+        hint:
+          errorCount > 0
+            ? 'Review ledger entries flagged as non-ok'
+            : 'All recent executions nominal',
+        tone: errorCount > 0 ? 'alert' : 'ok',
+      },
     ];
 
     items.push({
@@ -93,10 +106,20 @@ export default function App() {
           : guardianMode === 'stub'
             ? 'Stub mode (echo only)'
             : 'Status unavailable',
-      tone: guardianMode === 'agent' ? 'ok' : guardianMode === 'stub' ? 'neutral' : 'alert'
+      tone: guardianMode === 'agent' ? 'ok' : guardianMode === 'stub' ? 'neutral' : 'alert',
     });
     return items;
-  }, [snapshot.loading, snapshot.templates.length, snapshot.ledger.length, latest, profileCount, errorCount, guardianMode, guardianLoading, templateCount]);
+  }, [
+    snapshot.loading,
+    snapshot.templates.length,
+    snapshot.ledger.length,
+    latest,
+    profileCount,
+    errorCount,
+    guardianMode,
+    guardianLoading,
+    templateCount,
+  ]);
 
   const lastUpdated = useMemo(() => {
     if (snapshot.loading) {
@@ -113,20 +136,21 @@ export default function App() {
       {
         label: 'Workbench README',
         description: 'Follow the setup notes for running the frontend + BFF locally or in Replit.',
-        href: 'https://github.com/VaultSovereign/forge/blob/main/workbench/README-WORKBENCH.md'
+        href: 'https://github.com/VaultSovereign/forge/blob/main/workbench/README-WORKBENCH.md',
       },
       {
         label: 'Reality Ledger (API)',
         description: 'Inspect the raw JSON feed backing this dashboard to debug issues quickly.',
-        href: 'http://localhost:8787/v1/api/ledger/events?limit=25'
+        href: 'http://localhost:8787/v1/api/ledger/events?limit=25',
       },
       {
         label: 'Template Catalog',
-        description: 'Browse the source templates shipped with VaultMesh to design new automations.',
-        href: 'https://github.com/VaultSovereign/forge/tree/main/catalog'
-      }
+        description:
+          'Browse the source templates shipped with VaultMesh to design new automations.',
+        href: 'https://github.com/VaultSovereign/forge/tree/main/catalog',
+      },
     ],
-    []
+    [],
   );
 
   return (
@@ -142,9 +166,7 @@ export default function App() {
           <a href="#ledger">Reality Ledger</a>
           <a href="#resources">Resources</a>
         </nav>
-        <div className="app-sidebar__footer">
-          {lastUpdated}
-        </div>
+        <div className="app-sidebar__footer">{lastUpdated}</div>
       </aside>
 
       <main className="app-main">
@@ -155,7 +177,11 @@ export default function App() {
           </div>
           <div className="topbar__actions">
             <StreamingBadge />
-            <button type="button" onClick={() => void snapshot.refresh()} disabled={snapshot.loading}>
+            <button
+              type="button"
+              onClick={() => void snapshot.refresh()}
+              disabled={snapshot.loading}
+            >
               {snapshot.loading ? 'Refreshing…' : 'Refresh Data'}
             </button>
           </div>
@@ -167,7 +193,10 @@ export default function App() {
           <div className="callout" role="alert">
             <strong>API request failed</strong>
             <p>{snapshot.error}</p>
-            <p>Ensure the backend-for-frontend service is running on port 8787 and that CORS is permitted.</p>
+            <p>
+              Ensure the backend-for-frontend service is running on port 8787 and that CORS is
+              permitted.
+            </p>
           </div>
         ) : null}
 
@@ -187,7 +216,11 @@ export default function App() {
             title="Recent Activity"
             description="The latest ledger events provide traceability for every automated action."
             actions={
-              <button type="button" onClick={() => void snapshot.refresh()} disabled={snapshot.loading}>
+              <button
+                type="button"
+                onClick={() => void snapshot.refresh()}
+                disabled={snapshot.loading}
+              >
                 Sync Ledger
               </button>
             }
@@ -216,8 +249,8 @@ export default function App() {
             <div className="callout">
               <strong>Tip</strong>
               <p>
-                Expose `VITE_API_BASE` inside Replit to point the frontend at your running BFF. Restart the repl after
-                changing env vars.
+                Expose `VITE_API_BASE` inside Replit to point the frontend at your running BFF.
+                Restart the repl after changing env vars.
               </p>
             </div>
           </Panel>

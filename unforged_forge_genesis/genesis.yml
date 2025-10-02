@@ -14,22 +14,22 @@ consensus:
       stake_weight: 1
     - id: node-c
       stake_weight: 1
-  commit_rule: ">=2/3"
-  leader_rotation: "every 314 blocks"
+  commit_rule: '>=2/3'
+  leader_rotation: 'every 314 blocks'
 executor:
-  vm: "deterministic-wasm (placeholder)"
+  vm: 'deterministic-wasm (placeholder)'
   gas_limit_per_block: 10000000
 memory:
-  archive_merkle: "sha256-merkle"
-  chunk_size: 1048576         # 1 MiB
+  archive_merkle: 'sha256-merkle'
+  chunk_size: 1048576 # 1 MiB
   checkpoints_every: 1618
 entropy:
-  sources: ["os_rng", "verifiable_beacon"]
-  usage: "non-cryptographic scheduling only"
+  sources: ['os_rng', 'verifiable_beacon']
+  usage: 'non-cryptographic scheduling only'
 governance:
   hammer:
     proposal_min_period_blocks: 89
-    quorum: ">=2/3"
+    quorum: '>=2/3'
   roles:
     - name: smith
       can: [forge, temper, quench]
@@ -37,6 +37,6 @@ governance:
       can: [etch, restore, attest]
 tem:
   invariants:
-    - "no-deletion"
-    - "lineage-required"
-    - "quench-before-etch"
+    - 'no-deletion'
+    - 'lineage-required'
+    - 'quench-before-etch'

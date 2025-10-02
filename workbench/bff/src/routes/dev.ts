@@ -12,7 +12,7 @@ export default async function devRoutes(app: FastifyInstance) {
     const body = (req.body ?? {}) as { sub?: string; roles?: string[] };
     const token = await signDevJWT({
       sub: body.sub || 'dev-ci',
-      ['https://vaultmesh/roles']: Array.isArray(body.roles) ? body.roles : ['operator', 'auditor']
+      ['https://vaultmesh/roles']: Array.isArray(body.roles) ? body.roles : ['operator', 'auditor'],
     });
     return { token };
   });

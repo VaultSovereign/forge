@@ -1,10 +1,10 @@
 id: dora.ict_risk_framework.v1
-version: "1.1.1"
+version: '1.1.1'
 keyword: cyber-dora-ict-risk
 meta:
-  title: "DORA ICT Risk Management Framework Assessment"
+  title: 'DORA ICT Risk Management Framework Assessment'
   safety: read-only
-  tags: [ dora, ict, compliance, risk, audit ]
+  tags: [dora, ict, compliance, risk, audit]
 summary: >
   Evaluate an organisation’s ICT risk management framework in line with the
   Digital Operational Resilience Act (DORA). Aggregates evidence, policies, and
@@ -36,7 +36,7 @@ inputs:
         management_company,
         deposit_taking_credit,
         microenterprise,
-        other
+        other,
       ]
     required: true
   critical_functions:
@@ -47,41 +47,41 @@ inputs:
     type: array
     items:
       type: string
-      description: "Evidence paths or filenames for ICT policies"
+      description: 'Evidence paths or filenames for ICT policies'
     required: true
   assets:
     type: array
     items:
       type: string
-      description: "Critical asset inventory paths"
+      description: 'Critical asset inventory paths'
     required: true
   incidents:
     type: array
     items:
       type: string
-      description: "Incident register or reports"
+      description: 'Incident register or reports'
     required: true
   regions:
     type: array
     items:
       type: string
-    description: "Jurisdictions in scope"
+    description: 'Jurisdictions in scope'
   notes:
     type: string
   third_parties:
     type: array
     items:
       type: string
-    description: "Paths to third-party risk registers or DDQs"
+    description: 'Paths to third-party risk registers or DDQs'
   tests:
     type: array
     items:
       type: string
-    description: "Paths to resilience testing artefacts"
+    description: 'Paths to resilience testing artefacts'
 outputs:
   result:
     type: object
-  schema_ref: "file:../schemas/ict_risk.v1.json#/output_schema"
+  schema_ref: 'file:../schemas/ict_risk.v1.json#/output_schema'
 guardrails:
   schema_enforce: true
   temperature: 0.1

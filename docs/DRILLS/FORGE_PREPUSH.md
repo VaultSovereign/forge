@@ -52,6 +52,7 @@
   ```bash
   node dist/cli/index.js doctor
   ```
+
   Note: set `FORGE_SKIP_DOCTOR=1` to bypass this check when provider credentials are not configured.
 
 ## D. Security Gates (Full Repo, No Exclusions)
@@ -77,6 +78,7 @@
     | tee /tmp/review_out.json
   test "$(jq '.result.summary.high // 0' /tmp/review_out.json)" -eq 0
   ```
+
   Note: set `FORGE_SKIP_REMOTE_SCANS=1` when provider credentials (OPENAI_API_KEY, OPENROUTER_API_KEY, or OLLAMA_HOST) are unavailable.
 
 ## E. Supply Chain And Container (Optional In Fast Mode)
@@ -94,6 +96,7 @@
   node dist/cli/index.js run cyber-container-security-scanner \
     --args @/tmp/pre_docker.json > /tmp/container_out.json
   ```
+
   Note: set `FORGE_SKIP_REMOTE_SCANS=1` to skip when provider credentials are not available.
 
 ## F. Compliance Snapshot (Advisory)
@@ -106,6 +109,7 @@
   node dist/cli/index.js run cyber-compliance-gap-analyzer \
     --args @/tmp/gaps.json > /tmp/gaps_out.json
   ```
+
   Note: set `FORGE_SKIP_REMOTE_SCANS=1` to skip when provider credentials are not available.
 
 ## G. Artifacts (Commit Or Archive)

@@ -1,6 +1,7 @@
 {
   "name": "vaultmesh-forge",
   "version": "1.0.0",
+  "private": true,
   "description": "VaultMesh Forge - Earth's Civilization Ledger. Sovereign prompt orchestration platform for financial services compliance and cybersecurity operations.",
   "keywords": [
     "fintech",
@@ -23,14 +24,22 @@
   "license": "Apache-2.0",
   "type": "module",
   "packageManager": "pnpm@10.17.0",
+  "engines": {
+    "node": ">=20.11.1",
+    "pnpm": ">=10.17.0"
+  },
   "scripts": {
     "docs:sitemap": "node scripts/generate-docs-sitemap.mjs docs SITEMAP.md",
     "prepare": "husky install",
     "image:build": "docker build -t ghcr.io/vaultsovereign/forge:latest .",
     "image:push": "docker push ghcr.io/vaultsovereign/forge:latest",
     "//": "--- UTILS & AUTOMATION ---",
+    "build": "tsc -b",
+    "lint": "eslint . --ext .ts,.tsx",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "schemas:build": "node -e \"import('yaml').then(()=>import('./scripts/build-schemas.mjs'))\"",
-    "build": "tsc -p tsconfig.json",
     "postbuild": "npm run schemas:build && mkdir -p dist && cp -R catalog profiles schemas dist/",
     "build:web": "pnpm --prefix workbench/frontend run build && cp -r workbench/frontend/dist workbench/frontend-dist",
     "build:bff": "pnpm --prefix workbench/bff run build",
@@ -40,10 +49,6 @@
     "sales:deck": "npx @marp-team/marp-cli docs/SALES/DECK.marp.md -o dist/sales-deck.html --allow-local-files --theme docs/SALES/theme.css && npx @marp-team/marp-cli docs/SALES/DECK.marp.md -o dist/sales-deck.pdf --allow-local-files --pdf --theme docs/SALES/theme.css && cp dist/sales-deck.html dist/index.html || true",
     "sales:onepager": "npx @marp-team/marp-cli docs/SALES/ONE_PAGER.marp.md -o dist/one-pager.html --allow-local-files --theme docs/SALES/theme.css",
     "watch:deck": "npx @marp-team/marp-cli -w docs/SALES/DECK.marp.md -o dist/sales-deck.html --allow-local-files --theme docs/SALES/theme.css",
-    "lint": "eslint --cache --ext .ts,.tsx,.js,.cjs,.mjs .",
-    "lint:fix": "eslint --fix --cache --ext .ts,.tsx,.js,.cjs,.mjs .",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
     "test": "vitest run --coverage --passWithNoTests",
     "test:watch": "vitest",
     "test:forge": "python3 -m pytest -q -rA tests/test_unforged_forge.py",

@@ -6,7 +6,7 @@
 # Recommended defaults (non-binding): format=markdown, safety=read-only|advisory.
 # Guardian: Tem ensures remembrance; sovereignty preserved.
 # -------------------------------------------------------------
-voice: "Vault Sovereign - terse, operational, ritual tone"
+voice: 'Vault Sovereign - terse, operational, ritual tone'
 defaults:
   output_format: markdown
   footer: "- VaultMesh * Earth's Civilization Ledger"

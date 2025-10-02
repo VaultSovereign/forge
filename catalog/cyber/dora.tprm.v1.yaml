@@ -1,8 +1,8 @@
 id: dora.tprm.v1
-version: "1.0.0"
+version: '1.0.0'
 keyword: cyber-dora-tprm
 meta:
-  title: "DORA Third-Party Risk (TPRM) Assessment"
+  title: 'DORA Third-Party Risk (TPRM) Assessment'
   safety: read-only
   tags: [dora, tprm, fintech, compliance, audit]
 inputs:
@@ -17,10 +17,10 @@ inputs:
   # Prescan-injected fields (for documentation/UI)
   evidence:
     type: object
-    description: "Map of file path → first ~20 lines (prescan)."
+    description: 'Map of file path → first ~20 lines (prescan).'
 outputs:
   result: { type: object }
-  schema_ref: "file:../schemas/tprm.v1.json#/output_schema"
+  schema_ref: 'file:../schemas/tprm.v1.json#/output_schema'
 guardrails:
   schema_enforce: true
   temperature: 0.1

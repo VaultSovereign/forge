@@ -4,15 +4,15 @@ keyword: deck-fintech
 title: Fintech Strike Deck
 purpose: 7-slide outline + CTA + price ladder for a payments/fintech offer.
 inputs:
-  brief: {type: string, required: true}
-  audience: {type: enum, values: [founders, c-suite, investors, product], default: founders}
-  output_format: {type: enum, values: [json, yaml, markdown], default: markdown}
+  brief: { type: string, required: true }
+  audience: { type: enum, values: [founders, c-suite, investors, product], default: founders }
+  output_format: { type: enum, values: [json, yaml, markdown], default: markdown }
 quality_checklist:
-  - "Actionable outcomes; no fluff"
-  - "Include clear CTA"
-  - "Show price ladder with 3 tiers"
+  - 'Actionable outcomes; no fluff'
+  - 'Include clear CTA'
+  - 'Show price ladder with 3 tiers'
 safety_guardrails:
-  - "Do not include confidential or proprietary information"
+  - 'Do not include confidential or proprietary information'
 prompt:
   system: |
     You are the Deck Shaper for VaultMesh. Produce a crisp, outcome-first outline.
@@ -29,4 +29,4 @@ prompt:
 
     If output_format=json, respond in **strict JSON** matching schemas/output.schema.json#/definitions/deck/fintech.
 outputs:
-  schema_ref: "../schemas/output.schema.json#/definitions/deck/fintech"
+  schema_ref: '../schemas/output.schema.json#/definitions/deck/fintech'

@@ -81,7 +81,10 @@
                   "additionalProperties": false,
                   "required": ["op", "path"],
                   "properties": {
-                    "op": { "type": "string", "enum": ["add", "remove", "replace", "move", "copy", "test"] },
+                    "op": {
+                      "type": "string",
+                      "enum": ["add", "remove", "replace", "move", "copy", "test"]
+                    },
                     "path": { "type": "string" },
                     "from": { "type": "string" },
                     "value": {}
@@ -93,7 +96,10 @@
           {
             "required": ["merge_patch"],
             "properties": {
-              "merge_patch": { "type": "object", "description": "RFC 7386 JSON Merge Patch document." }
+              "merge_patch": {
+                "type": "object",
+                "description": "RFC 7386 JSON Merge Patch document."
+              }
             }
           }
         ]
@@ -161,12 +167,7 @@
   },
   "patch_rules": {
     "format": "rfc6902-json-patch-or-rfc7386-merge",
-    "allowed_paths": [
-      "/consensus/validators",
-      "/consensus/quorum",
-      "/parameters",
-      "/ledger"
-    ],
+    "allowed_paths": ["/consensus/validators", "/consensus/quorum", "/parameters", "/ledger"],
     "denied_paths": [
       "/genesis_time",
       "/history",

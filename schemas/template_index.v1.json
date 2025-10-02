@@ -8,9 +8,7 @@
   "properties": {
     "index_version": {
       "type": "integer",
-      "enum": [
-        1
-      ]
+      "enum": [1]
     },
     "generated_at": {
       "type": "string",
@@ -72,23 +70,12 @@
                 "type": "string"
               }
             },
-            "required": [
-              "to_version"
-            ]
+            "required": ["to_version"]
           }
         },
-        "required": [
-          "template_path",
-          "id",
-          "version",
-          "checksum_sha256"
-        ]
+        "required": ["template_path", "id", "version", "checksum_sha256"]
       }
     }
   },
-  "required": [
-    "index_version",
-    "generated_at",
-    "templates"
-  ]
+  "required": ["index_version", "generated_at", "templates"]
 }

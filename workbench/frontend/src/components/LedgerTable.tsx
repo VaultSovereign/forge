@@ -7,7 +7,11 @@ type LedgerTableProps = {
   showHeader?: boolean;
 };
 
-export default function LedgerTable({ rows: providedRows, limit = 25, showHeader = true }: LedgerTableProps) {
+export default function LedgerTable({
+  rows: providedRows,
+  limit = 25,
+  showHeader = true,
+}: LedgerTableProps) {
   const [rows, setRows] = useState<LedgerRow[]>(providedRows ?? []);
   const shouldFetch = providedRows === undefined;
 
@@ -26,7 +30,12 @@ export default function LedgerTable({ rows: providedRows, limit = 25, showHeader
 
   const renderStatus = useCallback((status?: string) => {
     const normalized = status ?? 'ok';
-    const tone = normalized === 'ok' ? 'badge badge--ok' : normalized === 'pending' ? 'badge badge--pending' : 'badge badge--error';
+    const tone =
+      normalized === 'ok'
+        ? 'badge badge--ok'
+        : normalized === 'pending'
+          ? 'badge badge--pending'
+          : 'badge badge--error';
     return <span className={tone}>{normalized}</span>;
   }, []);
 
@@ -47,7 +56,10 @@ export default function LedgerTable({ rows: providedRows, limit = 25, showHeader
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={5} style={{ padding: '18px 14px', textAlign: 'center', color: '#64748b' }}>
+                <td
+                  colSpan={5}
+                  style={{ padding: '18px 14px', textAlign: 'center', color: '#64748b' }}
+                >
                   No ledger events yet. Trigger a template run to see activity.
                 </td>
               </tr>

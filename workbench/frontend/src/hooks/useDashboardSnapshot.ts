@@ -22,7 +22,7 @@ export function useDashboardSnapshot(limit = 25): DashboardSnapshot {
     try {
       const [templatePayload, ledgerPayload] = await Promise.all([
         listTemplates(),
-        listLedger(limit)
+        listLedger(limit),
       ]);
 
       setTemplates(templatePayload);
@@ -44,8 +44,8 @@ export function useDashboardSnapshot(limit = 25): DashboardSnapshot {
       ledger,
       loading,
       error,
-      refresh
+      refresh,
     }),
-    [templates, ledger, loading, error, refresh]
+    [templates, ledger, loading, error, refresh],
   );
 }

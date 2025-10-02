@@ -39,8 +39,8 @@ export async function listTemplates(): Promise<TemplateSummary[]> {
 export async function executeOnce(body: TemplateExecution) {
   const response = await fetch(`${API_BASE}/v1/api/execute`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify(body)
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify(body),
   });
   if (!response.ok) throw new Error(`execute: ${response.status}`);
   return response.json();
@@ -50,12 +50,12 @@ export function streamExecute(
   query: TemplateExecution,
   onLog: (line: string) => void,
   onDone: (result: { ok?: boolean; id?: string; [k: string]: any }) => void,
-  onError: (error: unknown) => void
+  onError: (error: unknown) => void,
 ) {
   const params = new URLSearchParams({
     templateId: query.templateId,
     profile: query.profile ?? 'vault',
-    args: JSON.stringify(query.args ?? {})
+    args: JSON.stringify(query.args ?? {}),
   });
 
   const source = new EventSource(`${API_BASE}/v1/api/execute/stream?${params.toString()}`);

@@ -9,16 +9,16 @@ keyword: cyber-security-metrics-dashboard
 title: Security Metrics Dashboard Generator
 purpose: Produce an opinionated KPI dashboard spec with targets, thresholds, and roll-up score.
 inputs:
-  audience: {type: string, required: false}
-  frameworks: {type: string, required: false}
-  data_sources: {type: string, required: true}
-  output_format: {type: enum, values: [json, yaml, markdown], default: json}
+  audience: { type: string, required: false }
+  frameworks: { type: string, required: false }
+  data_sources: { type: string, required: true }
+  output_format: { type: enum, values: [json, yaml, markdown], default: json }
 quality_checklist:
-  - "Define KPIs with numeric targets"
-  - "Compute roll-up score (0–100) and SLO notes"
-  - "Reference frameworks in KPI descriptions where applicable"
+  - 'Define KPIs with numeric targets'
+  - 'Compute roll-up score (0–100) and SLO notes'
+  - 'Reference frameworks in KPI descriptions where applicable'
 safety_guardrails:
-  - "Read-only; advisory"
+  - 'Read-only; advisory'
 prompt:
   system: |
     Produce an opinionated KPI dashboard spec with targets and SLO/SLA notes.
@@ -30,5 +30,4 @@ prompt:
     Data sources (JSON):
     {{data_sources}}
 outputs:
-  schema_ref: "../schemas/output.schema.json#/definitions/cyber/security_metrics_dashboard"
-
+  schema_ref: '../schemas/output.schema.json#/definitions/cyber/security_metrics_dashboard'

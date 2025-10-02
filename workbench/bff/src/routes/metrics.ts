@@ -9,7 +9,7 @@ const modeGauge = new Gauge({
   name: 'guardian_mode',
   help: 'Current Guardian mode (one-hot)',
   labelNames: ['mode'] as const,
-  registers: [reg]
+  registers: [reg],
 });
 
 async function updateModeGauge() {
@@ -26,4 +26,3 @@ export default async function metricsRoutes(app: FastifyInstance) {
     return reply.send(await reg.metrics());
   });
 }
-

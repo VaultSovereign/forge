@@ -33,17 +33,20 @@ export function useStreamingHeartbeat(path = '/v1/tick/stream', staleMs = 3000) 
       }
     });
 
-    const interval = window.setInterval(() => {
-      const lastTick = lastTickRef.current;
-      if (cancelled || lastTick === null) {
-        return;
-      }
+    const interval = window.setInterval(
+      () => {
+        const lastTick = lastTickRef.current;
+        if (cancelled || lastTick === null) {
+          return;
+        }
 
-      const age = Date.now() - lastTick;
-      if (age > staleMs && !cancelled) {
-        setStatus((prev) => (prev === 'error' ? prev : 'stale'));
-      }
-    }, Math.max(500, Math.floor(staleMs / 2)));
+        const age = Date.now() - lastTick;
+        if (age > staleMs && !cancelled) {
+          setStatus((prev) => (prev === 'error' ? prev : 'stale'));
+        }
+      },
+      Math.max(500, Math.floor(staleMs / 2)),
+    );
 
     return () => {
       cancelled = true;

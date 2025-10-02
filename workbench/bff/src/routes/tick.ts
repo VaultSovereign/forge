@@ -29,7 +29,7 @@ export default async function tickRoutes(app: FastifyInstance) {
     send('hello', {
       service: 'workbench-bff',
       mode: process.env.AI_CORE_MODE ?? 'mock',
-      ts: Date.now()
+      ts: Date.now(),
     });
 
     const interval = setInterval(() => {

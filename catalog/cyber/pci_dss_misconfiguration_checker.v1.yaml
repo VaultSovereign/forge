@@ -1,15 +1,15 @@
 id: cyber.pci_dss_misconfiguration_checker.v1
 version: 1.0.0
 keyword: pci-check
-purpose: "Analyzes system configurations against common PCI DSS v4.0 requirements to identify misconfigurations and compliance gaps."
-author: "VaultMesh Security"
+purpose: 'Analyzes system configurations against common PCI DSS v4.0 requirements to identify misconfigurations and compliance gaps.'
+author: 'VaultMesh Security'
 
 safety:
   classification: read-only
   guardrails:
-    - "Analysis is based solely on the provided configuration data."
-    - "Does not perform active scanning or connect to any systems."
-    - "Recommendations are advisory and require review by a Qualified Security Assessor (QSA)."
+    - 'Analysis is based solely on the provided configuration data.'
+    - 'Does not perform active scanning or connect to any systems.'
+    - 'Recommendations are advisory and require review by a Qualified Security Assessor (QSA).'
 
 inputs:
   target_scope:
@@ -18,7 +18,7 @@ inputs:
     required: true
   config_data:
     type: string
-    description: "The raw configuration data to be analyzed (e.g., content of hardening scripts, firewall rules, server config files)."
+    description: 'The raw configuration data to be analyzed (e.g., content of hardening scripts, firewall rules, server config files).'
     required: true
   pci_requirements:
     type: array
@@ -27,11 +27,11 @@ inputs:
     description: "A list of specific PCI DSS v4.0 requirements to check (e.g., ['Req 2.2.2', 'Req 8.3.6'])."
     required: true
     default:
-      - "Req 1.2.1" # Firewall and router configurations
-      - "Req 2.2.2" # Secure configuration standards
-      - "Req 3.5.1" # PAN masking
-      - "Req 4.2.1" # Strong cryptography for transmission
-      - "Req 8.3.6" # Multi-factor authentication
+      - 'Req 1.2.1' # Firewall and router configurations
+      - 'Req 2.2.2' # Secure configuration standards
+      - 'Req 3.5.1' # PAN masking
+      - 'Req 4.2.1' # Strong cryptography for transmission
+      - 'Req 8.3.6' # Multi-factor authentication
   output_format:
     type: enum
     values: [json, yaml, markdown]
@@ -73,5 +73,5 @@ prompt:
     Please perform the analysis and generate the JSON report.
 
 outputs:
-  schema_ref: "../schemas/output.schema.json#/definitions/cyber/pci_dss_misconfiguration_checker"
-  format: "{{output_format}}"
+  schema_ref: '../schemas/output.schema.json#/definitions/cyber/pci_dss_misconfiguration_checker'
+  format: '{{output_format}}'

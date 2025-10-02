@@ -1,6 +1,6 @@
-$schema: "http://json-schema.org/draft-07/schema#"
-$id: "urn:vaultmesh:schemas:template_index.v1"
-title: "VaultMesh Template Index v1"
+$schema: 'http://json-schema.org/draft-07/schema#'
+$id: 'urn:vaultmesh:schemas:template_index.v1'
+title: 'VaultMesh Template Index v1'
 description: >
   Deterministic summary of all catalog templates and their most recent
   evolution metadata. Produced by scripts/template_index_build.mjs.
@@ -29,7 +29,7 @@ properties:
           pattern: "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[A-Za-z0-9.-]+)?$"
         checksum_sha256:
           type: string
-          pattern: "^[a-f0-9]{64}$"
+          pattern: '^[a-f0-9]{64}$'
         last_evolution:
           type: object
           additionalProperties: false

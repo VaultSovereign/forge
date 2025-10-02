@@ -35,6 +35,6 @@ This API reference is sourced from `docs/openapi/workbench.yaml` and describes t
   ```
 
 ## Notes
+
 - In development, `AUTH_DEV_BYPASS=1` allows testing without a token.
 - For production-like tests, enable the dev signer and mint a short‑lived JWT, then call the APIs with `Authorization: Bearer <token>`.
-

@@ -3,7 +3,9 @@ import { execSync } from 'node:child_process';
 
 function sh(cmd: string): string {
   try {
-    return execSync(cmd, { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+    return execSync(cmd, { stdio: ['ignore', 'pipe', 'ignore'] })
+      .toString()
+      .trim();
   } catch {
     return '';
   }
@@ -23,4 +25,3 @@ if (base) {
 const list = files.split('\n').filter(Boolean);
 const payload = { changed_only: Boolean(base), files: list };
 process.stdout.write(JSON.stringify(payload, null, 2) + '\n');
-

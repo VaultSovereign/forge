@@ -17,10 +17,10 @@ export async function buildServer(): Promise<FastifyInstance> {
 
   await app.register(security);
 
-  const ORIGINS = ((process.env.ALLOWED_ORIGINS ?? '')
+  const ORIGINS = (process.env.ALLOWED_ORIGINS ?? '')
     .split(',')
     .map((s) => s.trim())
-    .filter(Boolean)).length
+    .filter(Boolean).length
     ? (process.env.ALLOWED_ORIGINS as string)
         .split(',')
         .map((s) => s.trim())
@@ -33,7 +33,7 @@ export async function buildServer(): Promise<FastifyInstance> {
       cb(null, ORIGINS.includes(origin));
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    credentials: true
+    credentials: true,
   });
 
   // Load RBAC matrix and set claim envs
@@ -54,12 +54,14 @@ export async function buildServer(): Promise<FastifyInstance> {
     await app.register(fastifyStatic, {
       root: staticRoot,
       prefix: '/',
-      index: ['index.html']
+      index: ['index.html'],
     });
   } else {
-    app.log.warn({ staticRoot }, 'Static assets directory not found; SPA responses will return placeholder JSON.');
+    app.log.warn(
+      { staticRoot },
+      'Static assets directory not found; SPA responses will return placeholder JSON.',
+    );
   }
-
 
   // Optionally expose repo docs as static files under /docs when EXPOSE_DOCS=1
   if (process.env.EXPOSE_DOCS === '1') {
@@ -69,7 +71,7 @@ export async function buildServer(): Promise<FastifyInstance> {
         await app.register(fastifyStatic, {
           root: docsRoot,
           prefix: '/docs/',
-          decorateReply: false
+          decorateReply: false,
         } as any);
         app.log.info({ docsRoot }, 'docs exposed under /docs');
       } else {
@@ -122,7 +124,7 @@ export async function buildServer(): Promise<FastifyInstance> {
       return reply.send({
         ok: true,
         service: 'vaultmesh-workbench-bff',
-        note: 'SPA not found; build frontend to serve static assets'
+        note: 'SPA not found; build frontend to serve static assets',
       });
     }
 
@@ -137,10 +139,15 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   const app = await buildServer();
   const port = env.PORT;
   if (process.env.NODE_ENV === 'production' && process.env.AUTH_DEV_BYPASS === '1') {
-    app.log.warn({ env: 'production' }, 'AUTH_DEV_BYPASS=1 — auth bypass is active. Configure OIDC before production.');
+    app.log.warn(
+      { env: 'production' },
+      'AUTH_DEV_BYPASS=1 — auth bypass is active. Configure OIDC before production.',
+    );
   }
   if (process.env.NODE_ENV === 'production' && !process.env.CORE_GRPC_ADDR) {
-    app.log.error('CORE_GRPC_ADDR is required in production. Set the gRPC Core address or switch to a non-production environment.');
+    app.log.error(
+      'CORE_GRPC_ADDR is required in production. Set the gRPC Core address or switch to a non-production environment.',
+    );
     process.exit(1);
   }
   app

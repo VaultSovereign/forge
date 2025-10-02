@@ -20,7 +20,7 @@ const EnvSchema = z.object({
   CORE_TLS_CERT: z.string().optional(),
   CORE_TLS_KEY: z.string().optional(),
   LEDGER_DIR: z.string().default('./reality_ledger'),
-  STATIC_DIR: z.string().optional()
+  STATIC_DIR: z.string().optional(),
 });
 
 export const env = (() => {
@@ -34,13 +34,12 @@ export const env = (() => {
   }
 
   const values = parsed.data;
-  const corsList = values.CORS_ORIGIN?.split(',').map((entry) => entry.trim()).filter(Boolean) ?? [
-    'http://localhost:5000',
-    'http://127.0.0.1:5000'
-  ];
+  const corsList = values.CORS_ORIGIN?.split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean) ?? ['http://localhost:5000', 'http://127.0.0.1:5000'];
 
   return {
     ...values,
-    CORS_LIST: corsList
+    CORS_LIST: corsList,
   };
 })();

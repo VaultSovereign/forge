@@ -6,10 +6,7 @@
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import {
-  ListToolsRequestSchema,
-  CallToolRequestSchema
-} from '@modelcontextprotocol/sdk/types.js';
+import { ListToolsRequestSchema, CallToolRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { z } from 'zod';
@@ -28,19 +25,19 @@ const server = new Server(
     capabilities: {
       tools: {},
     },
-  }
+  },
 );
 
 const RunTemplateArgs = z.object({
   template: z.string().min(1),
   profile: z.string().default('vault'),
   args: z.record(z.unknown()).default({}),
-  format: z.enum(['markdown', 'json', 'yaml']).default('markdown')
+  format: z.enum(['markdown', 'json', 'yaml']).default('markdown'),
 });
 
 const RenderReportArgs = z.object({
   template: z.string().min(1),
-  eventId: z.string().min(1).optional()
+  eventId: z.string().min(1).optional(),
 });
 
 /**
@@ -84,11 +81,14 @@ async function listTemplates() {
                   category,
                   title: template.title || template.keyword,
                   purpose: template.purpose || 'No description',
-                  version: template.version || '1.0.0'
+                  version: template.version || '1.0.0',
                 });
               }
             } catch (err) {
-              console.error(`[mcp] Error reading template ${file}:`, err instanceof Error ? err.message : err);
+              console.error(
+                `[mcp] Error reading template ${file}:`,
+                err instanceof Error ? err.message : err,
+              );
             }
           }
         }
@@ -97,7 +97,10 @@ async function listTemplates() {
 
     return templates;
   } catch (error) {
-    console.error('[mcp] Error listing templates:', error instanceof Error ? error.message : String(error));
+    console.error(
+      '[mcp] Error listing templates:',
+      error instanceof Error ? error.message : String(error),
+    );
     return [];
   }
 }
@@ -105,7 +108,12 @@ async function listTemplates() {
 /**
  * Run template with given parameters
  */
-async function runTemplate(templateId: string, profile: string = 'vault', args: any = {}, format: string = 'markdown') {
+async function runTemplate(
+  templateId: string,
+  profile: string = 'vault',
+  args: any = {},
+  format: string = 'markdown',
+) {
   try {
     // Dynamic import to avoid provider initialization
     const { runKeyword } = await import('../dispatcher/router.js');
@@ -119,8 +127,8 @@ async function runTemplate(templateId: string, profile: string = 'vault', args: 
       profileName: profile,
       flags: {
         output_format: format,
-        ...args
-      }
+        ...args,
+      },
     });
 
     // Log to Reality Ledger
@@ -129,7 +137,7 @@ async function runTemplate(templateId: string, profile: string = 'vault', args: 
       profile: `@${profile}`,
       args,
       result,
-      operator: 'mcp'
+      operator: 'mcp',
     });
 
     return {
@@ -137,10 +145,13 @@ async function runTemplate(templateId: string, profile: string = 'vault', args: 
       result,
       template: templateId,
       profile: `@${profile}`,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   } catch (error) {
-    console.error(`[mcp] Error running template:`, error instanceof Error ? error.message : String(error));
+    console.error(
+      `[mcp] Error running template:`,
+      error instanceof Error ? error.message : String(error),
+    );
     throw error;
   }
 }
@@ -160,16 +171,19 @@ async function queryLedger(filters: any = {}) {
       template: filters.template,
       profile: filters.profile,
       since: filters.since,
-      limit: filters.limit || 10
+      limit: filters.limit || 10,
     });
 
     return {
       query: filters,
       results: events.length,
-      events
+      events,
     };
   } catch (error) {
-    console.error(`[mcp] Error querying ledger:`, error instanceof Error ? error.message : String(error));
+    console.error(
+      `[mcp] Error querying ledger:`,
+      error instanceof Error ? error.message : String(error),
+    );
     throw error;
   }
 }
@@ -193,28 +207,32 @@ async function renderReport(templateId: string, eventId?: string) {
         eventId,
         template: event.template,
         timestamp: event.ts,
-        report: event.output
+        report: event.output,
       };
     } else {
       // Render aggregate report for template
       const events = await queryLedger({
         template: templateId,
-        limit: 10
+        limit: 10,
       });
 
       return {
         type: 'aggregate',
         template: templateId,
         eventCount: events.length,
-        reports: events.map(e => ({
+        reports: events.map((e) => ({
           eventId: e.id,
           timestamp: e.ts,
-          summary: typeof e.output === 'string' ? e.output.substring(0, 200) + '...' : 'Binary output'
-        }))
+          summary:
+            typeof e.output === 'string' ? e.output.substring(0, 200) + '...' : 'Binary output',
+        })),
       };
     }
   } catch (error) {
-    console.error(`[mcp] Error rendering report:`, error instanceof Error ? error.message : String(error));
+    console.error(
+      `[mcp] Error rendering report:`,
+      error instanceof Error ? error.message : String(error),
+    );
     throw error;
   }
 }
@@ -228,8 +246,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
       inputSchema: {
         type: 'object',
         properties: {},
-        additionalProperties: false
-      }
+        additionalProperties: false,
+      },
     },
     {
       name: 'run_template',
@@ -239,28 +257,28 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         properties: {
           template: {
             type: 'string',
-            description: 'Template ID (e.g., tem-recon, deck-fintech)'
+            description: 'Template ID (e.g., tem-recon, deck-fintech)',
           },
           profile: {
             type: 'string',
             description: 'Profile to use (vault, blue, exec)',
-            default: 'vault'
+            default: 'vault',
           },
           args: {
             type: 'object',
             description: 'Template arguments as JSON object',
-            default: {}
+            default: {},
           },
           format: {
             type: 'string',
             description: 'Output format (json, yaml, markdown)',
             enum: ['json', 'yaml', 'markdown'],
-            default: 'markdown'
-          }
+            default: 'markdown',
+          },
         },
         required: ['template'],
-        additionalProperties: false
-      }
+        additionalProperties: false,
+      },
     },
     {
       name: 'health',
@@ -268,8 +286,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
       inputSchema: {
         type: 'object',
         properties: {},
-        additionalProperties: false
-      }
+        additionalProperties: false,
+      },
     },
     {
       name: 'ledger_query',
@@ -281,10 +299,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
           profile: { type: 'string', description: 'Filter by profile' },
           since: { type: 'string', description: 'Filter events since timestamp (ISO 8601)' },
           limit: { type: 'number', description: 'Maximum events to return', default: 10 },
-          stats: { type: 'boolean', description: 'Return ledger statistics', default: false }
+          stats: { type: 'boolean', description: 'Return ledger statistics', default: false },
         },
-        additionalProperties: false
-      }
+        additionalProperties: false,
+      },
     },
     {
       name: 'render_report',
@@ -293,12 +311,12 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         type: 'object',
         properties: {
           template: { type: 'string', description: 'Template ID for aggregate report' },
-          eventId: { type: 'string', description: 'Specific event ID for single report' }
+          eventId: { type: 'string', description: 'Specific event ID for single report' },
         },
-        additionalProperties: false
-      }
-    }
-  ]
+        additionalProperties: false,
+      },
+    },
+  ],
 }));
 
 // Tool execution handler
@@ -313,11 +331,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           content: [
             {
               type: 'text',
-              text: `# VaultMesh Templates\n\n${templates.map(t =>
-                `- **${t.id}** (${t.category}): ${t.purpose}`
-              ).join('\n')}\n\n**Total**: ${templates.length} templates available`
-            }
-          ]
+              text: `# VaultMesh Templates\n\n${templates
+                .map((t) => `- **${t.id}** (${t.category}): ${t.purpose}`)
+                .join('\n')}\n\n**Total**: ${templates.length} templates available`,
+            },
+          ],
         };
       }
 
@@ -329,9 +347,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           content: [
             {
               type: 'text',
-              text: JSON.stringify(result)
-            }
-          ]
+              text: JSON.stringify(result),
+            },
+          ],
         };
       }
 
@@ -347,10 +365,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 version: '1.0.0',
                 time: new Date().toISOString(),
                 templates: templates.length,
-                ledgerPath
-              })
-            }
-          ]
+                ledgerPath,
+              }),
+            },
+          ],
         };
       }
 
@@ -361,9 +379,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           content: [
             {
               type: 'text',
-              text: JSON.stringify(queryResult, null, 2)
-            }
-          ]
+              text: JSON.stringify(queryResult, null, 2),
+            },
+          ],
         };
       }
 
@@ -375,9 +393,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           content: [
             {
               type: 'text',
-              text: JSON.stringify(report)
-            }
-          ]
+              text: JSON.stringify(report),
+            },
+          ],
         };
       }
 
@@ -389,10 +407,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       content: [
         {
           type: 'text',
-          text: `Error: ${error instanceof Error ? error.message : String(error)}`
-        }
+          text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+        },
       ],
-      isError: true
+      isError: true,
     };
   }
 });

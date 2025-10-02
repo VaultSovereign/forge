@@ -1,13 +1,16 @@
 ## PR Overview
+
 Explain what this change does and why.
 
 ### Checklist - Forge Gates
+
 - [ ] Ran **local gate**: `make forge-prepush` (or `FORGE_FAST=1 make forge-prepush`)
 - [ ] **No secrets** in diffs (critical = 0)
 - [ ] **Code review** high severity = 0
 - [ ] CI **forge-prepush** job is green
 
 ### Notes
+
 - Skip flags (local only):
   - `FORGE_SKIP_DOCTOR=1` to skip doctor when providers aren't configured
   - `FORGE_SKIP_REMOTE_SCANS=1` to skip remote scanners

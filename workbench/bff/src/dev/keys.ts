@@ -24,7 +24,7 @@ export async function signDevJWT(payload: Record<string, any>) {
   return await new SignJWT({
     ...payload,
     iss,
-    aud
+    aud,
   })
     .setProtectedHeader({ alg: 'RS256', kid: jwk.kid! })
     .setIssuedAt(now)

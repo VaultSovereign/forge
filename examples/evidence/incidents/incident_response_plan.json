@@ -2,6 +2,6 @@
   "plan_version": "1.0",
   "owner": "Security",
   "last_review": "2022-12-01",
-  "severity_model": ["low","medium","high","major"],
-  "playbooks": ["ransomware","data exfiltration","system outage"]
+  "severity_model": ["low", "medium", "high", "major"],
+  "playbooks": ["ransomware", "data exfiltration", "system outage"]
 }

@@ -5,20 +5,20 @@ const CORE_ADDR = process.env.CORE_GRPC_ADDR;
 
 export async function coreExecute(
   req: ExecuteRequest,
-  onLog?: (line: string) => void
+  onLog?: (line: string) => void,
 ): Promise<ExecuteResponse> {
   if (CORE_ADDR) {
     try {
       const response = await executeGRPC(
         CORE_ADDR,
         { templateId: req.templateId, profile: req.profile, args: req.args },
-        onLog
+        onLog,
       );
       return {
         eventId: response.eventId,
         status: response.status,
         output: response.output,
-        error: response.error
+        error: response.error,
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -26,7 +26,7 @@ export async function coreExecute(
       return {
         eventId: '',
         status: 'error',
-        error: message
+        error: message,
       };
     }
   }
@@ -34,7 +34,10 @@ export async function coreExecute(
   return simulateExecute(req, onLog);
 }
 
-export async function coreLedgerQuery(query: { template?: string; limit?: number }): Promise<LedgerEvent[]> {
+export async function coreLedgerQuery(query: {
+  template?: string;
+  limit?: number;
+}): Promise<LedgerEvent[]> {
   if (CORE_ADDR) {
     try {
       const rows = await ledgerQueryGRPC(CORE_ADDR, query);
@@ -46,7 +49,7 @@ export async function coreLedgerQuery(query: { template?: string; limit?: number
         input: row.input,
         output: row.output,
         status: row.status,
-        error: row.error
+        error: row.error,
       }));
     } catch (error) {
       return [];
@@ -61,12 +64,15 @@ export async function coreLedgerQuery(query: { template?: string; limit?: number
       profile: 'vault',
       input: { msg: 'hi' },
       output: { msg: 'hi' },
-      status: 'ok'
-    }
+      status: 'ok',
+    },
   ];
 }
 
-async function simulateExecute(req: ExecuteRequest, onLog?: (line: string) => void): Promise<ExecuteResponse> {
+async function simulateExecute(
+  req: ExecuteRequest,
+  onLog?: (line: string) => void,
+): Promise<ExecuteResponse> {
   const eventId = `evt_${Math.random().toString(36).slice(2, 10)}`;
   onLog?.(`[dispatcher] starting ${req.templateId}`);
   await sleep(350);

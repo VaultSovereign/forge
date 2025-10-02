@@ -10,7 +10,7 @@ import {
   createPrivateKey,
   createPublicKey,
   sign as signDetached,
-  verify as verifyDetached
+  verify as verifyDetached,
 } from 'crypto';
 import { promises as fs, constants as FS_CONSTANTS } from 'fs';
 import * as path from 'path';
@@ -62,7 +62,7 @@ async function appendLineAtomic(filePath: string, line: string): Promise<void> {
   const handle = await fs.open(
     filePath,
     FS_CONSTANTS.O_CREAT | FS_CONSTANTS.O_WRONLY | FS_CONSTANTS.O_APPEND,
-    0o600
+    0o600,
   );
 
   try {
@@ -100,7 +100,12 @@ function redactSensitive(value: unknown): unknown {
   return clone;
 }
 
-function canonicalEventPayload(template: string, profile: string, input: unknown, output: unknown): string {
+function canonicalEventPayload(
+  template: string,
+  profile: string,
+  input: unknown,
+  output: unknown,
+): string {
   const normalized = stringify({ template, profile, input, output });
   return typeof normalized === 'string'
     ? normalized
@@ -111,7 +116,7 @@ function generateEventHash(
   template: string,
   profile: string,
   input: unknown,
-  output: unknown
+  output: unknown,
 ): { hash: string; normalized: string } {
   const normalized = canonicalEventPayload(template, profile, input, output);
   const hash = createHash('sha256').update(normalized).digest('hex');
@@ -128,7 +133,10 @@ function signEvent(normalized: string): string | undefined {
     const signature = signDetached(null, Buffer.from(normalized), key);
     return signature.toString('base64');
   } catch (error) {
-    console.error('[reality_ledger] signing failed:', error instanceof Error ? error.message : String(error));
+    console.error(
+      '[reality_ledger] signing failed:',
+      error instanceof Error ? error.message : String(error),
+    );
     return undefined;
   }
 }
@@ -144,7 +152,10 @@ function verifySignature(normalized: string, signature?: string): boolean {
       : createPublicKey(createPrivateKey(SIGNING_KEY!));
     return verifyDetached(null, Buffer.from(normalized), key, Buffer.from(signature, 'base64'));
   } catch (error) {
-    console.error('[reality_ledger] signature verification failed:', error instanceof Error ? error.message : String(error));
+    console.error(
+      '[reality_ledger] signature verification failed:',
+      error instanceof Error ? error.message : String(error),
+    );
     return false;
   }
 }
@@ -159,7 +170,10 @@ async function listShardFiles(): Promise<string[]> {
     const entries = await fs.readdir(LEDGER_DIR);
     return entries.filter(isShardFile).sort().reverse();
   } catch (error) {
-    console.error('[reality_ledger] listShardFiles failed:', error instanceof Error ? error.message : String(error));
+    console.error(
+      '[reality_ledger] listShardFiles failed:',
+      error instanceof Error ? error.message : String(error),
+    );
     return [];
   }
 }
@@ -183,7 +197,10 @@ async function readShard(fileName: string): Promise<LedgerEvent[]> {
     return events;
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-      console.error('[reality_ledger] readShard failed:', error instanceof Error ? error.message : String(error));
+      console.error(
+        '[reality_ledger] readShard failed:',
+        error instanceof Error ? error.message : String(error),
+      );
     }
     return [];
   }
@@ -206,7 +223,12 @@ export async function appendEvent(eventInput: EventInput): Promise<string> {
   const timestamp = new Date();
   const ts = timestamp.toISOString();
   const safeArgs = redactSensitive(eventInput.args ?? {});
-  const { hash, normalized } = generateEventHash(eventInput.template, eventInput.profile, safeArgs, eventInput.result);
+  const { hash, normalized } = generateEventHash(
+    eventInput.template,
+    eventInput.profile,
+    safeArgs,
+    eventInput.result,
+  );
   const sig = signEvent(normalized);
 
   const event: LedgerEvent = {
@@ -219,7 +241,7 @@ export async function appendEvent(eventInput: EventInput): Promise<string> {
     hash,
     sig,
     operator: eventInput.operator ?? 'unknown',
-    version: LEDGER_VERSION
+    version: LEDGER_VERSION,
   };
 
   const shardPath = shardPathFor(timestamp);
@@ -249,7 +271,12 @@ export async function verifyEvent(eventId: string): Promise<boolean> {
     return false;
   }
 
-  const { hash, normalized } = generateEventHash(event.template, event.profile, event.input, event.output);
+  const { hash, normalized } = generateEventHash(
+    event.template,
+    event.profile,
+    event.input,
+    event.output,
+  );
   if (hash !== event.hash) {
     return false;
   }
@@ -300,7 +327,7 @@ export async function getLedgerStats(): Promise<{
       totalEvents: 0,
       templates: [],
       profiles: [],
-      dateRange: null
+      dateRange: null,
     };
   }
 
@@ -314,8 +341,8 @@ export async function getLedgerStats(): Promise<{
     profiles,
     dateRange: {
       earliest: timestamps[0],
-      latest: timestamps[timestamps.length - 1]
-    }
+      latest: timestamps[timestamps.length - 1],
+    },
   };
 }
 

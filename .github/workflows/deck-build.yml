@@ -2,7 +2,7 @@ name: deck-build
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'docs/SALES/**'
       - '.github/workflows/deck-build.yml'

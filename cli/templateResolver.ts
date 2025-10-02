@@ -12,7 +12,10 @@ function slugify(input: string): string {
     .replace(/^-|-$/g, '');
 }
 
-export async function resolveTemplateMeta(projectRoot: string, input: string): Promise<TemplateListing> {
+export async function resolveTemplateMeta(
+  projectRoot: string,
+  input: string,
+): Promise<TemplateListing> {
   const key = `${projectRoot}::${input}`;
   if (cache.has(key)) return cache.get(key)!;
 

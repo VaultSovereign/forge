@@ -1,6 +1,7 @@
 # VaultMesh AI — GCP Deployment Guide (Workbench + CLI)
 
 This guide deploys:
+
 - **Workbench** (Fastify BFF + SPA) as a container
 - **CLI** image for batch jobs
 - Builds via **Cloud Build**, stores images in **Artifact Registry**, runs on **Cloud Run**
@@ -26,8 +27,8 @@ gcloud builds submit \
 ```
 
 Images land under:
-	•	`us-docker.pkg.dev/<PROJECT>/vaultmesh/workbench:<sha>`
-	•	`us-docker.pkg.dev/<PROJECT>/vaultmesh/cli:<sha>`
+• `us-docker.pkg.dev/<PROJECT>/vaultmesh/workbench:<sha>`
+• `us-docker.pkg.dev/<PROJECT>/vaultmesh/cli:<sha>`
 
 ## 3) Deploy Workbench to Cloud Run
 
@@ -59,7 +60,8 @@ curl -fsSN "https://<run-url>/v1/api/execute/stream?templateId=demo.echo&args=%7
 ```
 
 ## 5) Security & scaling notes
-	•	Auth: enable OIDC; set `AUTH_DEV_BYPASS=0`. Validate JWT in BFF.
-	•	SSE: already sets `Cache-Control: no-cache`, `Connection: keep-alive`, retry hints.
-	•	Autoscaling: start with `--max-instances=3`, add later as needed.
-	•	Ledger: store on a durable volume or forward events to a storage backend (GCS bucket) if desired.
+
+    •	Auth: enable OIDC; set `AUTH_DEV_BYPASS=0`. Validate JWT in BFF.
+    •	SSE: already sets `Cache-Control: no-cache`, `Connection: keep-alive`, retry hints.
+    •	Autoscaling: start with `--max-instances=3`, add later as needed.
+    •	Ledger: store on a durable volume or forward events to a storage backend (GCS bucket) if desired.

@@ -24,10 +24,11 @@ jobs:
         with:
           node-version: 20
           pnpm-version: '10.17.0'
-      - name: ESLint
-        run: pnpm -w run lint
-      - name: Prettier (check)
-        run: pnpm -w run format:check
+      - name: Lint & Format
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm format:check
+          pnpm lint
   build-test:
     needs: lint
     runs-on: ubuntu-latest

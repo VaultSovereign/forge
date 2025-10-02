@@ -12,7 +12,7 @@ export default function Header() {
         justifyContent: 'space-between',
         alignItems: 'center',
         gap: 16,
-        flexWrap: 'wrap'
+        flexWrap: 'wrap',
       }}
     >
       <strong>VaultMesh Workbench</strong>

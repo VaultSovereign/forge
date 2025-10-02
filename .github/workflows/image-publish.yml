@@ -2,8 +2,8 @@ name: image-publish
 
 on:
   push:
-    branches: [ main ]
-    tags: [ 'v*' ]   # publish semver tags as image tags
+    branches: [main]
+    tags: ['v*'] # publish semver tags as image tags
   workflow_dispatch:
 
 permissions:

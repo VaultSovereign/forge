@@ -1,35 +1,60 @@
-# 📖 Forge Documentation Hub
-
-Welcome to **VaultMesh Forge** — Earth’s Civilization Ledger; sovereign prompt orchestration for compliance and cybersecurity.  
-
-This site provides two ways to explore the docs:
-
-- **Curated Index** → [INDEX.md](INDEX.md)  
-  *The recommended entry point.*  
-  A hand-maintained guide with key categories: Run Modes, Production Checklist, Operations Runbook, Security, Branch Protection, OpenAPI reference, and more.
-
-- **Sitemap** → [SITEMAP.md](SITEMAP.md)  
-  *The exhaustive view.*  
-  An auto-generated listing of all Markdown files under `docs/`, grouped by folder. Useful for auditors and reviewers who want to scan everything.
+# Curated Docs Index
 
 <div style="margin:16px 0; display:flex; gap:12px; flex-wrap:wrap;">
-  <a href="INDEX.md" style="display:inline-block; padding:8px 12px; background:#0969da; color:#fff; border-radius:6px; text-decoration:none; font-weight:600;">👉 Curated Docs Index</a>
+  <a href="index.md" style="display:inline-block; padding:8px 12px; background:#0969da; color:#fff; border-radius:6px; text-decoration:none; font-weight:600;">🏠 Docs Hub</a>
   <a href="SITEMAP.md" style="display:inline-block; padding:8px 12px; background:#6f42c1; color:#fff; border-radius:6px; text-decoration:none; font-weight:600;">👉 Full Sitemap</a>
-  
 </div>
 
----
+## 📑 Table of Contents
 
-## Getting Started
+- [Run Modes Shortcuts (Makefile)](#run-modes-shortcuts-makefile)
+- [Docs Sitemap](SITEMAP.md)
 
-- [Quickstart](QUICKSTART.md) — one-command demo to run locally, or use the prebuilt Docker image.  
-- [Run Modes](README_RUN_MODES.md) — single-port, duo/HMR, smoke tests, and flags.  
-- [Security Overview](SECURITY.md) — JWT auth, RBAC, environment flags, and quick tests.  
+- Run Modes — how to run locally (single-port, duo/HMR, smoke)
+  - docs/README_RUN_MODES.md
+- Production Checklist — must-pass gates before production rollout
+  - docs/PROD_CHECKLIST.md
+- Operations Runbook — incident playbooks for common faults
+  - docs/OPERATIONS_RUNBOOK.md
+- Security Overview — auth, RBAC, env flags, quick tests
+  - docs/SECURITY.md
+- Branch Protection — required checks: docs-link-check, workbench-smoke, ci
+  - CONTRIBUTING.md#maintainers
+- [Run Modes Shortcuts (Makefile)](#run-modes-shortcuts-makefile) — quick commands for Docs links
 
----
+- OpenAPI — API reference for the Workbench BFF
+  - docs/OPENAPI.md
+- Docs Sitemap — browse all docs
+  - docs/SITEMAP.md
 
-> 📝 Tip: For contributors, see [CONTRIBUTING.md](../CONTRIBUTING.md) in the repo root for setup, hooks, and commit style.
+## Run Modes Shortcuts (Makefile)
 
----
+Quick commands for internal/external Docs links in the Workbench header. See also: [docs/README_RUN_MODES.md](README_RUN_MODES.md).
 
-Return to the GitHub repository: https://github.com/VaultSovereign/forge
+**Internal (served by BFF at /docs)**
+
+- Single‑port preview:
+  ```bash
+  make docs:internal-preview
+  ```
+- Dev duo (two‑shell instructions):
+  ```bash
+  make docs:internal-dev
+  ```
+
+**External (e.g., GitHub Pages / Confluence)**
+
+- Single‑port preview:
+  ```bash
+  make docs:external DOCS_URL=https://mydomain/docs
+  ```
+- Dev duo (two‑shell instructions):
+  ```bash
+  make docs:external-dev DOCS_URL=https://mydomain/docs
+  ```
+
+Notes
+
+- API link (/v1/openapi.json) appears when import.meta.env.DEV or VITE_EXPOSE_OPENAPI=1; server route gated by EXPOSE_OPENAPI=1 (or dev).
+- Docs link appears when VITE_EXPOSE_DOCS=1. Defaults to /docs/OPENAPI.md; override with VITE_DOCS_URL.
+- For internal docs, set EXPOSE_DOCS=1 on the BFF to serve /docs/\*.

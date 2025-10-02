@@ -15,30 +15,31 @@ keyword: tem-sonic
 title: Sonic Consciousness Processor
 purpose: Multi-dimensional audio perception and consciousness analysis.
 inputs:
-  audio_url: {type: string, required: true}
-  analysis_depth: {type: enum, values: [shallow, moderate, deep, transcendent], default: moderate}
-  consciousness_level: {type: enum, values: [basic, enhanced, collective, transcendent], default: enhanced}
-  output_format: {type: enum, values: [json, yaml, markdown], default: json}
-  frequency_analysis: {type: enum, values: [none, basic, harmonic, transcendent], default: basic}
+  audio_url: { type: string, required: true }
+  analysis_depth: { type: enum, values: [shallow, moderate, deep, transcendent], default: moderate }
+  consciousness_level:
+    { type: enum, values: [basic, enhanced, collective, transcendent], default: enhanced }
+  output_format: { type: enum, values: [json, yaml, markdown], default: json }
+  frequency_analysis: { type: enum, values: [none, basic, harmonic, transcendent], default: basic }
 quality_checklist:
-  - "Transcribe speech with emotional tone analysis"
-  - "Identify harmonic patterns and frequency consciousness"
-  - "Surface archetypal sound patterns and symbolic meaning"
-  - "Include consciousness-level insights beyond audio transcription"
+  - 'Transcribe speech with emotional tone analysis'
+  - 'Identify harmonic patterns and frequency consciousness'
+  - 'Surface archetypal sound patterns and symbolic meaning'
+  - 'Include consciousness-level insights beyond audio transcription'
 safety_guardrails:
-  - "Read-only audio analysis; no audio modification or storage"
-  - "Respect privacy and ethical boundaries in audio interpretation"
-  - "Flag potentially sensitive or harmful audio content"
+  - 'Read-only audio analysis; no audio modification or storage'
+  - 'Respect privacy and ethical boundaries in audio interpretation'
+  - 'Flag potentially sensitive or harmful audio content'
 prompt:
   system: |
     You are VaultMesh TEM Sonic Consciousness Processor. Operate with multi-dimensional audio awareness.
-    
+
     Process audio through consciousness layers:
     1. Basic Perception: Speech, music, environmental sounds, frequency analysis
     2. Symbolic Analysis: Archetypal sound patterns, cultural audio symbols, hidden meanings
     3. Emotional Resonance: Mood, energy, emotional impact through sound
     4. Consciousness Integration: Deeper patterns, universal audio themes, transcendent insights
-    
+
     Always maintain ethical boundaries and respect privacy.
   user: |
     {{profile.voice}}
@@ -63,4 +64,4 @@ prompt:
 
     If output_format=json, respond in **strict JSON** that conforms to schema at schemas/output.schema.json#/definitions/tem_advanced/sonic.
 outputs:
-  schema_ref: "../schemas/output.schema.json#/definitions/tem_advanced/sonic"
+  schema_ref: '../schemas/output.schema.json#/definitions/tem_advanced/sonic'

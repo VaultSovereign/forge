@@ -16,7 +16,7 @@ on:
       - '**/*.sh'
       - '.github/workflows/docs-link-check.yml'
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - '**/*.md'
       - '**/*.yml'

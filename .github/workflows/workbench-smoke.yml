@@ -3,13 +3,13 @@ name: workbench-smoke
 on:
   pull_request:
     paths:
-      - "workbench/**"
-      - "replit.*"
-      - ".replit"
-      - "pnpm-workspace.yaml"
-      - "package.json"
-      - "docs/WORKBENCH.md"
-      - ".github/workflows/workbench-smoke.yml"
+      - 'workbench/**'
+      - 'replit.*'
+      - '.replit'
+      - 'pnpm-workspace.yaml'
+      - 'package.json'
+      - 'docs/WORKBENCH.md'
+      - '.github/workflows/workbench-smoke.yml'
   workflow_dispatch: {}
 
 jobs:
@@ -77,7 +77,7 @@ jobs:
       NODE_ENV: production
       PORT: 3000
       AI_CORE_MODE: mock
-      AUTH_DEV_BYPASS: "1"
+      AUTH_DEV_BYPASS: '1'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -118,7 +118,6 @@ jobs:
         run: |
           kill "$(cat .bff.pid)" || true
 
-
   smoke-tokened:
     name: smoke script (tokened auth)
     needs: build
@@ -127,10 +126,10 @@ jobs:
       NODE_ENV: production
       PORT: 3000
       AI_CORE_MODE: mock
-      AUTH_DEV_SIGNER: "1"
-      OIDC_ISSUER: "http://127.0.0.1/"
-      OIDC_AUDIENCE: "vaultmesh-dev"
-      OIDC_JWKS_URL: "http://127.0.0.1:3000/dev/jwks.json"
+      AUTH_DEV_SIGNER: '1'
+      OIDC_ISSUER: 'http://127.0.0.1/'
+      OIDC_AUDIENCE: 'vaultmesh-dev'
+      OIDC_JWKS_URL: 'http://127.0.0.1:3000/dev/jwks.json'
     steps:
       - uses: actions/checkout@v4
 
@@ -168,7 +167,7 @@ jobs:
 
       - name: Run smoke script (tokened)
         env:
-          AUTH_HEADER: "Authorization: Bearer ${{ steps.token.outputs.token }}"
+          AUTH_HEADER: 'Authorization: Bearer ${{ steps.token.outputs.token }}'
         run: PORT=${PORT} scripts/smoke-workbench.sh
 
       - name: Stop BFF

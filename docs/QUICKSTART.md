@@ -1,6 +1,6 @@
 # Quickstart — VaultMesh Forge
-Earth’s Civilization Ledger; sovereign prompt orchestration for compliance and cybersecurity.
 
+Earth’s Civilization Ledger; sovereign prompt orchestration for compliance and cybersecurity.
 
 ## Installation & Setup
 
@@ -121,10 +121,12 @@ Then in Claude Code, run `/mcp` to verify the connection.
 ## Templates Available
 
 ### Compliance Suite (DORA)
+
 - ICT Risk Framework: `dora.ict_risk_framework.v1`
 - Third-Party Risk (TPRM): `dora.tprm.v1`
 
 Run (examples):
+
 ```bash
 # DORA ICT Risk Assessment
 vm run dora.ict_risk_framework.v1 --args @examples/inputs/ict_risk.acme.json
@@ -224,11 +226,10 @@ docker run --rm -p 3000:3000 ghcr.io/vaultsovereign/forge:latest
 
 Tags
 
-	•	:latest — built from main
+    •	:latest — built from main
 
-	•	:vX.Y.Z — release tags
+    •	:vX.Y.Z — release tags
 
-	•	:<git-sha> — every push
-
+    •	:<git-sha> — every push
 
 [⬅️ Return to [README](../README.md) (badges, docs index, Docker)]

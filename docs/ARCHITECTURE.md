@@ -7,6 +7,7 @@ VaultMesh is a **sovereign prompt orchestration platform** designed as "Earth's 
 ## Core Components
 
 ### 1. Dispatcher (`/dispatcher/`)
+
 **Purpose**: Template execution engine with safety guardrails
 
 - `router.ts` - Main execution router and template resolution
@@ -17,6 +18,7 @@ VaultMesh is a **sovereign prompt orchestration platform** designed as "Earth's 
 - `types.ts` - TypeScript interfaces and types
 
 ### 2. Reality Ledger (`/reality_ledger/`)
+
 **Purpose**: Immutable audit trail for all template executions
 
 - `reality_ledger.py` - Core ledger operations and event storage
@@ -26,6 +28,7 @@ VaultMesh is a **sovereign prompt orchestration platform** designed as "Earth's 
 - `events-YYYY-MM-DD.idx` - Index files for deduplication
 
 ### 3. Template Catalog (`/catalog/`)
+
 **Purpose**: Structured prompt templates with metadata
 
 ```
@@ -37,12 +40,14 @@ catalog/
 ```
 
 ### 4. CLI Interface (`/cli/`)
+
 **Purpose**: Command-line interface for template execution
 
 - `index.ts` - Main CLI entry point (target for `vm` command)
 - `forge.ts` - Legacy forge interface
 
 ### 5. MCP Server (`/mcp/`)
+
 **Purpose**: Model Context Protocol integration with Claude Code
 
 - `vaultmesh-mcp-server.ts` - MCP server implementation
@@ -65,17 +70,20 @@ catalog/
 ## Security Model
 
 ### Template Safety
+
 - **Guardrails**: Mandatory safety checks before LLM execution
 - **Schema Validation**: Strict input/output validation with auto-repair
 - **Sandboxing**: Templates cannot execute arbitrary code
 - **Audit Trail**: Every execution logged immutably
 
 ### Secrets Management
+
 - **Environment Variables**: All API keys in `.env` files only
 - **No Hardcoding**: Zero secrets in code or configuration files
 - **MCP Security**: Environment variable substitution in MCP configs
 
 ### Reality Ledger Integrity
+
 - **Content Addressing**: SHA-256 hashes for all events
 - **Optional Signatures**: Ed25519 signatures for verification
 - **Immutability**: Append-only event logs
@@ -84,17 +92,20 @@ catalog/
 ## Extensibility
 
 ### Adding Templates
+
 1. Create YAML template in appropriate `/catalog/` subdirectory
 2. Define input schema and validation rules
 3. Add output schema to `/schemas/output.schema.json`
 4. Test with golden snapshots
 
 ### Adding Providers
+
 1. Extend `modelProvider.ts` with new provider
 2. Add environment variable configuration
 3. Update `.env.example` with provider settings
 
 ### MCP Extensions
+
 1. Add new tools to `vaultmesh-mcp-server.ts`
 2. Update tool list and input schemas
 3. Wire to existing dispatcher functions
@@ -107,6 +118,7 @@ catalog/
 - **Concurrency**: Async/await pattern throughout for non-blocking operations
 
 ## Visual Workbench (Planned)
+
 The VaultMesh Visual Workbench introduces a sovereign, auditable UI that layers on top of the dispatcher and Reality Ledger.
 
 - Reference architecture, security posture, and implementation roadmap are documented in `docs/WORKBENCH.md`.

@@ -67,4 +67,3 @@ describe('VaultMesh Agent skeleton', () => {
     expect((result as any).outputText).toBe('Latest: 3 events; 1 error.');
   });
 });
-

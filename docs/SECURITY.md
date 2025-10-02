@@ -88,4 +88,3 @@ TOKEN=$(curl -s -X POST -H "content-type: application/json" \
 
 curl -H "Authorization: Bearer $TOKEN" http://localhost:3000/v1/api/templates | jq .
 ```
-

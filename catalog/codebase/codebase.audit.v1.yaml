@@ -1,8 +1,8 @@
 id: codebase.audit.v1
-version: "1.0.0"
+version: '1.0.0'
 keyword: codebase-audit
 meta:
-  title: "Codebase Audit (Structured Scroll)"
+  title: 'Codebase Audit (Structured Scroll)'
   description: >
     Runs a structured audit across the repository. Produces a JSON scroll
     conforming to urn:vaultmesh:audit.scroll.v1, with a high-level map,
@@ -56,7 +56,7 @@ inputs:
 outputs:
   result:
     type: object
-  schema_ref: "file:../schemas/audit.scroll.v1.json"
+  schema_ref: 'file:../schemas/audit.scroll.v1.json'
 guardrails:
   schema_enforce: true
   temperature: 0.1
@@ -172,8 +172,8 @@ prompt:
     when producing evidence. Otherwise proceed with direct repository inspection
     and mark the bundle as unavailable in module weaknesses.
   post:
-    - type: "validate_schema"
-    - type: "module_fn"
-      module: "./tools/audit_result_coercer"
-      export: "coerce"
-    - type: "validate_schema"
+    - type: 'validate_schema'
+    - type: 'module_fn'
+      module: './tools/audit_result_coercer'
+      export: 'coerce'
+    - type: 'validate_schema'

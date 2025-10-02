@@ -25,7 +25,10 @@ let bundle;
 try {
   bundle = JSON.parse(readFileSync(bundlePath, 'utf8'));
 } catch (error) {
-  console.error('[verify] failed to read bundle:', error instanceof Error ? error.message : String(error));
+  console.error(
+    '[verify] failed to read bundle:',
+    error instanceof Error ? error.message : String(error),
+  );
   process.exit(1);
 }
 

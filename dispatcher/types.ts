@@ -1,5 +1,5 @@
 export interface TemplateInputSpec {
-  type: "string" | "enum";
+  type: 'string' | 'enum';
   required?: boolean;
   values?: string[];
   default?: any;
@@ -26,7 +26,7 @@ export interface Profile {
 
 export interface RunArgs {
   [k: string]: any;
-  output_format?: "json" | "yaml" | "markdown";
+  output_format?: 'json' | 'yaml' | 'markdown';
   scope?: string;
   lab?: boolean;
   variant?: string;

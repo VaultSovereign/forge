@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-import { fileURLToPath } from "url";
-import path from "path";
-import minimist from "minimist";
-import { runKeyword } from "../dispatcher/router.js";
+import { fileURLToPath } from 'url';
+import path from 'path';
+import minimist from 'minimist';
+import { runKeyword } from '../dispatcher/router.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const projectRoot = path.resolve(__dirname, "..");
+const projectRoot = path.resolve(__dirname, '..');
 
 function help() {
   console.log(`
@@ -29,18 +29,18 @@ Flags:
 }
 
 async function main() {
-  const argv = minimist(process.argv.slice(2), { string: ["_"] }) as minimist.ParsedArgs;
+  const argv = minimist(process.argv.slice(2), { string: ['_'] }) as minimist.ParsedArgs;
   if (argv._.length === 0 || argv.help || argv.h) {
     help();
     return;
   }
-  const tokens = (argv._ as string[]);
+  const tokens = argv._ as string[];
   let profile: string | null = null;
-  let keyword = "";
+  let keyword = '';
   const free: string[] = [];
 
   for (const t of tokens) {
-    if (t.startsWith("@")) profile = t.slice(1);
+    if (t.startsWith('@')) profile = t.slice(1);
     else if (!keyword && /^[a-z]+-[a-z]+(\-[a-z]+)?$/.test(t)) keyword = t;
     else free.push(t);
   }
@@ -50,22 +50,23 @@ async function main() {
     process.exit(1);
   }
 
-  const notes = free.join(" ");
+  const notes = free.join(' ');
   const { _, ...restFlags } = argv;
   const flags = { ...restFlags } as Record<string, unknown>;
 
   try {
     const out = await runKeyword({ projectRoot, keyword, profileName: profile, flags, notes });
-    if (typeof out === "string") {
+    if (typeof out === 'string') {
       console.log(out);
     } else {
-      const fmt = typeof flags.format === "string" ? flags.format.toLowerCase() : "";
-      if (fmt === "json") console.log(JSON.stringify(out, null, 2));
-      else if (out && typeof out === "object" && "markdown" in out) console.log((out as any).markdown);
+      const fmt = typeof flags.format === 'string' ? flags.format.toLowerCase() : '';
+      if (fmt === 'json') console.log(JSON.stringify(out, null, 2));
+      else if (out && typeof out === 'object' && 'markdown' in out)
+        console.log((out as any).markdown);
       else console.log(JSON.stringify(out, null, 2));
     }
   } catch (e: any) {
-    console.error("[forge] ERROR:", e?.message || e);
+    console.error('[forge] ERROR:', e?.message || e);
     process.exit(1);
   }
 }

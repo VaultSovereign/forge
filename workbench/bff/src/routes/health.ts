@@ -8,16 +8,13 @@ export default async function healthRoutes(app: FastifyInstance) {
     mode: process.env.AI_CORE_MODE ?? 'mock',
     ts: Date.now(),
     version:
-      process.env.GIT_SHA ??
-      process.env.GITHUB_SHA ??
-      process.env.VERCEL_GIT_COMMIT_SHA ??
-      'dev'
+      process.env.GIT_SHA ?? process.env.GITHUB_SHA ?? process.env.VERCEL_GIT_COMMIT_SHA ?? 'dev',
   }));
 
   app.get('/v1/api/health', async () => ({
     ok: true,
     ts: new Date().toISOString(),
-    version: '0.1.0'
+    version: '0.1.0',
   }));
 
   app.get('/v1/api/health/deep', async () => {

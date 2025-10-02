@@ -13,7 +13,7 @@ const loaderOptions: protoLoader.Options = {
   longs: String,
   enums: String,
   defaults: true,
-  oneofs: true
+  oneofs: true,
 };
 
 interface ExecuteReq {
@@ -70,23 +70,36 @@ function loadCredentials(): grpc.ChannelCredentials {
 function getClient(addr: string) {
   const packageDefinition = protoLoader.loadSync(PROTO_PATH, loaderOptions);
   const pkg = grpc.loadPackageDefinition(packageDefinition) as unknown as {
-    vaultmesh: { ai: { v1: { Core: new (address: string, creds: grpc.ChannelCredentials, options?: grpc.ClientOptions) => grpc.Client & {
-      Execute: grpc.handleUnaryCall<any, any>;
-      LedgerQuery: grpc.handleServerStreamingCall<any, any>;
-      LedgerVerify: grpc.handleUnaryCall<any, any>;
-    }; } } };
+    vaultmesh: {
+      ai: {
+        v1: {
+          Core: new (
+            address: string,
+            creds: grpc.ChannelCredentials,
+            options?: grpc.ClientOptions,
+          ) => grpc.Client & {
+            Execute: grpc.handleUnaryCall<any, any>;
+            LedgerQuery: grpc.handleServerStreamingCall<any, any>;
+            LedgerVerify: grpc.handleUnaryCall<any, any>;
+          };
+        };
+      };
+    };
   };
 
   const CoreService = pkg.vaultmesh.ai.v1.Core;
   const credentials = loadCredentials();
   const client = new CoreService(addr, credentials, {
-    'grpc.keepalive_time_ms': 20000
+    'grpc.keepalive_time_ms': 20000,
   });
 
   return client as unknown as grpc.Client & {
     Execute(request: any, callback: (err: grpc.ServiceError | null, response: any) => void): void;
     LedgerQuery(request: any): grpc.ClientReadableStream<any>;
-    LedgerVerify(request: any, callback: (err: grpc.ServiceError | null, response: any) => void): void;
+    LedgerVerify(
+      request: any,
+      callback: (err: grpc.ServiceError | null, response: any) => void,
+    ): void;
   };
 }
 
@@ -98,14 +111,18 @@ function safeJSON(payload: string) {
   }
 }
 
-export async function executeGRPC(addr: string, req: ExecuteReq, onLog?: (line: string) => void): Promise<ExecuteRes> {
+export async function executeGRPC(
+  addr: string,
+  req: ExecuteReq,
+  onLog?: (line: string) => void,
+): Promise<ExecuteRes> {
   const client = getClient(addr);
   onLog?.(`[grpc] Execute ${req.templateId}`);
 
   const executeReq = {
     template_id: req.templateId,
     profile: req.profile ?? 'vault',
-    args_json: JSON.stringify(req.args ?? {})
+    args_json: JSON.stringify(req.args ?? {}),
   };
 
   const response = await new Promise<any>((resolve, reject) => {
@@ -128,18 +145,21 @@ export async function executeGRPC(addr: string, req: ExecuteReq, onLog?: (line: 
     eventId: response.event_id,
     status,
     output,
-    error: response.error || undefined
+    error: response.error || undefined,
   };
 }
 
-export async function ledgerQueryGRPC(addr: string, query: { template?: string; limit?: number }): Promise<LedgerEvent[]> {
+export async function ledgerQueryGRPC(
+  addr: string,
+  query: { template?: string; limit?: number },
+): Promise<LedgerEvent[]> {
   const client = getClient(addr);
 
   const request = {
     template: query.template ?? '',
     profile: '',
     limit: query.limit ?? 50,
-    cursor: ''
+    cursor: '',
   };
 
   const results: LedgerEvent[] = [];
@@ -158,7 +178,7 @@ export async function ledgerQueryGRPC(addr: string, query: { template?: string; 
         status: message.status || 'ok',
         error: message.error || undefined,
         hash: message.hash || undefined,
-        sig: message.sig || undefined
+        sig: message.sig || undefined,
       });
     });
 

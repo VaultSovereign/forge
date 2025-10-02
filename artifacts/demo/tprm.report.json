@@ -4,16 +4,9 @@
     "vendor": {
       "name": "AcmeCloud",
       "criticality": "high",
-      "regions": [
-        "EU"
-      ],
-      "business_services": [
-        "Payments"
-      ],
-      "data_categories": [
-        "PII",
-        "PCI"
-      ]
+      "regions": ["EU"],
+      "business_services": ["Payments"],
+      "data_categories": ["PII", "PCI"]
     },
     "risk": {
       "score": 75,
@@ -30,26 +23,16 @@
         "id": "F1",
         "title": "Insufficient encryption for sensitive data",
         "severity": "high",
-        "control_ids": [
-          "AC-17",
-          "SC-28"
-        ],
-        "evidence": [
-          "examples/evidence/tprm/acme/encryption_report.pdf"
-        ],
+        "control_ids": ["AC-17", "SC-28"],
+        "evidence": ["examples/evidence/tprm/acme/encryption_report.pdf"],
         "recommendation": "Implement strong encryption protocols for all sensitive data in transit and at rest."
       },
       {
         "id": "F2",
         "title": "Lack of regular security audits",
         "severity": "medium",
-        "control_ids": [
-          "CA-2",
-          "CA-5"
-        ],
-        "evidence": [
-          "examples/evidence/tprm/acme/audit_schedule.pdf"
-        ],
+        "control_ids": ["CA-2", "CA-5"],
+        "evidence": ["examples/evidence/tprm/acme/audit_schedule.pdf"],
         "recommendation": "Establish a regular security audit schedule to identify and mitigate vulnerabilities."
       }
     ],

@@ -10,4 +10,3 @@ export function fromHere(metaUrl: string, ...rel: string[]) {
 }
 
 export { pathToFileURL };
-

@@ -39,7 +39,12 @@ function extractRoles(payload: JWTPayload): string[] {
   if (Array.isArray(val)) return val.map(String);
   if (typeof val === 'string') return [val];
   const def = process.env.RBAC_DEFAULT_ROLES;
-  return def ? def.split(',').map((s) => s.trim()).filter(Boolean) : [];
+  return def
+    ? def
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
 }
 
 // Minimal dot-path accessor (a.b.c)
@@ -61,7 +66,7 @@ export async function verifyJWT(token: string): Promise<AuthContext> {
     exp: payload.exp,
     iat: payload.iat,
     roles,
-    raw: payload
+    raw: payload,
   };
 }
 

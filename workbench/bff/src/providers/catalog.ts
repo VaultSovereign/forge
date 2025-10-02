@@ -50,7 +50,7 @@ function detectCatalogRoot(): string | null {
     path.resolve(cwd, '..', 'catalog'),
     path.resolve(cwd, '..', '..', 'catalog'),
     path.resolve(cwd, '..', '..', '..', 'catalog'),
-    fromHere(import.meta.url, '../../..', '..', '..', 'catalog')
+    fromHere(import.meta.url, '../../..', '..', '..', 'catalog'),
   ];
   for (const c of candidates) {
     if (fs.existsSync(c)) return c;
@@ -78,7 +78,10 @@ function* walkCatalog(dir: string): Generator<TemplateMeta> {
     const p = path.join(dir, e.name);
     if (e.isDirectory()) {
       yield* walkCatalog(p);
-    } else if (e.isFile() && (e.name.endsWith('.yaml') || e.name.endsWith('.yml') || e.name.endsWith('.json'))) {
+    } else if (
+      e.isFile() &&
+      (e.name.endsWith('.yaml') || e.name.endsWith('.yml') || e.name.endsWith('.json'))
+    ) {
       const j = safeRead(p);
       if (!j) continue;
       const stem = path.basename(e.name, path.extname(e.name));
@@ -97,10 +100,11 @@ function* walkCatalog(dir: string): Generator<TemplateMeta> {
 function applyFilter(items: TemplateMeta[], filter: string | null | undefined): TemplateMeta[] {
   if (!filter) return items;
   const f = filter.toLowerCase();
-  return items.filter((t) =>
-    t.id.toLowerCase().includes(f) ||
-    t.name.toLowerCase().includes(f) ||
-    (t.tags || []).some((tag) => tag.toLowerCase().includes(f))
+  return items.filter(
+    (t) =>
+      t.id.toLowerCase().includes(f) ||
+      t.name.toLowerCase().includes(f) ||
+      (t.tags || []).some((tag) => tag.toLowerCase().includes(f)),
   );
 }
 

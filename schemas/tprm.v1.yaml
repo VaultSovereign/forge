@@ -1,6 +1,6 @@
 # VaultMesh Template Spec — DORA Third-Party Risk (TPRM) v1
 id: dora.tprm.v1
-title: "Third-Party Risk Assessment (DORA) — v1"
+title: 'Third-Party Risk Assessment (DORA) — v1'
 kind: spec
 status: draft
 owner: platform
@@ -8,8 +8,8 @@ safety:
   class: read-only
   data_access: advisory
   notes:
-    - "Template performs analysis only; no external network effects."
-    - "Intended for CI/PR review and auditor read-outs."
+    - 'Template performs analysis only; no external network effects.'
+    - 'Intended for CI/PR review and auditor read-outs.'
 tags:
   - dora
   - tprm
@@ -22,7 +22,7 @@ summary: >
 
 inputs:
   schema:
-    $schema: "http://json-schema.org/draft-07/schema#"
+    $schema: 'http://json-schema.org/draft-07/schema#'
     type: object
     required: [vendor_name, criticality]
     additionalProperties: false
@@ -36,7 +36,7 @@ inputs:
       business_services:
         type: array
         items: { type: string }
-        description: "Business services the vendor supports (e.g., Payments, Trading)."
+        description: 'Business services the vendor supports (e.g., Payments, Trading).'
       data_categories:
         type: array
         items:
@@ -45,36 +45,36 @@ inputs:
       regions:
         type: array
         items: { type: string }
-        description: "Jurisdictions/hosting regions in scope (e.g., EU, UAE, IE)."
+        description: 'Jurisdictions/hosting regions in scope (e.g., EU, UAE, IE).'
       evidence_paths:
         type: array
         items: { type: string }
-        description: "Local repo globs with evidence (policies, DDQs, pentests)."
+        description: 'Local repo globs with evidence (policies, DDQs, pentests).'
       questionnaires:
         type: array
         items: { type: string }
-        description: "Path(s) to completed DDQs (JSON/YAML)."
+        description: 'Path(s) to completed DDQs (JSON/YAML).'
       notes:
         type: string
 
 scoring:
   factors:
     confidentiality: { weight: 0.22 }
-    integrity:       { weight: 0.22 }
-    availability:    { weight: 0.22 }
-    resilience:      { weight: 0.18 }
-    compliance:      { weight: 0.16 }
-  aggregation: "weighted_sum_normalized_0_100"
+    integrity: { weight: 0.22 }
+    availability: { weight: 0.22 }
+    resilience: { weight: 0.18 }
+    compliance: { weight: 0.16 }
+  aggregation: 'weighted_sum_normalized_0_100'
   levels:
-    - { level: low,       min: 0,  max: 29 }
-    - { level: moderate,  min: 30, max: 59 }
-    - { level: high,      min: 60, max: 79 }
-    - { level: critical,  min: 80, max: 100 }
+    - { level: low, min: 0, max: 29 }
+    - { level: moderate, min: 30, max: 59 }
+    - { level: high, min: 60, max: 79 }
+    - { level: critical, min: 80, max: 100 }
 
 acceptance:
   pass_if:
-    - "secrets.critical == 0"
-    - "controls.coverage.dora >= 0.85"
+    - 'secrets.critical == 0'
+    - 'controls.coverage.dora >= 0.85'
     - "risk.level in ['low','moderate']"
   warn_if:
     - "risk.level == 'high'"
@@ -83,25 +83,25 @@ acceptance:
 
 controls_map:
   dora:
-    - id: "ICTRM.1"
-      name: "ICT risk management framework"
-    - id: "TPRM.1"
-      name: "Third-party risk management lifecycle"
-    - id: "IR.1"
-      name: "Incident reporting & register"
-    - id: "DR.1"
-      name: "Operational resilience testing"
+    - id: 'ICTRM.1'
+      name: 'ICT risk management framework'
+    - id: 'TPRM.1'
+      name: 'Third-party risk management lifecycle'
+    - id: 'IR.1'
+      name: 'Incident reporting & register'
+    - id: 'DR.1'
+      name: 'Operational resilience testing'
   iso27001:
-    - "A.5 Information security policies"
-    - "A.15 Supplier relationships"
-    - "A.17 Information security aspects of business continuity"
+    - 'A.5 Information security policies'
+    - 'A.15 Supplier relationships'
+    - 'A.17 Information security aspects of business continuity'
   nist80053:
-    - "RA-3, RA-5"
-    - "SA-9, SA-12"
-    - "CP-2, CP-9, CP-10"
+    - 'RA-3, RA-5'
+    - 'SA-9, SA-12'
+    - 'CP-2, CP-9, CP-10'
 
 output_schema:
-  $schema: "http://json-schema.org/draft-07/schema#"
+  $schema: 'http://json-schema.org/draft-07/schema#'
   type: object
   required: [vendor, risk, coverage, findings, recommendations, acceptance]
   properties:
@@ -123,8 +123,8 @@ output_schema:
     coverage:
       type: object
       properties:
-        dora:      { type: number, minimum: 0, maximum: 1 }
-        iso27001:  { type: number, minimum: 0, maximum: 1 }
+        dora: { type: number, minimum: 0, maximum: 1 }
+        iso27001: { type: number, minimum: 0, maximum: 1 }
         nist80053: { type: number, minimum: 0, maximum: 1 }
     findings:
       type: array
@@ -145,8 +145,8 @@ output_schema:
       type: object
       properties:
         critical: { type: integer, minimum: 0 }
-        high:     { type: integer, minimum: 0 }
-        medium:   { type: integer, minimum: 0 }
+        high: { type: integer, minimum: 0 }
+        medium: { type: integer, minimum: 0 }
     acceptance:
       type: object
       required: [pass, reasons]
@@ -155,7 +155,7 @@ output_schema:
         reasons: { type: array, items: { type: string } }
     receipt:
       type: object
-      description: "Reality Ledger receipt stub—fill on append."
+      description: 'Reality Ledger receipt stub—fill on append.'
       properties:
         event_id: { type: string }
         hash: { type: string }

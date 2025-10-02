@@ -3,35 +3,38 @@
  * VaultMesh Template Journal Appender (JSONL)
  * Appends one line per amended template to artifacts/evolution/template_journal.jsonl.
  */
-import fs from "fs";
-import path from "path";
-import crypto from "crypto";
-import childProcess from "child_process";
+import fs from 'fs';
+import path from 'path';
+import crypto from 'crypto';
+import childProcess from 'child_process';
 
 const ROOT = process.cwd();
-const EVO_DIR = path.join(ROOT, "artifacts", "evolution");
-const RECEIPT = path.join(EVO_DIR, "template_evolution_receipt.json");
-const PROOF = path.join(EVO_DIR, "proof_bundle.json");
-const JOURNAL = path.join(EVO_DIR, "template_journal.jsonl");
+const EVO_DIR = path.join(ROOT, 'artifacts', 'evolution');
+const RECEIPT = path.join(EVO_DIR, 'template_evolution_receipt.json');
+const PROOF = path.join(EVO_DIR, 'proof_bundle.json');
+const JOURNAL = path.join(EVO_DIR, 'template_journal.jsonl');
 const TAIL_SIZE = 1024 * 1024; // 1 MiB
 
 function sha256File(p) {
-  return crypto.createHash("sha256").update(fs.readFileSync(p)).digest("hex");
+  return crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
 }
 
 function gitShortHash() {
   try {
-    return childProcess.execSync("git rev-parse --short HEAD", {
-      stdio: ["ignore", "pipe", "ignore"],
-    }).toString().trim();
+    return childProcess
+      .execSync('git rev-parse --short HEAD', {
+        stdio: ['ignore', 'pipe', 'ignore'],
+      })
+      .toString()
+      .trim();
   } catch {
-    return "unknown";
+    return 'unknown';
   }
 }
 
 function readJSONSafe(p) {
   try {
-    return JSON.parse(fs.readFileSync(p, "utf8"));
+    return JSON.parse(fs.readFileSync(p, 'utf8'));
   } catch {
     return null;
   }
@@ -50,11 +53,11 @@ function dedupHasLine(journalPath, key) {
   const size = Math.min(TAIL_SIZE, stats.size);
   const start = Math.max(0, stats.size - size);
   const buffer = Buffer.alloc(size);
-  const fd = fs.openSync(journalPath, "r");
+  const fd = fs.openSync(journalPath, 'r');
   fs.readSync(fd, buffer, 0, size, start);
   fs.closeSync(fd);
-  const segment = buffer.toString("utf8");
-  return segment.split("\n").some((line) => line.includes(`"dedup_key":"${key}"`));
+  const segment = buffer.toString('utf8');
+  return segment.split('\n').some((line) => line.includes(`"dedup_key":"${key}"`));
 }
 
 function stableJSONStringify(o) {
@@ -65,11 +68,11 @@ function stableJSONStringify(o) {
   return JSON.stringify(ordered);
 }
 
-requireFile(RECEIPT, "evolution receipt");
+requireFile(RECEIPT, 'evolution receipt');
 
 const receipt = readJSONSafe(RECEIPT);
 if (!receipt || !Array.isArray(receipt.targets) || receipt.targets.length === 0) {
-  console.error("[journal] malformed or empty receipt");
+  console.error('[journal] malformed or empty receipt');
   process.exit(2);
 }
 
@@ -80,7 +83,7 @@ const artifact_id = proof.artifact_id || proof.artifactId || null;
 const proof_root = proof.merkle_root || proof.root || proof.archive_root || null;
 
 fs.mkdirSync(path.dirname(JOURNAL), { recursive: true });
-const fd = fs.openSync(JOURNAL, "a");
+const fd = fs.openSync(JOURNAL, 'a');
 
 for (const target of receipt.targets) {
   const template_path = target.template_path;
@@ -97,14 +100,14 @@ for (const target of receipt.targets) {
     template_path,
     from_version: target.from_version || null,
     to_version: target.to_version || null,
-    receipt_path: "artifacts/evolution/template_evolution_receipt.json",
+    receipt_path: 'artifacts/evolution/template_evolution_receipt.json',
     receipt_sha256,
     artifact_id,
     proof_root,
     dedup_key,
   };
 
-  fs.writeSync(fd, stableJSONStringify(line) + "\n", null, "utf8");
+  fs.writeSync(fd, stableJSONStringify(line) + '\n', null, 'utf8');
 }
 
 fs.closeSync(fd);

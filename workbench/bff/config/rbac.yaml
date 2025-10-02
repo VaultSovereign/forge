@@ -15,7 +15,6 @@ roles:
 # optional mapping claim -> role(s)
 # e.g. for Auth0: "https://vaultmesh/roles": ["operator","auditor"]
 claims:
-  roles_claim_path: "https://vaultmesh/roles"
+  roles_claim_path: 'https://vaultmesh/roles'
   # fallback if claim missing:
-  default_roles: ["auditor"]
-
+  default_roles: ['auditor']

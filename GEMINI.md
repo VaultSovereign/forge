@@ -8,17 +8,17 @@ VaultMesh Forge is a "Prompt OS" that turns small commands into complex, structu
 
 The core of the application is the `forge` CLI, which has the following key features:
 
-*   **Template Execution:** The `run` command executes a template from the `catalog` directory, sending a dynamically generated prompt to an AI model and validating the output against a JSON schema.
-*   **Reality Ledger:** All events are recorded in a "Reality Ledger," which provides an immutable audit trail. The CLI includes commands for verifying, querying, and viewing stats for the ledger.
-*   **Profiles:** The CLI uses profiles (e.g., `@vault`, `@blue`, `@exec`) to inject different "voices" and default settings into the prompts.
-*   **Safety:** The platform has built-in safety guardrails to prevent destructive actions and ensure that the AI operates within a predefined scope.
+- **Template Execution:** The `run` command executes a template from the `catalog` directory, sending a dynamically generated prompt to an AI model and validating the output against a JSON schema.
+- **Reality Ledger:** All events are recorded in a "Reality Ledger," which provides an immutable audit trail. The CLI includes commands for verifying, querying, and viewing stats for the ledger.
+- **Profiles:** The CLI uses profiles (e.g., `@vault`, `@blue`, `@exec`) to inject different "voices" and default settings into the prompts.
+- **Safety:** The platform has built-in safety guardrails to prevent destructive actions and ensure that the AI operates within a predefined scope.
 
 ## Building and Running
 
 ### Prerequisites
 
-*   Node.js
-*   `pnpm` package manager (`npm install -g pnpm`)
+- Node.js
+- `pnpm` package manager (`npm install -g pnpm`)
 
 ### Installation
 
@@ -96,8 +96,8 @@ pnpm test:ledger
 
 ## Development Conventions
 
-*   **TypeScript:** The project is written in TypeScript. Follow existing coding styles and conventions.
-*   **Templates:** New functionality is added by creating new YAML templates in the `catalog` directory. Use the `pnpm vm scaffold template <family>.<name>` command to generate a new template.
-*   **Schemas:** The output of each template is validated against a JSON schema defined in the `schemas` directory.
-*   **Reality Ledger:** All template executions are recorded in the Reality Ledger. This is a core feature of the platform and should be treated with care.
-*   **Linting and Formatting:** The project has placeholders for ESLint and Prettier, but they are not yet configured. (TODO)
+- **TypeScript:** The project is written in TypeScript. Follow existing coding styles and conventions.
+- **Templates:** New functionality is added by creating new YAML templates in the `catalog` directory. Use the `pnpm vm scaffold template <family>.<name>` command to generate a new template.
+- **Schemas:** The output of each template is validated against a JSON schema defined in the `schemas` directory.
+- **Reality Ledger:** All template executions are recorded in the Reality Ledger. This is a core feature of the platform and should be treated with care.
+- **Linting and Formatting:** The project has placeholders for ESLint and Prettier, but they are not yet configured. (TODO)

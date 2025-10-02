@@ -24,8 +24,9 @@ export function resolveTemplateId(id: string): string | null {
   // fallback scan (case-insensitive)
   const { items } = listTemplates({ limit: 200 });
   const hit = items.find(
-    (t) => t.id.toLowerCase() === norm.toLowerCase() || (t.name ?? '').toLowerCase() === norm.toLowerCase()
+    (t) =>
+      t.id.toLowerCase() === norm.toLowerCase() ||
+      (t.name ?? '').toLowerCase() === norm.toLowerCase(),
   );
   return hit?.id ?? null;
 }
-

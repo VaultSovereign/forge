@@ -63,7 +63,7 @@ export default function TemplateRunner() {
       (error) => {
         setLogs((prev) => [...prev, `stream error: ${String(error)}`]);
         setStreaming(false);
-      }
+      },
     );
   };
 

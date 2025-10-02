@@ -11,7 +11,9 @@ type RbacDoc = {
 let matrix: RbacDoc = { roles: {} };
 
 export function loadRbacMatrix() {
-  const p = process.env.VMESH_RBAC_PATH || path.join(process.cwd(), 'workbench', 'bff', 'config', 'rbac.yaml');
+  const p =
+    process.env.VMESH_RBAC_PATH ||
+    path.join(process.cwd(), 'workbench', 'bff', 'config', 'rbac.yaml');
   if (fs.existsSync(p)) {
     try {
       matrix = YAML.parse(fs.readFileSync(p, 'utf8')) as RbacDoc;
@@ -44,7 +46,7 @@ export function rbac(required: string[]) {
 
     // Action-based check
     const ok = required.some((action) =>
-      [...roles].some((role) => (matrix.roles[role] ?? []).includes(action))
+      [...roles].some((role) => (matrix.roles[role] ?? []).includes(action)),
     );
     if (!ok) {
       reply.code(403).send({ ok: false, error: 'forbidden', need: required });

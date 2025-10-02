@@ -23,8 +23,8 @@ export default async function shimsRoute(app: FastifyInstance) {
       url: `/v1/api/templates${buildQS({ filter, limit, cursor })}`,
       headers: {
         ...(req.headers.authorization ? { authorization: String(req.headers.authorization) } : {}),
-        accept: 'application/json'
-      }
+        accept: 'application/json',
+      },
     });
     reply.headers(r.headers);
     reply.status(r.statusCode);
@@ -33,7 +33,14 @@ export default async function shimsRoute(app: FastifyInstance) {
 
   // GET /ledger → /v1/api/ledger/events
   app.get('/ledger', async (req, reply) => {
-    const r = await app.inject({ method: 'GET', url: '/v1/api/ledger/events', headers: { ...(req.headers.authorization ? { authorization: String(req.headers.authorization) } : {}), accept: 'application/json' } });
+    const r = await app.inject({
+      method: 'GET',
+      url: '/v1/api/ledger/events',
+      headers: {
+        ...(req.headers.authorization ? { authorization: String(req.headers.authorization) } : {}),
+        accept: 'application/json',
+      },
+    });
     reply.headers(r.headers);
     reply.status(r.statusCode);
     return reply.send(r.body);
@@ -53,7 +60,11 @@ export default async function shimsRoute(app: FastifyInstance) {
       method: 'POST',
       url: '/v1/api/execute',
       payload: { templateId: id, args },
-      headers: { 'content-type': 'application/json', ...(req.headers.authorization ? { authorization: String(req.headers.authorization) } : {}), accept: 'application/json' }
+      headers: {
+        'content-type': 'application/json',
+        ...(req.headers.authorization ? { authorization: String(req.headers.authorization) } : {}),
+        accept: 'application/json',
+      },
     });
     reply.headers(r.headers);
     reply.status(r.statusCode);

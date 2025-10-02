@@ -9,16 +9,16 @@ keyword: cyber-container-security-scanner
 title: Container Security Scanner
 purpose: Analyze container and Dockerfile misconfigurations and vulnerabilities, proposing minimal diffs and prioritized fixes.
 inputs:
-  dockerfile_path: {type: string, required: false}
-  dockerfile_text: {type: string, required: false}
-  trivy_report: {type: string, required: false}
-  output_format: {type: enum, values: [json, yaml, markdown], default: json}
+  dockerfile_path: { type: string, required: false }
+  dockerfile_text: { type: string, required: false }
+  trivy_report: { type: string, required: false }
+  output_format: { type: enum, values: [json, yaml, markdown], default: json }
 quality_checklist:
-  - "Classify findings by severity and provide minimal diffs"
-  - "Compute numeric score (0–100)"
-  - "Reference supply-chain best practices"
+  - 'Classify findings by severity and provide minimal diffs'
+  - 'Compute numeric score (0–100)'
+  - 'Reference supply-chain best practices'
 safety_guardrails:
-  - "Advisory; read-only"
+  - 'Advisory; read-only'
 prompt:
   system: |
     Analyze container image and Dockerfile misconfigurations, suggest minimal diffs.
@@ -33,5 +33,4 @@ prompt:
     Trivy report (optional JSON):
     {{trivy_report}}
 outputs:
-  schema_ref: "../schemas/output.schema.json#/definitions/cyber/container_security_scanner"
-
+  schema_ref: '../schemas/output.schema.json#/definitions/cyber/container_security_scanner'

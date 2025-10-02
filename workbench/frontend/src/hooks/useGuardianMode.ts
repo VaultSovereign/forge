@@ -24,18 +24,20 @@ export function useGuardianMode(pollMs = 0) {
       // Prefer lightweight GET probe; fallback to POST if not available
       const r = await fetch(`${BASE}/v1/guardian/mode`, { signal: ctrl.signal });
       if (r.ok) {
-        const data = await r.json().catch(() => ({} as any));
-        const m: GuardianMode = data?.mode === 'agent' ? 'agent' : data?.mode === 'stub' ? 'stub' : 'unknown';
+        const data = await r.json().catch(() => ({}) as any);
+        const m: GuardianMode =
+          data?.mode === 'agent' ? 'agent' : data?.mode === 'stub' ? 'stub' : 'unknown';
         setMode(m);
       } else {
         const r2 = await fetch(`${BASE}/guardian/ask`, {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ input: 'ping' }),
-          signal: ctrl.signal
+          signal: ctrl.signal,
         });
-        const data2 = await r2.json().catch(() => ({} as any));
-        const m2: GuardianMode = data2?.mode === 'agent' ? 'agent' : data2?.mode === 'stub' ? 'stub' : 'unknown';
+        const data2 = await r2.json().catch(() => ({}) as any);
+        const m2: GuardianMode =
+          data2?.mode === 'agent' ? 'agent' : data2?.mode === 'stub' ? 'stub' : 'unknown';
         setMode(m2);
       }
     } catch (e: any) {

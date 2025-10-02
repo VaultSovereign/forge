@@ -106,4 +106,3 @@ export async function askGuardian(input: string, model = 'gpt-4.1') {
   });
   return res;
 }
-
