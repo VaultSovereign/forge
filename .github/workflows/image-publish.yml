@@ -2,6 +2,12 @@ name: image-publish
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'Dockerfile'
+      - 'docker/**'
+      - 'workbench/**'
+      - 'package.json'
+      - '.github/workflows/image-publish.yml'
     tags: [ 'v*' ]
   workflow_dispatch:
 permissions:
@@ -12,6 +18,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   build-push:
+    if: ${{ hashFiles('Dockerfile') != '' || hashFiles('docker/Dockerfile') != '' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -41,4 +48,3 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           provenance: true
-
