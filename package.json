@@ -40,7 +40,8 @@
   "pnpm": {
     "overrides": {
       "cross-spawn": ">=7.0.5",
-      "brace-expansion": ">=2.0.2"
+      "brace-expansion@2.x": ">=2.0.2",
+      "brace-expansion@1.x": ">=1.1.12"
     }
   },
   "scripts": {
