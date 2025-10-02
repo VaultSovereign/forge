@@ -91,7 +91,7 @@ jobs:
           else
             echo "mode=main" >> "$GITHUB_OUTPUT";
           fi
-      - name: Run tests (PR: changed-only, main: full with coverage)
+      - name: 'Run tests (PR: changed-only, main: full with coverage)'
         env:
           COVERAGE_RELAX: ${{ github.event_name == 'pull_request' && '1' || '0' }}
         run: |
