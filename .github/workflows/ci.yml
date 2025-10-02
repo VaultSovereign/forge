@@ -45,10 +45,18 @@ jobs:
         with:
           node-version: 20
           pnpm-version: 10.17.0
+
+      - name: Cache ESLint
+        uses: actions/cache@v4
+        with:
+          path: .eslintcache
+          key: eslint-${{ runner.os }}-${{ hashFiles('**/*.{ts,tsx,js,jsx,json,yml,yaml}') }}
+          restore-keys: eslint-${{ runner.os }}-
+
       - name: Lint & Format
         run: |
           pnpm format:check
-          pnpm exec eslint -c .eslintrc.json . --ext .ts,.tsx --quiet
+          pnpm exec eslint -c .eslintrc.json . --ext .ts,.tsx --quiet --cache
   build-test:
     needs: lint
     runs-on: ubuntu-latest
@@ -153,6 +161,12 @@ jobs:
           name: gitleaks-${{ github.run_id }}-${{ github.run_attempt }}
           path: gitleaks.sarif
           if-no-files-found: ignore
+
+      - name: Upload SARIF to Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: gitleaks.sarif
+        continue-on-error: true
 
       - name: Security audit
         run: pnpm audit --prod || echo "Audit warnings found"

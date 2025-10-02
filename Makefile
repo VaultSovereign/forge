@@ -1,4 +1,4 @@
-.PHONY: forge-prepush install-git-hooks proposal-verify purge-check quality dev lint typecheck doctor prepush-scans \
+.PHONY: forge-prepush install-git-hooks proposal-verify purge-check quality dev lint lint:fix lint:quiet docs-openapi typecheck doctor prepush-scans \
         dev-bff dev-web build-bff build-web curl-mode curl-mode-head curl-metrics curl-templates-count \
         smoke-bff smoke-web smoke-up smoke-guardian smoke-templates smoke-execute docs-internal-dev docs-external-dev \
         docs-internal-preview docs-external docs-sitemap status commits
@@ -29,6 +29,18 @@ dev: dev-web
 lint:
 	@echo ">> lint"
 	@pnpm -w run lint
+
+lint:fix:
+	@echo ">> lint --fix"
+	@pnpm -w exec eslint . --ext .ts,.tsx --fix
+
+lint:quiet:
+	@echo ">> lint (errors only)"
+	@pnpm -w exec eslint -c .eslintrc.json . --ext .ts,.tsx --quiet
+
+docs-openapi:
+	@echo ">> regenerate OpenAPI docs"
+	@pnpm -w run docs:openapi:md
 
 typecheck:
 	@echo ">> typecheck"
