@@ -41,6 +41,12 @@ const RenderReportArgs = z.object({
   eventId: z.string().min(1).optional(),
 });
 
+const AnalyzeThreatIntelArgs = z.object({
+  topic: z.string().min(1),
+  sources: z.array(z.string()).optional(),
+  scope: z.string().optional(),
+});
+
 /**
  * List available templates
  */
@@ -317,6 +323,28 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         additionalProperties: false,
       },
     },
+    {
+      name: 'analyze_threat_intel',
+      description: 'Analyze threat intel and produce an executive-ready summary',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          topic: { type: 'string', description: 'Topic to analyze' },
+          sources: {
+            type: 'array',
+            description: 'List of sources (strings, links, or file refs)',
+            items: { type: 'string' },
+          },
+          scope: {
+            type: 'string',
+            description: 'Summary scope (concise|executive|expanded)',
+            default: 'executive',
+          },
+        },
+        required: ['topic'],
+        additionalProperties: false,
+      },
+    },
   ],
 }));
 
@@ -395,6 +423,24 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: 'text',
               text: JSON.stringify(report),
+            },
+          ],
+        };
+      }
+
+      case 'analyze_threat_intel': {
+        const { topic, sources, scope } = AnalyzeThreatIntelArgs.parse(args ?? {});
+        const result = await runTemplate('operations-research-analyst', 'analyst', {
+          topic,
+          sources,
+          scope: scope || 'executive',
+        });
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(result),
             },
           ],
         };

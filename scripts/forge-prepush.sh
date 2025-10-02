@@ -178,6 +178,17 @@ if [ "$FAST" != "1" ]; then
     fi
     jq -nc --argjson tests_passed "$tests_passed" --argjson secrets_gate_ran "$secrets_gate_ran" --argjson secrets_critical "$SECRETS_CRIT" --argjson review_high "$REVIEW_HIGH" '{ current_controls: { ci:{ tests_passed: $tests_passed, secrets_gate_ran: $secrets_gate_ran, secrets_critical: $secrets_critical, review_high: $review_high }, ledger:{ hashing:"sha256", signature:"ed25519?" } }, target_frameworks:["NIST 800-53","OWASP ASVS"] }' > "$TMPDIR/gaps.json"
     node dist/cli/index.js run cyber-compliance-gap-analyzer --args @"$TMPDIR/gaps.json" >"$TMPDIR/gaps_out.json" || true
+    
+    # Executive summary via Research Analyst (advisory)
+    say "Executive summary (research-analyst)..."
+    jq -nc \
+      --arg tp "Pre-push CI security summary" \
+      --arg seco "$SECO" \
+      --arg revo "$REVO" \
+      --arg gaps "$TMPDIR/gaps_out.json" \
+      '{topic:$tp, sources:["secrets_audit:"+$seco, "code_review:"+$revo, "compliance_gaps:"+$gaps], scope:"executive"}' \
+      > "$TMPDIR/analyst_args.json"
+    node dist/cli/index.js run operations-research-analyst --args @"$TMPDIR/analyst_args.json" >"$TMPDIR/exec_summary_out.json" || true
   else
     if [ "$SKIP_REMOTE" = "1" ]; then
       say "Skipping compliance snapshot because no provider is configured."
@@ -192,5 +203,8 @@ say "Archiving artifacts..."
 mkdir -p artifacts/prepush
 cp -f "$TMPDIR"/*_out.json artifacts/prepush/ 2>/dev/null || true
 [ -f sbom.json ] && cp -f sbom.json artifacts/prepush/
+if [ -f "$TMPDIR/exec_summary_out.json" ]; then
+  cp -f "$TMPDIR/exec_summary_out.json" artifacts/prepush/executive-summary.json || true
+fi
 
 say "Pre-push checks passed."

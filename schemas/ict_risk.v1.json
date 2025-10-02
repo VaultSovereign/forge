@@ -70,7 +70,10 @@
       "regions": {
         "description": "Jurisdictions in scope for the assessment.",
         "items": {
-          "enum": ["EU", "EEA"],
+          "enum": [
+            "EU",
+            "EEA"
+          ],
           "type": "string"
         },
         "minItems": 1,
@@ -92,7 +95,14 @@
         "type": "array"
       }
     },
-    "required": ["org_name", "assessment_date", "org_type", "assets", "policies", "incidents"],
+    "required": [
+      "org_name",
+      "assessment_date",
+      "org_type",
+      "assets",
+      "policies",
+      "incidents"
+    ],
     "title": "ICT Risk Assessment (Inputs)",
     "type": "object"
   },
@@ -112,7 +122,13 @@
           "additionalProperties": false,
           "properties": {
             "control_id": {
-              "enum": ["DORA-IRM-01", "DORA-INC-01", "DORA-TRT-01", "DORA-TPRM-01", "DORA-GOV-01"],
+              "enum": [
+                "DORA-IRM-01",
+                "DORA-INC-01",
+                "DORA-TRT-01",
+                "DORA-TPRM-01",
+                "DORA-GOV-01"
+              ],
               "type": "string"
             },
             "evidence_paths": {
@@ -140,11 +156,20 @@
               "type": "number"
             },
             "status": {
-              "enum": ["Compliant", "Partial", "Non-Compliant"],
+              "enum": [
+                "Compliant",
+                "Partial",
+                "Non-Compliant"
+              ],
               "type": "string"
             }
           },
-          "required": ["control_id", "pillar", "status", "risk_score"],
+          "required": [
+            "control_id",
+            "pillar",
+            "status",
+            "risk_score"
+          ],
           "type": "object"
         },
         "type": "array"
@@ -163,13 +188,22 @@
         "type": "string"
       }
     },
-    "required": ["org_name", "assessment_date", "controls"],
+    "required": [
+      "org_name",
+      "assessment_date",
+      "controls"
+    ],
     "title": "ICT Risk Assessment (Outputs)",
     "type": "object"
   },
   "owner": "platform",
   "status": "draft",
   "summary": "Schema for digital operational resilience assessments under Regulation (EU) 2022/2554 (DORA). Defines expected inputs and outputs for automated assessment aligned to the five pillars.\n",
-  "tags": ["dora", "ict", "compliance", "risk"],
+  "tags": [
+    "dora",
+    "ict",
+    "compliance",
+    "risk"
+  ],
   "title": "ICT Risk Assessment for DORA"
 }

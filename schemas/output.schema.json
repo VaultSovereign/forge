@@ -1,6 +1,24 @@
 {
   "$id": "output.schema.json",
   "definitions": {
+    "operations": {
+      "research_analyst": {
+        "type": "object",
+        "required": ["summary", "details"],
+        "properties": {
+          "summary": {
+            "type": "array",
+            "maxItems": 3,
+            "items": { "type": "string" }
+          },
+          "details": { "type": "string" },
+          "next_steps": { "type": "array", "items": { "type": "string" } },
+          "escalations": { "type": "array", "items": { "type": "string" } },
+          "confidence": { "type": "string", "enum": ["high", "medium", "low"] }
+        },
+        "additionalProperties": true
+      }
+    },
     "cyber": {
       "secrets_audit": {
         "type": "object",
