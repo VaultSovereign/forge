@@ -4,6 +4,8 @@ import { z } from 'zod';
 import { authMiddleware } from '../auth/oidc.js';
 import { rbac } from '../auth/rbac.js';
 import { coreExecute } from '../core/client.js';
+// eslint-disable-next-line import/no-relative-packages
+import { limitCfg } from './_limits.js';
 
 const ExecuteReq = z.object({
   templateId: z.string().min(1),
@@ -14,7 +16,7 @@ const ExecuteReq = z.object({
 export default async function executeRoutes(app: FastifyInstance) {
   app.post(
     '/v1/api/execute',
-    { preHandler: [authMiddleware(), rbac(['execute:run'])] },
+    { preHandler: [authMiddleware(), rbac(['execute:run'])], ...limitCfg('EXECUTE_POST_RPS', 'EXECUTE_POST_WINDOW', 30, '1 minute') },
     async (request) => {
       const body = ExecuteReq.parse(request.body ?? {});
       const result = await coreExecute(body);
