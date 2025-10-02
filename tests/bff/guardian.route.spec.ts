@@ -15,28 +15,28 @@ import { askGuardian } from '../../agents/index.ts';
 describe('POST /guardian/ask handler (direct)', () => {
   function makeReply() {
     const reply: any = { statusCode: 200, body: undefined, headers: {} };
-    
+
     // Fastify's chaining API
     reply.code = (code: number) => {
       reply.statusCode = code;
       return reply;
     };
-    
+
     reply.status = (code: number) => {
       reply.statusCode = code;
       return reply;
     };
-    
+
     reply.send = (data: unknown) => {
       reply.body = data;
       return reply;
     };
-    
+
     reply.header = (key: string, value: string) => {
       reply.headers[key] = value;
       return reply;
     };
-    
+
     return reply;
   }
 
