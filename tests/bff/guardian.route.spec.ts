@@ -110,4 +110,3 @@ describe('makePostGuardian handler', () => {
     expect(logError).toHaveBeenCalled();
   });
 });
-

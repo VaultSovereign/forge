@@ -13,9 +13,6 @@
     "ecmaVersion": 2021,
     "sourceType": "module",
     "tsconfigRootDir": ".",
-    "EXPERIMENTAL_useProjectService": {
-      "maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING": 200
-    },
     "noWarnOnMultipleProjects": true
   },
   "env": {

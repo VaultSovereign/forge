@@ -67,7 +67,9 @@ async function validateAnalystOutput(filepath) {
 
     // Success
     console.log('✅ Schema validation passed');
-    console.log(`   - Summary items: ${output.summary.length}/${SCHEMA_REQUIREMENTS.maxSummaryItems}`);
+    console.log(
+      `   - Summary items: ${output.summary.length}/${SCHEMA_REQUIREMENTS.maxSummaryItems}`
+    );
     console.log(`   - Details length: ${output.details.length} chars`);
     console.log(`   - Confidence: ${output.confidence}`);
     if (output.next_steps) console.log(`   - Next steps: ${output.next_steps.length} items`);

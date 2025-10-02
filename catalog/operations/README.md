@@ -55,44 +55,36 @@ make forge-prepush
 ```
 
 This advisory summary aggregates:
+
 - Secrets audit results
 - Code security review findings
 - Compliance gap analysis
 
 ## Input Schema
 
-| Field | Type | Required | Default | Description |
-|-------|------|----------|---------|-------------|
-| `topic` | string | ✅ | - | The research question or topic to analyze |
-| `sources` | array[string] | ❌ | [] | List of sources (strings, links, file refs) |
-| `scope` | enum | ❌ | `concise` | Summary depth: `concise`, `executive`, or `expanded` |
-| `output_format` | enum | ❌ | `json` | Output format: `json`, `yaml`, or `markdown` |
+| Field           | Type          | Required | Default   | Description                                          |
+| --------------- | ------------- | -------- | --------- | ---------------------------------------------------- |
+| `topic`         | string        | ✅       | -         | The research question or topic to analyze            |
+| `sources`       | array[string] | ❌       | []        | List of sources (strings, links, file refs)          |
+| `scope`         | enum          | ❌       | `concise` | Summary depth: `concise`, `executive`, or `expanded` |
+| `output_format` | enum          | ❌       | `json`    | Output format: `json`, `yaml`, or `markdown`         |
 
 ## Output Schema
 
 ```json
 {
-  "summary": [
-    "First key insight",
-    "Second key insight",
-    "Third key insight"
-  ],
+  "summary": ["First key insight", "Second key insight", "Third key insight"],
   "details": "Expanded analysis with citations...",
-  "next_steps": [
-    "Optional actionable recommendation",
-    "Another step if appropriate"
-  ],
-  "escalations": [
-    "Blocker or approval needed",
-    "Another escalation signal"
-  ],
-  "confidence": "high"  // or "medium" or "low"
+  "next_steps": ["Optional actionable recommendation", "Another step if appropriate"],
+  "escalations": ["Blocker or approval needed", "Another escalation signal"],
+  "confidence": "high" // or "medium" or "low"
 }
 ```
 
 ## Quality Checklist
 
 The template enforces:
+
 - ✅ Lead with 3-bullet executive summary
 - ✅ Support insights with citations or confidence levels
 - ✅ Highlight unknowns, blockers, and assumptions
@@ -111,9 +103,11 @@ The template enforces:
 Voice: "Research Analyst - clear, neutral, evidence-driven; bullet-first"
 
 **Defaults:**
+
 - `output_format: json` (for schema validation)
 
 **Style:**
+
 - `bullets: true` (executive-friendly formatting)
 - `citations: required` (all claims sourced)
 
@@ -132,9 +126,7 @@ Voice: "Research Analyst - clear, neutral, evidence-driven; bullet-first"
     "Expand test coverage for reality ledger cryptographic operations",
     "Consider adding mutation testing for critical security paths"
   ],
-  "escalations": [
-    "Review team approval needed for expanding test infrastructure budget"
-  ],
+  "escalations": ["Review team approval needed for expanding test infrastructure budget"],
   "confidence": "high"
 }
 ```
@@ -142,18 +134,21 @@ Voice: "Research Analyst - clear, neutral, evidence-driven; bullet-first"
 ## Integration Points
 
 ### 1. Prepush Gate (`forge-prepush.sh`)
+
 - Runs automatically during CI mirror
 - Aggregates security scan results
 - Non-blocking advisory output
 - Stored: `artifacts/prepush/executive-summary.json`
 
 ### 2. MCP Server (`vaultmesh-mcp-server.ts`)
+
 - Tool: `analyze_threat_intel`
 - Zod validation for inputs
 - Returns structured JSON
 - Available in Claude Desktop
 
 ### 3. Template Catalog (`catalog/operations/`)
+
 - Keyword: `operations-research-analyst`
 - RITUAL-CLAUSE compliant
 - Guardian: Tem (Remembrance)

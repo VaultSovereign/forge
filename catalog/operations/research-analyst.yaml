@@ -66,4 +66,3 @@ prompt:
     No additional commentary.
 outputs:
   schema_ref: '../schemas/output.schema.json#/definitions/operations/research_analyst'
-
