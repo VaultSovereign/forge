@@ -9,7 +9,7 @@
 # Dependencies
 node_modules/
 *.lock
-pnpm-lock.yaml
+!pnpm-lock.yaml
 
 # Build outputs
 dist/
@@ -39,6 +39,10 @@ _backups/vaultmesh-ai-remote/
 _backups/*_dirlist.txt
 _backups/*_filelist.txt
 _backups/*_topdirs.txt
+# Large local backups/archives should not be versioned
+_backups/**/*.tgz
+_backups/**/*.tar.gz
+_backups/**/*.zip
 ._*
 .Spotlight-V100
 .Trashes
@@ -68,6 +72,17 @@ replit-run.sh
 replit.md
 .local/state/replit/
 .local/share/pnpm/
+
+# Local analysis outputs (do not version)
+artifacts/audit/
+artifacts/prepush/
+artifacts/reports/
+artifacts/seals/
+
+# Generated from YAML at build time; keep out of VCS
+schemas/ict_risk.v1.json
+schemas/template_index.v1.json
+schemas/tprm.v1.json
 
 # Build outputs (prefer not versioning)
 **/dist/
