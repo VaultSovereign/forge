@@ -29,10 +29,28 @@ jobs:
           fi
           echo "✅ No Replit remnants found"
 
-      - uses: ./.github/actions/setup-pnpm
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-          pnpm-version: '10.17.0'
+          cache: 'pnpm'
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.0
+          run_install: false
+      - name: Install workspace deps
+        run: pnpm -w install --frozen-lockfile || pnpm -w install
+      - name: Install workspace deps
+        run: pnpm -w install --frozen-lockfile || pnpm -w install
+      - name: Install workspace deps
+        run: pnpm -w install --frozen-lockfile || pnpm -w install
+      - name: Install workspace deps
+        run: pnpm -w install --frozen-lockfile || pnpm -w install
+      - name: Install workspace deps
+        run: pnpm -w install --frozen-lockfile || pnpm -w install
+      - name: Install workspace deps
+        run: pnpm -w install --frozen-lockfile || pnpm -w install
       - name: Lint & Format
         run: |
           pnpm install --frozen-lockfile
@@ -52,11 +70,18 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup toolchain
-        uses: ./.github/actions/setup-pnpm
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          pnpm-version: '10.17.0'
+          cache: 'pnpm'
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.0
+          run_install: false
+      - name: Install workspace deps
+        run: pnpm -w install --frozen-lockfile || pnpm -w install
 
       # Ensure base exists for PRs so changed-only tests can diff against origin/<base>
       - name: Fetch base branch (PR only)
@@ -181,8 +206,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup toolchain
-        uses: ./.github/actions/setup-pnpm
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.0
+          run_install: false
       - name: Generate OPENAPI.md from spec
         run: node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md
 
@@ -241,12 +274,21 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Setup toolchain
+      - name: Setup Node.js
         if: steps.changes.outputs.catalog == 'true' || steps.changes.outputs.ore == 'true'
-        uses: ./.github/actions/setup-pnpm
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
-          pnpm-version: '10.17.0'
+          cache: 'pnpm'
+      - name: Setup pnpm
+        if: steps.changes.outputs.catalog == 'true' || steps.changes.outputs.ore == 'true'
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.0
+          run_install: false
+      - name: Install workspace deps
+        if: steps.changes.outputs.catalog == 'true' || steps.changes.outputs.ore == 'true'
+        run: pnpm -w install --frozen-lockfile || pnpm -w install
 
       - name: Build project
         if: steps.changes.outputs.catalog == 'true' || steps.changes.outputs.ore == 'true'
@@ -289,8 +331,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup toolchain
-        uses: ./.github/actions/setup-pnpm
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.0
+          run_install: false
       - name: Generate OPENAPI.md from spec
         run: node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md
 
@@ -390,12 +440,21 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Setup toolchain
+      - name: Setup Node.js
         if: steps.orechg.outputs.ore == 'true'
-        uses: ./.github/actions/setup-pnpm
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
-          pnpm-version: '10.17.0'
+          cache: 'pnpm'
+      - name: Setup pnpm
+        if: steps.orechg.outputs.ore == 'true'
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.0
+          run_install: false
+      - name: Install workspace deps
+        if: steps.orechg.outputs.ore == 'true'
+        run: pnpm -w install --frozen-lockfile || pnpm -w install
 
       - name: Build project
         if: steps.orechg.outputs.ore == 'true'
@@ -461,11 +520,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup toolchain
-        uses: ./.github/actions/setup-pnpm
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-          pnpm-version: '10.17.0'
+          cache: 'pnpm'
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.0
+          run_install: false
 
       - name: Install workspace deps
         run: pnpm install --frozen-lockfile
@@ -704,8 +768,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup toolchain
-        uses: ./.github/actions/setup-pnpm
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.0
+          run_install: false
       - name: Generate OPENAPI.md from spec
         run: node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md
 
@@ -754,8 +826,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup toolchain
-        uses: ./.github/actions/setup-pnpm
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.0
+          run_install: false
       - name: Generate OPENAPI.md from spec
         run: node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md
 
@@ -778,8 +858,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup toolchain
-        uses: ./.github/actions/setup-pnpm
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.0
+          run_install: false
       - name: Generate OPENAPI.md from spec
         run: node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md
 
@@ -876,11 +964,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup toolchain
-        uses: ./.github/actions/setup-pnpm
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-          pnpm-version: '10.17.0'
+          cache: 'pnpm'
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.0
+          run_install: false
 
       - name: Install & build CLI
         run: |
