@@ -12,10 +12,9 @@
  * - Counts items; attempts to classify "major" incidents when JSON has { severity: "major" }
  */
 
-import fs from 'fs';
-import path from 'path';
-
-import fg from 'fast-glob';
+import { sync as globSync } from 'fast-glob';
+import fs from 'node:fs';
+import path from 'node:path';
 
 type Input = {
   org_name: string;
@@ -44,14 +43,14 @@ function applicability(orgType?: string) {
 
 function countFromPatterns(patterns?: string[]) {
   if (!patterns?.length) return 0;
-  return fg.sync(patterns, { dot: true }).length;
+  return globSync(patterns, { dot: true }).length;
 }
 
 function classifyIncidents(patterns?: string[]) {
   let incidents_count = 0;
   let major_incidents = 0;
   if (!patterns?.length) return { incidents_count, major_incidents };
-  const files = fg.sync(patterns, { dot: true });
+  const files = globSync(patterns, { dot: true });
   for (const f of files) {
     incidents_count += 1;
     try {

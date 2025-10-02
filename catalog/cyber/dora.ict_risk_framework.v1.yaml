@@ -1,6 +1,7 @@
 id: dora.ict_risk_framework.v1
 version: '1.1.1'
 keyword: cyber-dora-ict-risk
+purpose: 'ICT Risk Assessment framework orchestration template for DORA compliance'
 meta:
   title: 'DORA ICT Risk Management Framework Assessment'
   safety: read-only

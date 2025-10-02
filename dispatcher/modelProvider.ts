@@ -42,10 +42,9 @@ export function createProviderConfig(): ProviderConfig {
         if (!response.ok) {
           throw new Error(`Ollama chat failed with status ${response.status}`);
         }
-        const data: any = await response.json();
-        const msg =
-          data?.message?.content ?? data?.messages?.map((m: any) => m?.content).join('\n');
-        return String(msg ?? '');
+        const payload = (await response.json()) as unknown;
+        const message = extractOllamaContent(payload);
+        return message ?? '';
       },
     };
   }
@@ -103,4 +102,30 @@ export function createProviderConfig(): ProviderConfig {
       return res.choices?.[0]?.message?.content ?? '';
     },
   };
+}
+
+type OllamaMessage = { content?: unknown } | undefined;
+type OllamaResponse = {
+  message?: OllamaMessage;
+  messages?: OllamaMessage[];
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function extractOllamaContent(payload: unknown): string | null {
+  if (!isRecord(payload)) return null;
+  const response = payload as OllamaResponse;
+  const direct = response.message;
+  if (isRecord(direct) && typeof direct.content === 'string') {
+    return direct.content;
+  }
+  const messages = response.messages;
+  if (!Array.isArray(messages)) return null;
+  const combined = messages
+    .map((entry) => (isRecord(entry) && typeof entry.content === 'string' ? entry.content : null))
+    .filter((content): content is string => Boolean(content))
+    .join('\n');
+  return combined.length ? combined : null;
 }

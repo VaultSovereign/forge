@@ -12,7 +12,8 @@
   "parserOptions": {
     "ecmaVersion": 2021,
     "sourceType": "module",
-    "tsconfigRootDir": "."
+    "tsconfigRootDir": ".",
+    "noWarnOnMultipleProjects": true
   },
   "env": {
     "node": true,
@@ -90,7 +91,7 @@
         "tests/**/*.ts"
       ],
       "rules": {
-        "@typescript-eslint/no-explicit-any": "warn",
+        "@typescript-eslint/no-explicit-any": "off",
         "no-useless-escape": "warn",
         "no-empty": "warn",
         "import/no-unresolved": "off",
@@ -98,6 +99,22 @@
           "warn",
           { "ts-ignore": true, "ts-expect-error": "allow-with-description" }
         ]
+      }
+    },
+    {
+      "files": ["cli/**/*.ts"],
+      "rules": {
+        "no-console": "off"
+      }
+    },
+    {
+      "files": [
+        "dispatcher/modelProvider.ts",
+        "reality_ledger/node.ts",
+        "workbench/bff/src/server.ts"
+      ],
+      "rules": {
+        "import/no-named-as-default": "off"
       }
     },
     {

@@ -5,6 +5,14 @@
   "properties": {
     "bundle_path": {
       "type": "string"
+    },
+    "bundle_content": {
+      "type": "string",
+      "description": "Inline JSON audit bundle (capped)"
+    },
+    "bundle_truncated": {
+      "type": "boolean",
+      "description": "True when content was truncated for size"
     }
   },
   "additionalProperties": false

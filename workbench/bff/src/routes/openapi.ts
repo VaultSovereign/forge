@@ -1,7 +1,6 @@
+import { FastifyInstance } from 'fastify';
 import fs from 'node:fs';
 import path from 'node:path';
-
-import { FastifyInstance } from 'fastify';
 
 import { fromHere } from '../utils/esm-paths.js';
 

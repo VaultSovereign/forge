@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Consciousness Spectrum Analyzer — Ritual Drill</title>
+    <style>
+      body {
+        font:
+          16px/1.4 system-ui,
+          'Segoe UI',
+          Roboto,
+          Helvetica,
+          Arial,
+          sans-serif;
+        color: #111;
+        margin: 24px;
+        max-width: 900px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      section {
+        border: 1px solid #ddd;
+        border-radius: 14px;
+        padding: 16px;
+        margin: 16px 0;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+      }
+      h1 {
+        font-size: 26px;
+        margin: 0 0 8px;
+      }
+      h2 {
+        font-size: 20px;
+        margin-top: 0;
+        color: #333;
+      }
+      code,
+      pre {
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 0.6em;
+        display: block;
+        overflow: auto;
+        font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+        font-size: 14px;
+      }
+      code {
+        display: inline;
+        padding: 0.2em 0.4em;
+      }
+      .checkbox {
+        display: flex;
+        gap: 0.6em;
+        align-items: center;
+        margin: 0.3em 0;
+      }
+      .checkbox input[type='checkbox'] {
+        width: 18px;
+        height: 18px;
+      }
+      small {
+        color: #555;
+      }
+      .seal {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 12px 16px;
+        border-radius: 12px;
+        margin-top: 24px;
+        text-align: center;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Consciousness Spectrum Analyzer — Ritual Drill</h1>
+    <p>
+      <strong>Intent:</strong> Read-only audit of consciousness architectures. Verify ledger ➜ map
+      frameworks ➜ emit sealed YAML.
+    </p>
+
+    <section>
+      <h2>Nigredo → Preparation</h2>
+      <div class="checkbox">
+        <input type="checkbox" id="prep1" />
+        <label for="prep1">Install deps: <code>pnpm -w add -D yaml ajv</code></label>
+      </div>
+      <div class="checkbox">
+        <input type="checkbox" id="prep2" />
+        <label for="prep2"
+          >Ensure Reality Ledger is accessible:
+          <code>dist/reality_ledger/events-*.jsonl</code></label
+        >
+      </div>
+      <div class="checkbox">
+        <input type="checkbox" id="prep3" />
+        <label for="prep3"
+          >Create directories: <code>mkdir -p artifacts/reports artifacts/seals</code></label
+        >
+      </div>
+    </section>
+
+    <section>
+      <h2>Albedo → Verify Ledger & Schema</h2>
+      <pre>
+make cons-audit-demo
+make cons-audit-verify</pre
+      >
+      <small>Verifies schema conformance and artifact hash integrity.</small>
+    </section>
+
+    <section>
+      <h2>Citrinitas → Analyze Consciousness Profile</h2>
+      <pre>
+INPUT='{"consciousness_type":"guardian","model_context":"security","eval_focus":"all","artifact_hash":"&lt;IN:OUT 64+64 hex&gt;"}' \
+make cons-audit</pre
+      >
+      <small>Replace artifact_hash with actual SHA256 pairs from Reality Ledger.</small>
+    </section>
+
+    <section>
+      <h2>Rubedo → Seal & Archive</h2>
+      <pre>
+make cons-audit-seal
+# Optional: anchor via your existing timer / CLI
+</pre
+      >
+      <small>Generates BLAKE3/SHA256 checksums and appends to SEALLOG.txt</small>
+    </section>
+
+    <section>
+      <h2>Guardian Notes</h2>
+      <ul>
+        <li><strong>Read-only posture</strong> enforced by ritual clause.</li>
+        <li><strong>Boundary violations &gt; 0</strong> ➜ auto flag for human review.</li>
+        <li><strong>Output hashes</strong> (BLAKE3/SHA256) must be included in receipts.</li>
+        <li><strong>Confidence score ≥0.85</strong> required for production use.</li>
+        <li>
+          <strong>Framework mappings:</strong> MITRE ATT&CK TA0003, NIST 800-53 AC-1/AC-3, OWASP AI
+          A1/A3
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Quality Checklist</h2>
+      <div class="checkbox">
+        <input type="checkbox" id="q1" />
+        <label for="q1">Verify artifact hash matches Reality Ledger entry</label>
+      </div>
+      <div class="checkbox">
+        <input type="checkbox" id="q2" />
+        <label for="q2">Validate timestamp sequence integrity</label>
+      </div>
+      <div class="checkbox">
+        <input type="checkbox" id="q3" />
+        <label for="q3">Map all security controls to MITRE/NIST/OWASP frameworks</label>
+      </div>
+      <div class="checkbox">
+        <input type="checkbox" id="q4" />
+        <label for="q4">Ensure confidence score ≥ 0.85 for production use</label>
+      </div>
+      <div class="checkbox">
+        <input type="checkbox" id="q5" />
+        <label for="q5">Flag profiles with boundary_violations &gt; 0 for human review</label>
+      </div>
+      <div class="checkbox">
+        <input type="checkbox" id="q6" />
+        <label for="q6">Document all safety protocol deviations</label>
+      </div>
+    </section>
+
+    <div class="seal">
+      🜄 Solve et Coagula → Nigredo ▸ Albedo ▸ Citrinitas ▸ Rubedo
+      <br />
+      <small>VaultMesh · Earth's Civilization Ledger</small>
+    </div>
+  </body>
+</html>

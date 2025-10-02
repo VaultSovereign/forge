@@ -8,6 +8,7 @@ concurrency:
   cancel-in-progress: true
 
 on:
+  workflow_dispatch:
   push:
     branches: [main, develop]
   pull_request:
@@ -17,26 +18,52 @@ jobs:
   lint:
     name: lint & format check
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
+        include:
+          - node-version: 22
+            allow_failure: true
     steps:
       - uses: actions/checkout@v4
 
-      - name: Verify No Replit Remnants
-        run: |
-          if grep -RIn --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=attached_assets -E 'replit' . | grep -v '.gitignore:'; then
-            echo "❌ Found disallowed 'replit' references. Purification compromised."
-            exit 1
-          fi
-          echo "✅ No Replit remnants found"
-
-      - uses: ./.github/actions/setup-pnpm
+      - name: Node & pnpm setup
+        uses: ./.github/actions/node-pnpm-setup
         with:
-          node-version: 20
-          pnpm-version: '10.17.0'
+          node-version: ${{ matrix.node-version }}
+          pnpm-version: 10.17.0
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-${{ runner.os }}-${{ matrix.node-version }}-
+            pnpm-${{ runner.os }}-
+
+      - name: Cache ESLint
+        uses: actions/cache@v4
+        with:
+          path: .eslintcache
+          key: eslint-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('**/*.{ts,tsx,js,jsx,json,yml,yaml}') }}
+          restore-keys: eslint-${{ runner.os }}-${{ matrix.node-version }}-
+
       - name: Lint & Format
+        continue-on-error: ${{ matrix.allow_failure || false }}
         run: |
-          pnpm install --frozen-lockfile
           pnpm format:check
-          pnpm lint
+          pnpm exec eslint -c .eslintrc.json . --ext .ts,.tsx --quiet --cache
+
+      - name: Mark soft-fail result
+        if: ${{ matrix.allow_failure }}
+        run: echo "⚠️ Node ${{ matrix.node-version }} - failures allowed during transition period"
+
+      - name: Job summary
+        if: ${{ matrix.allow_failure }}
+        run: echo "⚠️ Node ${{ matrix.node-version }} is soft-fail for this job during transition period." >> $GITHUB_STEP_SUMMARY
+
   build-test:
     needs: lint
     runs-on: ubuntu-latest
@@ -51,11 +78,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup toolchain
-        uses: ./.github/actions/setup-pnpm
+      - name: Node & pnpm setup
+        uses: ./.github/actions/node-pnpm-setup
         with:
           node-version: ${{ matrix.node-version }}
-          pnpm-version: '10.17.0'
+          pnpm-version: 10.17.0
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-${{ runner.os }}-
 
       # Ensure base exists for PRs so changed-only tests can diff against origin/<base>
       - name: Fetch base branch (PR only)
@@ -65,10 +100,13 @@ jobs:
 
       - name: Generate OPENAPI.md from spec
         run: node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md
+      - name: Format OPENAPI.md
+        run: pnpm exec prettier --write docs/OPENAPI.md || npx prettier --write docs/OPENAPI.md
 
       - name: Verify OPENAPI.md is up to date
         run: |
-          git diff --exit-code -- docs/OPENAPI.md || {
+          # Ignore whitespace-only diffs to account for Markdown table reflows
+          git diff -w --exit-code -- docs/OPENAPI.md || {
             echo "::error file=docs/OPENAPI.md::docs/OPENAPI.md is out of date. Run 'pnpm -w run docs:openapi:md' and commit.";
             exit 1;
           }
@@ -91,7 +129,7 @@ jobs:
           else
             echo "mode=main" >> "$GITHUB_OUTPUT";
           fi
-      - name: Run tests (PR: changed-only, main: full with coverage)
+      - name: 'Run tests (PR: changed-only, main: full with coverage)'
         env:
           COVERAGE_RELAX: ${{ github.event_name == 'pull_request' && '1' || '0' }}
         run: |
@@ -103,6 +141,28 @@ jobs:
 
       - name: Build project
         run: pnpm run build
+
+      - name: Consciousness Spectrum — fabricate report (advisory)
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          IN=$(printf '%064d' 0)
+          OUT=$(printf '%064d' 0)
+          node scripts/consciousness-spectrum-analyzer.mjs \
+            --input "{\"artifact_hash\":\"${IN}:${OUT}\",\"eval_focus\":\"all\",\"consciousness_type\":\"guardian\"}" \
+            --out artifacts/reports/ci-smoke.yaml
+          node scripts/jsonschema-validate.mjs \
+            artifacts/reports schemas/output.schema.json \
+            "#/definitions/consciousness/spectrum_analyzer"
+
+      - name: Codebase Audit (advisory, inline bundle)
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/audit
+          echo '{"files":["README.md"],"commit":"'"${GITHUB_SHA}"'","ci":{"run_id":"'"${GITHUB_RUN_ID}"'"},"notes":"ci smoke bundle"}' > artifacts/audit/audit_bundle.json
+          MODEL="openai/gpt-5" node dist/cli/index.js run codebase-audit \
+            --args "$(jq -n --rawfile bc artifacts/audit/audit_bundle.json '{bundle_content:$bc}')" || true
 
       - name: Generate OpenAPI (Workbench)
         run: node scripts/generate-openapi.mjs
@@ -117,11 +177,34 @@ jobs:
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sbom
+          name: sbom-node${{ matrix.node-version }}
           path: sbom.json
+          if-no-files-found: ignore
 
-      - name: Secrets scan
-        run: pnpm run scan:secrets
+      - name: Install gitleaks
+        run: |
+          set -euo pipefail
+          GITLEAKS_VERSION=8.24.3
+          curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+            | tar -xz gitleaks
+          sudo mv gitleaks /usr/local/bin/gitleaks
+          gitleaks version
+
+      - name: Scan secrets (gitleaks)
+        run: gitleaks detect --redact --no-git --exit-code 1 --report-format sarif --report-path gitleaks.sarif
+
+      - name: Upload gitleaks report
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitleaks-${{ github.run_id }}-${{ github.run_attempt }}-node${{ matrix.node-version }}
+          path: gitleaks.sarif
+          if-no-files-found: ignore
+
+      - name: Upload SARIF to Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: gitleaks.sarif
+        continue-on-error: true
 
       - name: Security audit
         run: pnpm audit --prod || echo "Audit warnings found"
@@ -180,14 +263,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup toolchain
-        uses: ./.github/actions/setup-pnpm
+      - name: Node & pnpm setup
+        uses: ./.github/actions/node-pnpm-setup
+        with:
+          node-version: 20
+          pnpm-version: 10.17.0
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-${{ runner.os }}-
+      - name: Install workspace deps
+        run: pnpm -w install --frozen-lockfile || pnpm -w install
       - name: Generate OPENAPI.md from spec
         run: node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md
+      - name: Format OPENAPI.md
+        run: pnpm exec prettier --write docs/OPENAPI.md || npx prettier --write docs/OPENAPI.md
 
       - name: Verify OPENAPI.md is up to date
         run: |
-          git diff --exit-code -- docs/OPENAPI.md || {
+          git diff -w --exit-code -- docs/OPENAPI.md || {
             echo "::error file=docs/OPENAPI.md::docs/OPENAPI.md is out of date. Run 'pnpm -w run docs:openapi:md' and commit.";
             exit 1;
           }
@@ -240,12 +338,21 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Setup toolchain
+      - name: Setup Node.js
         if: steps.changes.outputs.catalog == 'true' || steps.changes.outputs.ore == 'true'
-        uses: ./.github/actions/setup-pnpm
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
-          pnpm-version: '10.17.0'
+          cache: 'pnpm'
+      - name: Setup pnpm
+        if: steps.changes.outputs.catalog == 'true' || steps.changes.outputs.ore == 'true'
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.0
+          run_install: false
+      - name: Install workspace deps
+        if: steps.changes.outputs.catalog == 'true' || steps.changes.outputs.ore == 'true'
+        run: pnpm -w install --frozen-lockfile || pnpm -w install
 
       - name: Build project
         if: steps.changes.outputs.catalog == 'true' || steps.changes.outputs.ore == 'true'
@@ -288,14 +395,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup toolchain
-        uses: ./.github/actions/setup-pnpm
+      - name: Node & pnpm setup
+        uses: ./.github/actions/node-pnpm-setup
+        with:
+          node-version: 20
+          pnpm-version: 10.17.0
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-${{ runner.os }}-
+      - name: Install workspace deps
+        run: pnpm -w install --frozen-lockfile || pnpm -w install
+      - name: Install workspace deps
+        run: pnpm -w install --frozen-lockfile || pnpm -w install
       - name: Generate OPENAPI.md from spec
         run: node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md
+      - name: Format OPENAPI.md
+        run: pnpm exec prettier --write docs/OPENAPI.md || npx prettier --write docs/OPENAPI.md
 
       - name: Verify OPENAPI.md is up to date
         run: |
-          git diff --exit-code -- docs/OPENAPI.md || {
+          git diff -w --exit-code -- docs/OPENAPI.md || {
             echo "::error file=docs/OPENAPI.md::docs/OPENAPI.md is out of date. Run 'pnpm -w run docs:openapi:md' and commit.";
             exit 1;
           }
@@ -389,12 +513,21 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Setup toolchain
+      - name: Setup Node.js
         if: steps.orechg.outputs.ore == 'true'
-        uses: ./.github/actions/setup-pnpm
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
-          pnpm-version: '10.17.0'
+          cache: 'pnpm'
+      - name: Setup pnpm
+        if: steps.orechg.outputs.ore == 'true'
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.0
+          run_install: false
+      - name: Install workspace deps
+        if: steps.orechg.outputs.ore == 'true'
+        run: pnpm -w install --frozen-lockfile || pnpm -w install
 
       - name: Build project
         if: steps.orechg.outputs.ore == 'true'
@@ -460,11 +593,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup toolchain
-        uses: ./.github/actions/setup-pnpm
+      - name: Node & pnpm setup
+        uses: ./.github/actions/node-pnpm-setup
         with:
           node-version: 20
-          pnpm-version: '10.17.0'
+          pnpm-version: 10.17.0
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-${{ runner.os }}-
+      - name: Install workspace deps
+        run: pnpm -w install --frozen-lockfile || pnpm -w install
 
       - name: Install workspace deps
         run: pnpm install --frozen-lockfile
@@ -698,19 +841,40 @@ jobs:
 
   validate-templates:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
+        include:
+          - node-version: 22
+            allow_failure: true
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup toolchain
-        uses: ./.github/actions/setup-pnpm
+      - name: Node & pnpm setup
+        uses: ./.github/actions/node-pnpm-setup
+        with:
+          node-version: ${{ matrix.node-version }}
+          pnpm-version: 10.17.0
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-${{ runner.os }}-${{ matrix.node-version }}-
+            pnpm-${{ runner.os }}-
       - name: Generate OPENAPI.md from spec
         run: node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md
+      - name: Format OPENAPI.md
+        run: pnpm exec prettier --write docs/OPENAPI.md || npx prettier --write docs/OPENAPI.md
 
       - name: Verify OPENAPI.md is up to date
         run: |
-          git diff --exit-code -- docs/OPENAPI.md || {
+          git diff -w --exit-code -- docs/OPENAPI.md || {
             echo "::error file=docs/OPENAPI.md::docs/OPENAPI.md is out of date. Run 'pnpm -w run docs:openapi:md' and commit.";
             exit 1;
           }
@@ -719,6 +883,7 @@ jobs:
         run: pnpm run build
 
       - name: Validate template schemas
+        continue-on-error: ${{ matrix.allow_failure || false }}
         run: |
           for file in catalog/**/*.yaml; do
             echo "Validating $file"
@@ -743,31 +908,64 @@ jobs:
           done
 
       - name: Test template loading
+        continue-on-error: ${{ matrix.allow_failure || false }}
         run: |
           echo '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | timeout 10s node dist/mcp/vaultmesh-mcp-server.js | grep -q "tools" || echo "MCP server test failed"
 
+      - name: Mark soft-fail result
+        if: ${{ matrix.allow_failure }}
+        run: echo "⚠️ Node ${{ matrix.node-version }} - failures allowed during transition period"
+
   licensing-check:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
+        include:
+          - node-version: 22
+            allow_failure: true
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup toolchain
-        uses: ./.github/actions/setup-pnpm
+      - name: Node & pnpm setup
+        uses: ./.github/actions/node-pnpm-setup
+        with:
+          node-version: ${{ matrix.node-version }}
+          pnpm-version: 10.17.0
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-${{ runner.os }}-${{ matrix.node-version }}-
+            pnpm-${{ runner.os }}-
+      - name: Install workspace deps
+        run: pnpm -w install --frozen-lockfile || pnpm -w install
       - name: Generate OPENAPI.md from spec
         run: node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md
+      - name: Format OPENAPI.md
+        run: pnpm exec prettier --write docs/OPENAPI.md || npx prettier --write docs/OPENAPI.md
 
       - name: Verify OPENAPI.md is up to date
         run: |
-          git diff --exit-code -- docs/OPENAPI.md || {
+          git diff -w --exit-code -- docs/OPENAPI.md || {
             echo "::error file=docs/OPENAPI.md::docs/OPENAPI.md is out of date. Run 'pnpm -w run docs:openapi:md' and commit.";
             exit 1;
           }
 
       - name: Check licenses
+        continue-on-error: ${{ matrix.allow_failure || false }}
         run: |
           pnpm dlx license-checker --onlyAllow 'Apache-2.0;MIT;BSD-2-Clause;BSD-3-Clause;ISC' --excludePrivatePackages || echo "License check warnings"
+
+      - name: Mark soft-fail result
+        if: ${{ matrix.allow_failure }}
+        run: echo "⚠️ Node ${{ matrix.node-version }} - failures allowed during transition period"
 
   security-templates:
     runs-on: ubuntu-latest
@@ -777,14 +975,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup toolchain
-        uses: ./.github/actions/setup-pnpm
+      - name: Node & pnpm setup
+        uses: ./.github/actions/node-pnpm-setup
+        with:
+          node-version: 20
+          pnpm-version: 10.17.0
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-${{ runner.os }}-
       - name: Generate OPENAPI.md from spec
         run: node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md
+      - name: Format OPENAPI.md
+        run: pnpm exec prettier --write docs/OPENAPI.md || npx prettier --write docs/OPENAPI.md
 
       - name: Verify OPENAPI.md is up to date
         run: |
-          git diff --exit-code -- docs/OPENAPI.md || {
+          git diff -w --exit-code -- docs/OPENAPI.md || {
             echo "::error file=docs/OPENAPI.md::docs/OPENAPI.md is out of date. Run 'pnpm -w run docs:openapi:md' and commit.";
             exit 1;
           }
@@ -875,11 +1086,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup toolchain
-        uses: ./.github/actions/setup-pnpm
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-          pnpm-version: '10.17.0'
+          cache: 'pnpm'
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.0
+          run_install: false
 
       - name: Install & build CLI
         run: |

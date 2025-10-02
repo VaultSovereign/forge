@@ -7,7 +7,6 @@
 import { promises as fs, readFileSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-
 import yargs, { Argv } from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
@@ -64,7 +63,11 @@ function toTitleCase(parts: string[]): string {
     .trim();
 }
 
-function loadArgs(raw?: string): any {
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function loadArgs(raw?: string): Record<string, unknown> {
   if (!raw || !raw.trim()) return {};
   let value = raw.trim();
   if (value.startsWith('@')) {
@@ -73,7 +76,11 @@ function loadArgs(raw?: string): any {
     value = readFileSync(resolved, 'utf8');
   }
   try {
-    return JSON.parse(value);
+    const parsed = JSON.parse(value) as unknown;
+    if (!isRecord(parsed)) {
+      throw new Error('Expected --args JSON to evaluate to an object');
+    }
+    return parsed;
   } catch (error) {
     const reason = error instanceof Error ? error.message : String(error);
     throw new Error(`Failed to parse --args value: ${reason}`);

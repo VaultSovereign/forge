@@ -1,12 +1,11 @@
-import fs from 'node:fs';
+import type { FastifyInstance } from 'fastify';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-import type { FastifyInstance } from 'fastify';
+// eslint-disable-next-line import/no-relative-packages
 import { limitCfg } from './_limits.js';
+import { askGuardian as askGuardianDirect } from '../../../../agents/index';
 
-import { askGuardian as askGuardianDirect } from '../../../../agents/index.ts';
-import { fromHere } from '../utils/esm-paths.js';
 // Test-only import: used by exported postGuardian handler for unit tests.
 // At runtime, the Fastify route below continues to use dynamic agent resolution.
 // The relative path walks up to repo root from workbench/bff/src/routes.
@@ -17,11 +16,6 @@ type GuardianMode = 'stub' | 'agent' | 'unknown';
 const TTL_MS = Number(process.env.GUARDIAN_MODE_TTL_MS ?? 1000);
 
 let modeCache: { mode: GuardianMode; ts: number } = { mode: 'unknown', ts: 0 };
-let agentCache: { fn: ((input: string) => Promise<any>) | null; path: string | null } = {
-  fn: null,
-  path: null,
-};
-
 export async function detectMode(): Promise<GuardianMode> {
   const now = Date.now();
   if (now - modeCache.ts < TTL_MS) return modeCache.mode;
@@ -48,30 +42,6 @@ export async function detectMode(): Promise<GuardianMode> {
   }
   modeCache = { mode: 'stub', ts: now };
   return 'stub';
-}
-
-async function resolveAgent() {
-  const agentPath = process.env.GUARDIAN_AGENT_ENTRY;
-  if (!agentPath) {
-    return null;
-  }
-
-  const resolvedPath = path.resolve(agentPath);
-  if (agentCache.path === resolvedPath && agentCache.fn) {
-    return agentCache.fn;
-  }
-
-  try {
-    const mod: any = await import(pathToFileURL(resolvedPath).href);
-    const askFn = mod?.askGuardian ?? mod?.ask ?? mod?.default?.askGuardian ?? mod?.default?.ask;
-    if (typeof askFn === 'function') {
-      agentCache = { fn: askFn, path: resolvedPath };
-      return askFn as (input: string) => Promise<any>;
-    }
-  } catch {
-    // continue to return null
-  }
-  return null;
 }
 
 /**
@@ -107,17 +77,23 @@ export async function postGuardian(req: any, reply: any) {
     // emulate Fastify header behavior if available
     try {
       if (typeof reply?.header === 'function') reply.header('x-guardian-mode', 'agent');
-    } catch {}
+    } catch {
+      // Reply may be a minimal mock without header support
+    }
     return send(200, {
       text: result?.outputText ?? 'Agent responded.',
       events: Array.isArray(result?.events) ? result.events : [],
     });
-  } catch (e: any) {
+  } catch (error) {
     try {
       if (typeof reply?.header === 'function') reply.header('x-guardian-mode', 'stub');
-    } catch {}
+    } catch {
+      // Ignore header failures on mocks
+    }
     return send(200, {
-      text: `Guardian (stub due to agent error): ${String(e?.message || e)}. Echo: ${input}`,
+      text: `Guardian (stub due to agent error): ${String(
+        (error as Error)?.message ?? error
+      )}. Echo: ${input}`,
       events: [],
     });
   }
@@ -144,10 +120,10 @@ export default async function guardianRoutes(app: FastifyInstance) {
           },
         },
       },
+      // Limit agent calls to avoid abuse; defaults allow bursts but protect sustained load
+      ...limitCfg('GUARDIAN_ASK_RPS', 'GUARDIAN_ASK_WINDOW', 30, '1 minute'),
     },
-    postGuardian,
-    // Limit agent calls to avoid abuse; defaults allow bursts but protect sustained load
-    ...limitCfg('GUARDIAN_ASK_RPS', 'GUARDIAN_ASK_WINDOW', 30, '1 minute')
+    postGuardian
   );
 
   // Lightweight mode probe for dashboards

@@ -34,10 +34,16 @@
     "LICENSE"
   ],
   "engines": {
-    "node": ">=20.11.1",
+    "node": ">=20 <23",
     "pnpm": ">=10.17.0"
   },
-  
+  "pnpm": {
+    "overrides": {
+      "cross-spawn": ">=7.0.5",
+      "brace-expansion@2.x": ">=2.0.2",
+      "brace-expansion@1.x": ">=1.1.12"
+    }
+  },
   "scripts": {
     "docs:sitemap": "node scripts/generate-docs-sitemap.mjs docs SITEMAP.md",
     "prepare": "husky install",
@@ -51,11 +57,12 @@
     "format:check": "prettier --check .",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "schemas:build": "node -e \"import('yaml').then(()=>import('./scripts/build-schemas.mjs'))\"",
-    "postbuild": "pnpm run schemas:build && mkdir -p dist && cp -R catalog profiles schemas dist/",
+    "postbuild": "pnpm run schemas:build && mkdir -p dist && cp -R catalog profiles schemas dist/ && cp reality_ledger/reality_ledger.py dist/reality_ledger/",
     "build:web": "pnpm --prefix workbench/frontend run build && cp -r workbench/frontend/dist workbench/frontend-dist",
     "build:bff": "pnpm --prefix workbench/bff run build",
     "dev": "concurrently -k \"pnpm --prefix workbench/bff run dev\" \"pnpm --prefix workbench/frontend run dev\"",
     "build:workbench": "pnpm --prefix workbench/frontend run build && pnpm --prefix workbench/bff run build && mkdir -p workbench/bff/public && cp -R workbench/frontend/dist/* workbench/bff/public/ || true",
+    "deck:build": "pnpm run build:sales",
     "build:sales": "pnpm run sales:deck && pnpm run sales:onepager",
     "sales:deck": "npx @marp-team/marp-cli docs/SALES/DECK.marp.md -o dist/sales-deck.html --allow-local-files --theme docs/SALES/theme.css && npx @marp-team/marp-cli docs/SALES/DECK.marp.md -o dist/sales-deck.pdf --allow-local-files --pdf --theme docs/SALES/theme.css && cp dist/sales-deck.html dist/index.html || true",
     "sales:onepager": "npx @marp-team/marp-cli docs/SALES/ONE_PAGER.marp.md -o dist/one-pager.html --allow-local-files --theme docs/SALES/theme.css",
@@ -71,8 +78,8 @@
     "test:forge:deps": "python3 -m pip install --upgrade pip && pip3 install -r requirements-dev.txt && python3 -m pytest -q -rA tests/test_unforged_forge.py",
     "proposal:verify": "python3 unforged_forge_genesis/scripts/proposal_verify.py --proposal unforged_forge_genesis/ore/0002_protocol_evolution_template.json --genesis unforged_forge_genesis/genesis.json",
     "audit": "npm audit --production",
-    "sbom": "npx @cyclonedx/cyclonedx-npm --output-format json --output-file sbom.json",
-    "scan:secrets": "npx gitleaks detect --redact --no-git",
+    "sbom": "pnpm dlx @cyclonedx/cyclonedx-npm@latest --output-format json --output-file sbom.json",
+    "scan:secrets": "pnpm dlx gitleaks@latest detect --redact --no-git",
     "scan:container": "trivy image --exit-code 1 ghcr.io/vaultsovereign/forge:latest || true",
     "vm": "node --loader ts-node/esm --experimental-specifier-resolution=node cli/index.ts",
     "start": "node dist/cli/index.js",

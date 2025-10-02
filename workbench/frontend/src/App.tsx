@@ -15,7 +15,7 @@ import { useTemplateCount } from './hooks/useTemplateCount.js';
 export default function App() {
   const snapshot = useDashboardSnapshot(20);
   const { mode: guardianMode, loading: guardianLoading } = useGuardianMode(0);
-  const { count: templateCountLive, loading: templateCountLoading } = useTemplateCount();
+  const { count: templateCountLive } = useTemplateCount();
 
   const templateCount =
     (typeof templateCountLive === 'number' ? templateCountLive : undefined) ??

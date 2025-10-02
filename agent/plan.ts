@@ -1,8 +1,7 @@
-import Ajv from 'ajv';
-
-import { createProviderConfig } from '../dispatcher/modelProvider.js';
+import { default as Ajv } from 'ajv';
 
 import { PlanSchema } from './schemas.js';
+import { createProviderConfig } from '../dispatcher/modelProvider.js';
 
 type Constraints = Record<string, unknown>;
 

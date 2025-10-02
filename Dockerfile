@@ -1,38 +1,43 @@
 # VaultMesh - Earth's Civilization Ledger
 # Multi-stage build for production-ready container
 
-# Build stage
-FROM node:20-alpine AS builder
+# syntax=docker/dockerfile:1
 
+# Base stage with pnpm - use specific Alpine version with security patches
+FROM node:20.19.5-alpine3.22 AS base
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-COPY tsconfig.json ./
+# Update Alpine packages to get latest security patches, then enable pnpm
+RUN apk update && apk upgrade --no-cache && \
+    corepack enable && corepack prepare pnpm@10.17.0 --activate
 
-# Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+# Build stage
+FROM base AS builder
+
+# Copy package manifests first for better caching
+COPY pnpm-lock.yaml package.json tsconfig.json pnpm-workspace.yaml ./
+
+# Install all dependencies (including dev for build)
+RUN pnpm install --frozen-lockfile
 
 # Copy source code
 COPY . .
 
 # Build project
-RUN npm run build
+RUN pnpm run build
 
 # Production stage
-FROM node:20-alpine AS production
+FROM base AS production
 
 # Create non-root user
 RUN addgroup -g 1001 -S vaultmesh && \
     adduser -S vaultmesh -u 1001 -G vaultmesh
 
-WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
+# Copy package manifests
+COPY pnpm-lock.yaml package.json pnpm-workspace.yaml ./
 
 # Install production dependencies only
-RUN npm ci --only=production && npm cache clean --force
+RUN pnpm install --frozen-lockfile --prod --ignore-scripts
 
 # Copy built application
 COPY --from=builder /app/dist ./dist

@@ -1,7 +1,8 @@
-import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { mkdtempSync, rmSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+
 import { appendEvent, getEvent, verifyEvent } from './node';
 
 describe('Reality Ledger', () => {
@@ -16,7 +17,8 @@ describe('Reality Ledger', () => {
   });
 
   afterAll(() => {
-    if (prev) process.env.REALITY_LEDGER_DIR = prev; else delete process.env.REALITY_LEDGER_DIR;
+    if (prev) process.env.REALITY_LEDGER_DIR = prev;
+    else delete process.env.REALITY_LEDGER_DIR;
     rmSync(tmp, { recursive: true, force: true });
     vi.useRealTimers();
   });
@@ -57,15 +59,30 @@ describe('Reality Ledger', () => {
   });
 
   it('hash is stable for identical inputs', async () => {
-    const id1 = await appendEvent({ template: 'tem.same', profile: '@blue', args: { x: 1 }, result: { y: 2 } });
-    const id2 = await appendEvent({ template: 'tem.same', profile: '@blue', args: { x: 1 }, result: { y: 2 } });
+    const id1 = await appendEvent({
+      template: 'tem.same',
+      profile: '@blue',
+      args: { x: 1 },
+      result: { y: 2 },
+    });
+    const id2 = await appendEvent({
+      template: 'tem.same',
+      profile: '@blue',
+      args: { x: 1 },
+      result: { y: 2 },
+    });
     const e1 = await getEvent(id1);
     const e2 = await getEvent(id2);
     expect(e1?.hash).toBe(e2?.hash);
   });
 
   it('verifyEvent returns false if tampered', async () => {
-    const id = await appendEvent({ template: 'tem.guard', profile: '@vault', args: { x: 1 }, result: { ok: true } });
+    const id = await appendEvent({
+      template: 'tem.guard',
+      profile: '@vault',
+      args: { x: 1 },
+      result: { ok: true },
+    });
     const shard = join(tmp, `events-2025-01-02.jsonl`);
     const text = readFileSync(shard, 'utf8');
     const lines = text.split('\n').filter(Boolean);
@@ -80,7 +97,12 @@ describe('Reality Ledger', () => {
   });
 
   it('shards by date correctly', async () => {
-    const id = await appendEvent({ template: 'tem.shard', profile: '@vault', args: {}, result: {} });
+    const id = await appendEvent({
+      template: 'tem.shard',
+      profile: '@vault',
+      args: {},
+      result: {},
+    });
     const shard = join(tmp, `events-2025-01-02.jsonl`);
     const content = readFileSync(shard, 'utf8');
     expect(content).toContain(id);

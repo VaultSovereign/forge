@@ -14,17 +14,8 @@ const ExecuteReq = z.object({
 export default async function executeRoutes(app: FastifyInstance) {
   app.post(
     '/v1/api/execute',
-    {
-      preHandler: [authMiddleware(), rbac(['execute:run'])],
-      // Rate limit: bursts allowed but cap sustained abuse per IP
-      config: {
-        rateLimit: {
-          max: Number(process.env.EXECUTE_POST_RPS ?? 30),
-          timeWindow: process.env.EXECUTE_POST_WINDOW ?? '1 minute',
-        },
-      },
-    },
-    async (request, reply) => {
+    { preHandler: [authMiddleware(), rbac(['execute:run'])] },
+    async (request) => {
       const body = ExecuteReq.parse(request.body ?? {});
       const result = await coreExecute(body);
       return result;
@@ -33,16 +24,7 @@ export default async function executeRoutes(app: FastifyInstance) {
 
   app.get(
     '/v1/api/execute/stream',
-    {
-      preHandler: [authMiddleware(), rbac(['execute:run'])],
-      // Keep SSE connections reasonable per IP to prevent resource exhaustion
-      config: {
-        rateLimit: {
-          max: Number(process.env.EXECUTE_STREAM_RPS ?? 6),
-          timeWindow: process.env.EXECUTE_STREAM_WINDOW ?? '1 minute',
-        },
-      },
-    },
+    { preHandler: [authMiddleware(), rbac(['execute:run'])] },
     async (req: FastifyRequest, reply: FastifyReply) => {
       // Use a Zod schema for query parameters for type safety and validation
       const QuerySchema = ExecuteReq.extend({
@@ -58,7 +40,7 @@ export default async function executeRoutes(app: FastifyInstance) {
           })
           .default('{}'),
       });
-      const parseResult = QuerySchema.safeParse(req.query);
+      const parseResult = QuerySchema.safeParse(req.query ?? {});
       if (!parseResult.success) {
         return reply.code(400).send({ error: 'invalid_query', issues: parseResult.error.issues });
       }

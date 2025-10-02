@@ -4,12 +4,11 @@
  * Provides template execution, ledger queries, and metadata tools to Claude Code
  */
 
-import path from 'path';
-import { fileURLToPath } from 'url';
-
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { ListToolsRequestSchema, CallToolRequestSchema } from '@modelcontextprotocol/sdk/types.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { z } from 'zod';
 
 // Dynamic imports to avoid provider initialization issues
@@ -39,6 +38,12 @@ const RunTemplateArgs = z.object({
 const RenderReportArgs = z.object({
   template: z.string().min(1),
   eventId: z.string().min(1).optional(),
+});
+
+const AnalyzeThreatIntelArgs = z.object({
+  topic: z.string().min(1),
+  sources: z.array(z.string()).optional(),
+  scope: z.string().optional(),
 });
 
 /**
@@ -109,10 +114,12 @@ async function listTemplates() {
 /**
  * Run template with given parameters
  */
+type RunTemplateArgs = Record<string, unknown>;
+
 async function runTemplate(
   templateId: string,
   profile: string = 'vault',
-  args: any = {},
+  args: RunTemplateArgs = {},
   format: string = 'markdown'
 ) {
   try {
@@ -160,7 +167,15 @@ async function runTemplate(
 /**
  * Query Reality Ledger
  */
-async function queryLedger(filters: any = {}) {
+interface LedgerQueryFilters {
+  template?: string;
+  profile?: string;
+  since?: string;
+  limit?: number;
+  stats?: boolean;
+}
+
+async function queryLedger(filters: LedgerQueryFilters = {}) {
   try {
     const { queryLedger, getLedgerStats } = await import('../reality_ledger/node.js');
 
@@ -317,6 +332,28 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         additionalProperties: false,
       },
     },
+    {
+      name: 'analyze_threat_intel',
+      description: 'Analyze threat intel and produce an executive-ready summary',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          topic: { type: 'string', description: 'Topic to analyze' },
+          sources: {
+            type: 'array',
+            description: 'List of sources (strings, links, or file refs)',
+            items: { type: 'string' },
+          },
+          scope: {
+            type: 'string',
+            description: 'Summary scope (concise|executive|expanded)',
+            default: 'executive',
+          },
+        },
+        required: ['topic'],
+        additionalProperties: false,
+      },
+    },
   ],
 }));
 
@@ -395,6 +432,24 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: 'text',
               text: JSON.stringify(report),
+            },
+          ],
+        };
+      }
+
+      case 'analyze_threat_intel': {
+        const { topic, sources, scope } = AnalyzeThreatIntelArgs.parse(args ?? {});
+        const result = await runTemplate('operations-research-analyst', 'analyst', {
+          topic,
+          sources,
+          scope: scope || 'executive',
+        });
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(result),
             },
           ],
         };

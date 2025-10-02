@@ -1,6 +1,7 @@
 id: dora.tprm.v1
 version: '1.0.0'
 keyword: cyber-dora-tprm
+purpose: 'Third-Party Risk Management (TPRM) assessment for DORA compliance'
 meta:
   title: 'DORA Third-Party Risk (TPRM) Assessment'
   safety: read-only

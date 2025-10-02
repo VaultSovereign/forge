@@ -18,6 +18,9 @@ workbench/frontend-dist/
 workbench/frontend/vite.config.js
 *.tsbuildinfo
 
+# Lint cache
+.eslintcache
+
 # Runtime logs
 logs/
 *.log

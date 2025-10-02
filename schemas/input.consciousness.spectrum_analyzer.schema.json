@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schemas/input.consciousness.spectrum_analyzer.schema.json",
+  "type": "object",
+  "required": ["consciousness_type", "artifact_hash"],
+  "properties": {
+    "consciousness_type": {
+      "type": "string",
+      "enum": ["guardian", "analytical", "creative", "synthesis", "transcendent"]
+    },
+    "model_context": {
+      "type": "string",
+      "enum": ["security", "finance", "research", "governance", "general"],
+      "default": "general"
+    },
+    "eval_focus": {
+      "type": "string",
+      "enum": ["security_posture", "ethical_controls", "integration_patterns", "all"],
+      "default": "all"
+    },
+    "artifact_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}:[a-f0-9]{64}$"
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,4 +1,5 @@
-import Ajv from 'ajv';
+import { default as Ajv } from 'ajv';
+import type { AnySchema, ErrorObject } from 'ajv';
 import addFormats from 'ajv-formats';
 
 const ajv = new Ajv({ allErrors: true, strict: false });
@@ -6,13 +7,13 @@ addFormats(ajv);
 
 export async function ensureConforms(
   raw: string,
-  schemaObj: any
-): Promise<{ ok: boolean; value?: any; errors?: any[] }> {
+  schemaObj: AnySchema
+): Promise<{ ok: boolean; value?: unknown; errors?: Array<ErrorObject | { message: string }> }> {
   // Try extracting JSON from raw text
-  let candidate: any;
+  let candidate: unknown;
   try {
     const jsonBlock = extractJSON(raw);
-    candidate = JSON.parse(jsonBlock);
+    candidate = JSON.parse(jsonBlock) as unknown;
   } catch (_e) {
     return { ok: false, errors: [{ message: 'JSON parse failed' }] };
   }

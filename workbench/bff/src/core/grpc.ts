@@ -1,9 +1,8 @@
+import * as grpc from '@grpc/grpc-js';
+import * as protoLoader from '@grpc/proto-loader';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-
-import * as grpc from '@grpc/grpc-js';
-import * as protoLoader from '@grpc/proto-loader';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -29,6 +28,62 @@ interface ExecuteRes {
   output?: unknown;
   error?: string;
 }
+
+interface CoreExecuteResponse {
+  event_id: string;
+  status: string;
+  output_json: string;
+  error?: string;
+}
+
+interface CoreLedgerQueryMessage {
+  id: string;
+  ts: string;
+  template: string;
+  profile: string;
+  input_json: string;
+  output_json: string;
+  status?: string;
+  error?: string;
+  hash?: string;
+  sig?: string;
+}
+
+interface CoreLedgerVerifyResponse {
+  ok: boolean;
+  error?: string;
+}
+
+type CoreServiceClient = grpc.Client & {
+  Execute(
+    request: { template_id: string; profile: string; args_json: string },
+    callback: (err: grpc.ServiceError | null, response: CoreExecuteResponse) => void
+  ): void;
+  LedgerQuery(request: {
+    template: string;
+    profile: string;
+    limit: number;
+    cursor: string;
+  }): grpc.ClientReadableStream<CoreLedgerQueryMessage>;
+  LedgerVerify(
+    request: { event_id: string },
+    callback: (err: grpc.ServiceError | null, response: CoreLedgerVerifyResponse) => void
+  ): void;
+};
+
+type CorePackage = {
+  vaultmesh: {
+    ai: {
+      v1: {
+        Core: new (
+          address: string,
+          creds: grpc.ChannelCredentials,
+          options?: grpc.ClientOptions
+        ) => CoreServiceClient;
+      };
+    };
+  };
+};
 
 export interface LedgerEvent {
   id: string;
@@ -68,25 +123,9 @@ function loadCredentials(): grpc.ChannelCredentials {
   throw new Error(`Unknown CORE_TLS mode: ${mode}`);
 }
 
-function getClient(addr: string) {
+function getClient(addr: string): CoreServiceClient {
   const packageDefinition = protoLoader.loadSync(PROTO_PATH, loaderOptions);
-  const pkg = grpc.loadPackageDefinition(packageDefinition) as unknown as {
-    vaultmesh: {
-      ai: {
-        v1: {
-          Core: new (
-            address: string,
-            creds: grpc.ChannelCredentials,
-            options?: grpc.ClientOptions
-          ) => grpc.Client & {
-            Execute: grpc.handleUnaryCall<any, any>;
-            LedgerQuery: grpc.handleServerStreamingCall<any, any>;
-            LedgerVerify: grpc.handleUnaryCall<any, any>;
-          };
-        };
-      };
-    };
-  };
+  const pkg = grpc.loadPackageDefinition(packageDefinition) as unknown as CorePackage;
 
   const CoreService = pkg.vaultmesh.ai.v1.Core;
   const credentials = loadCredentials();
@@ -94,14 +133,7 @@ function getClient(addr: string) {
     'grpc.keepalive_time_ms': 20000,
   });
 
-  return client as unknown as grpc.Client & {
-    Execute(request: any, callback: (err: grpc.ServiceError | null, response: any) => void): void;
-    LedgerQuery(request: any): grpc.ClientReadableStream<any>;
-    LedgerVerify(
-      request: any,
-      callback: (err: grpc.ServiceError | null, response: any) => void
-    ): void;
-  };
+  return client;
 }
 
 function safeJSON(payload: string) {
@@ -126,8 +158,8 @@ export async function executeGRPC(
     args_json: JSON.stringify(req.args ?? {}),
   };
 
-  const response = await new Promise<any>((resolve, reject) => {
-    client.Execute(executeReq, (err: grpc.ServiceError | null, res: any) => {
+  const response = await new Promise<CoreExecuteResponse>((resolve, reject) => {
+    client.Execute(executeReq, (err: grpc.ServiceError | null, res: CoreExecuteResponse) => {
       if (err) return reject(err);
       resolve(res);
     });
@@ -168,7 +200,7 @@ export async function ledgerQueryGRPC(
   const stream = client.LedgerQuery(request);
 
   return await new Promise<LedgerEvent[]>((resolve, reject) => {
-    stream.on('data', (message: any) => {
+    stream.on('data', (message: CoreLedgerQueryMessage) => {
       results.push({
         id: message.id,
         ts: message.ts,

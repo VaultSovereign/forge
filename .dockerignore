@@ -1,0 +1,57 @@
+# Git
+.git
+.github
+.gitignore
+
+# Dependencies
+node_modules
+pnpm-store
+.pnpm-store
+
+# Build outputs
+dist
+coverage
+*.tsbuildinfo
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Temporary files
+tmp
+temp
+*.tmp
+*.swp
+*.swo
+
+# Documentation backups
+_docs
+_backups
+_archive
+
+# Test artifacts
+artifacts/demo
+artifacts/audit
+artifacts/evolution
+artifacts/prepush
+
+# IDE
+.vscode
+.idea
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+*.md.backup
+sbom.json
+gitleaks.sarif

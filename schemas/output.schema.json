@@ -1,6 +1,24 @@
 {
   "$id": "output.schema.json",
   "definitions": {
+    "operations": {
+      "research_analyst": {
+        "type": "object",
+        "required": ["summary", "details"],
+        "properties": {
+          "summary": {
+            "type": "array",
+            "maxItems": 3,
+            "items": { "type": "string" }
+          },
+          "details": { "type": "string" },
+          "next_steps": { "type": "array", "items": { "type": "string" } },
+          "escalations": { "type": "array", "items": { "type": "string" } },
+          "confidence": { "type": "string", "enum": ["high", "medium", "low"] }
+        },
+        "additionalProperties": true
+      }
+    },
     "cyber": {
       "secrets_audit": {
         "type": "object",
@@ -416,6 +434,69 @@
           "confidence_scores": { "type": "object" }
         },
         "additionalProperties": true
+      },
+      "spectrum_analyzer": {
+        "type": "object",
+        "required": ["analysis_report", "confidence_score", "ledger_provenance"],
+        "properties": {
+          "analysis_report": {
+            "type": "object",
+            "required": [
+              "consciousness_profile",
+              "security_assessment",
+              "ethical_audit",
+              "framework_references"
+            ],
+            "properties": {
+              "consciousness_profile": { "type": "string" },
+              "security_assessment": {
+                "type": "object",
+                "properties": {
+                  "framework_violations": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": ["id", "description", "status"],
+                      "properties": {
+                        "id": { "type": "string" },
+                        "description": { "type": "string" },
+                        "status": {
+                          "type": "string",
+                          "enum": ["compliant", "non_compliant", "no_indicators"]
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "ethical_audit": {
+                "type": "object",
+                "required": ["safety_protocols", "boundary_violations"],
+                "properties": {
+                  "safety_protocols": { "type": "array", "items": { "type": "string" } },
+                  "boundary_violations": { "type": "integer", "minimum": 0 }
+                },
+                "additionalProperties": false
+              },
+              "framework_references": { "type": "array", "items": { "type": "string" } }
+            },
+            "additionalProperties": false
+          },
+          "confidence_score": { "type": "number", "minimum": 0, "maximum": 1 },
+          "ledger_provenance": {
+            "type": "object",
+            "required": ["input_hash", "output_hash", "timestamp"],
+            "properties": {
+              "input_hash": { "type": "string", "pattern": "^[a-f0-9]{64}:[a-f0-9]{64}$" },
+              "output_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              "timestamp": { "type": "string", "format": "date-time" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
       }
     }
   }

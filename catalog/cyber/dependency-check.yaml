@@ -1,0 +1,44 @@
+---
+# RITUAL-CLAUSE: CYBER:DependencyCheck
+# -------------------------------------------------------------
+# Read-only analysis of dependency manifests/lockfiles to surface
+# known vulnerabilities and prioritized remediation.
+# -------------------------------------------------------------
+
+id: cyber.dependency_check.v1
+version: 1.0.0
+keyword: cyber-dependency-check
+title: Dependency Vulnerability Check
+purpose: Analyze dependency manifests and lockfiles to summarize known vulnerabilities, risk, and concrete remediation, read-only.
+inputs:
+  repo_context: { type: string, required: true }
+  lockfile_path: { type: string, required: false }
+  manager: { type: enum, values: [npm, pnpm, yarn], default: pnpm }
+  output_format: { type: enum, values: [json, yaml, markdown], default: json }
+quality_checklist:
+  - 'Map findings to CVE/CWE and ecosystem advisories'
+  - 'Include severity, affected range, fixed versions'
+  - 'Suggest exact upgrade commands per manager'
+  - 'Summarize counts by severity with an overall risk score (0–100)'
+safety_guardrails:
+  - 'Read-only; do not install or modify dependencies'
+  - 'Never fetch remote resources beyond local manifests/lockfiles'
+prompt:
+  system: |
+    You are a dependency security analyzer. Operate read-only.
+    Parse local manifests/lockfiles, reason about known vulnerabilities,
+    and produce a concise, actionable report. Output must be valid JSON
+    matching the referenced schema.
+  user: |
+    {{profile.voice}}
+
+    Repo context: {{repo_context}}
+    Package manager: {{manager}}
+    Lockfile path (optional): {{lockfile_path}}
+
+    Produce:
+      - score (0–100), convention explicit
+      - summary counts by severity (critical/high/medium/low)
+      - findings with package, version, range, severity, cve, cwe, remediation (upgrade steps)
+outputs:
+  schema_ref: '../schemas/output.schema.json#/definitions/cyber/dependency_check'
