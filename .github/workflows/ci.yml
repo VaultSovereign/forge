@@ -18,29 +18,34 @@ jobs:
   lint:
     name: lint & format check
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
     steps:
       - uses: actions/checkout@v4
 
       - name: Node & pnpm setup
         uses: ./.github/actions/node-pnpm-setup
         with:
-          node-version: 20
+          node-version: ${{ matrix.node-version }}
           pnpm-version: 10.17.0
 
       - name: Cache pnpm store
         uses: actions/cache@v4
         with:
           path: ~/.pnpm-store
-          key: pnpm-store-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: pnpm-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            pnpm-store-${{ runner.os }}-
+            pnpm-${{ runner.os }}-${{ matrix.node-version }}-
+            pnpm-${{ runner.os }}-
 
       - name: Cache ESLint
         uses: actions/cache@v4
         with:
           path: .eslintcache
-          key: eslint-${{ runner.os }}-${{ hashFiles('**/*.{ts,tsx,js,jsx,json,yml,yaml}') }}
-          restore-keys: eslint-${{ runner.os }}-
+          key: eslint-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('**/*.{ts,tsx,js,jsx,json,yml,yaml}') }}
+          restore-keys: eslint-${{ runner.os }}-${{ matrix.node-version }}-
 
       - name: Lint & Format
         run: |
@@ -800,6 +805,10 @@ jobs:
 
   validate-templates:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
 
     steps:
       - name: Checkout code
@@ -808,16 +817,17 @@ jobs:
       - name: Node & pnpm setup
         uses: ./.github/actions/node-pnpm-setup
         with:
-          node-version: 20
+          node-version: ${{ matrix.node-version }}
           pnpm-version: 10.17.0
 
       - name: Cache pnpm store
         uses: actions/cache@v4
         with:
           path: ~/.pnpm-store
-          key: pnpm-store-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: pnpm-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            pnpm-store-${{ runner.os }}-
+            pnpm-${{ runner.os }}-${{ matrix.node-version }}-
+            pnpm-${{ runner.os }}-
       - name: Generate OPENAPI.md from spec
         run: node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md
       - name: Format OPENAPI.md
@@ -863,6 +873,10 @@ jobs:
 
   licensing-check:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
 
     steps:
       - name: Checkout code
@@ -871,16 +885,17 @@ jobs:
       - name: Node & pnpm setup
         uses: ./.github/actions/node-pnpm-setup
         with:
-          node-version: 20
+          node-version: ${{ matrix.node-version }}
           pnpm-version: 10.17.0
 
       - name: Cache pnpm store
         uses: actions/cache@v4
         with:
           path: ~/.pnpm-store
-          key: pnpm-store-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: pnpm-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            pnpm-store-${{ runner.os }}-
+            pnpm-${{ runner.os }}-${{ matrix.node-version }}-
+            pnpm-${{ runner.os }}-
       - name: Install workspace deps
         run: pnpm -w install --frozen-lockfile || pnpm -w install
       - name: Generate OPENAPI.md from spec

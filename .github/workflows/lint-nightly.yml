@@ -12,14 +12,27 @@ jobs:
   lint-strict:
     name: Lint (strict mode - all warnings fail)
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
     steps:
       - uses: actions/checkout@v4
 
       - name: Node & pnpm setup
         uses: ./.github/actions/node-pnpm-setup
         with:
-          node-version: 20
+          node-version: ${{ matrix.node-version }}
           pnpm-version: 10.17.0
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-${{ runner.os }}-${{ matrix.node-version }}-
+            pnpm-${{ runner.os }}-
 
       - name: Lint (strict - fail on warnings)
         run: pnpm exec eslint -c .eslintrc.json . --ext .ts,.tsx --max-warnings=0
