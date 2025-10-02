@@ -6,6 +6,7 @@
 [![docs-link-check](https://github.com/VaultSovereign/forge/actions/workflows/docs-link-check.yml/badge.svg)](https://github.com/VaultSovereign/forge/actions/workflows/docs-link-check.yml)
 [![pages](https://img.shields.io/github/deployments/VaultSovereign/forge/github-pages?label=pages)](https://github.com/VaultSovereign/forge/deployments/github-pages)
 [![GHCR](https://img.shields.io/badge/ghcr-forge-6f42c1?logo=github&logoColor=white)](https://ghcr.io/vaultsovereign/forge)
+[![GHCR Package](https://img.shields.io/badge/ghcr-package-6f42c1?logo=github&logoColor=white)](https://github.com/orgs/VaultSovereign/packages/container/package/forge)
 [![Release](https://img.shields.io/github/v/release/VaultSovereign/forge?logo=github)](https://github.com/VaultSovereign/forge/releases)
 [![Docs Index](https://img.shields.io/badge/docs-index-blue)](https://VaultSovereign.github.io/forge/INDEX.html)
 [![Docs Sitemap](https://img.shields.io/badge/docs-sitemap-blueviolet)](https://VaultSovereign.github.io/forge/SITEMAP.md)
@@ -109,6 +110,8 @@ Check image tags
 - With `crane` (requires installation): `crane ls ghcr.io/vaultsovereign/forge`
 - With `skopeo` (requires installation): `skopeo list-tags docker://ghcr.io/vaultsovereign/forge`
 - Quick runtime check: `docker run --rm -p 3000:3000 ghcr.io/vaultsovereign/forge:latest`
+
+> See all image tags on the [GHCR package page](https://github.com/orgs/VaultSovereign/packages/container/package/forge) → Versions.
 
 After tagging
 

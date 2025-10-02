@@ -14,6 +14,7 @@
 - [ ] If adding docs: ran `make docs:sitemap` locally or confirmed Pages workflow will regenerate
 - [ ] CHANGELOG updated under **[Unreleased]** or a new section
 - [ ] If publishing images: tags/versions noted in README (GHCR)
+- [ ] If Dockerfile/image changed: verified tags visible on GHCR package page (Versions)
 - [ ] If security/auth touched: updated `docs/SECURITY.md` and tested 401/403 paths
 
 ## Pages (docs)
