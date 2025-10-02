@@ -351,7 +351,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
       - name: Install workspace deps
         run: pnpm -w install --frozen-lockfile || pnpm -w install
       - name: Install workspace deps
@@ -544,7 +543,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
       - name: Install workspace deps
         run: pnpm -w install --frozen-lockfile || pnpm -w install
 
