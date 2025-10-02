@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+
 import { listTemplates } from '../providers/catalog.js';
 
 const DEFAULT_ROOT = process.env.VM_CATALOG_ROOT
@@ -26,7 +27,7 @@ export function resolveTemplateId(id: string): string | null {
   const hit = items.find(
     (t) =>
       t.id.toLowerCase() === norm.toLowerCase() ||
-      (t.name ?? '').toLowerCase() === norm.toLowerCase(),
+      (t.name ?? '').toLowerCase() === norm.toLowerCase()
   );
   return hit?.id ?? null;
 }

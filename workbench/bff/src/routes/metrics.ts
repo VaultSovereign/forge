@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { Registry, collectDefaultMetrics, Gauge } from 'prom-client';
+
 import { detectMode } from './guardian.js';
 
 const reg = new Registry();

@@ -7,6 +7,9 @@ declare module 'jose' {
     iat?: number;
   };
   export function createRemoteJWKSet(url: URL): any;
-  export function jwtVerify(token: string, key: any, opts: { issuer?: string; audience?: string | string[] }): Promise<{ payload: JWTPayload }>;
+  export function jwtVerify(
+    token: string,
+    key: any,
+    opts: { issuer?: string; audience?: string | string[] },
+  ): Promise<{ payload: JWTPayload }>;
 }
-

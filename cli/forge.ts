@@ -1,7 +1,9 @@
 #!/usr/bin/env node
-import { fileURLToPath } from 'url';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
 import minimist from 'minimist';
+
 import { runKeyword } from '../dispatcher/router.js';
 
 const __filename = fileURLToPath(import.meta.url);

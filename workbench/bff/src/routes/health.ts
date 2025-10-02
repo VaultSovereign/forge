@@ -1,4 +1,5 @@
 import { FastifyInstance } from 'fastify';
+
 import { coreLedgerQuery } from '../core/client.js';
 
 export default async function healthRoutes(app: FastifyInstance) {

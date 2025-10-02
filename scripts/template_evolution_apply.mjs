@@ -67,7 +67,7 @@ function parseArgs() {
   }
   if (!proposalPath) {
     console.error(
-      'usage: node scripts/template_evolution_apply.mjs <proposal.json> [--repo-root .]',
+      'usage: node scripts/template_evolution_apply.mjs <proposal.json> [--repo-root .]'
     );
     process.exit(2);
   }
@@ -95,7 +95,7 @@ for (const target of proposal.targets || []) {
   const currentVersion = match ? match[1] : '';
   if (currentVersion !== target.from_version) {
     console.error(
-      `[apply] version mismatch in ${templatePath}: file=${currentVersion}, expected=${target.from_version}`,
+      `[apply] version mismatch in ${templatePath}: file=${currentVersion}, expected=${target.from_version}`
     );
     process.exit(1);
   }

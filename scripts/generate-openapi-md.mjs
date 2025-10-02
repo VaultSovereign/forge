@@ -108,9 +108,9 @@ function joinSecurity(secArr) {
     .map((obj) =>
       Object.entries(obj || {})
         .map(([scheme, scopes]) =>
-          scopes && scopes.length ? `${scheme}(${scopes.join(',')})` : scheme,
+          scopes && scopes.length ? `${scheme}(${scopes.join(',')})` : scheme
         )
-        .join('+'),
+        .join('+')
     )
     .join(' \\| ');
 }
@@ -122,7 +122,7 @@ function renderSecuritySchemes(schemes) {
     if (!v) continue;
     if (v.type === 'http') {
       lines.push(
-        `- **${k}**: http${v.scheme ? ` (${v.scheme})` : ''}${v.bearerFormat ? ` — ${v.bearerFormat}` : ''}`,
+        `- **${k}**: http${v.scheme ? ` (${v.scheme})` : ''}${v.bearerFormat ? ` — ${v.bearerFormat}` : ''}`
       );
     } else if (v.type === 'apiKey') {
       lines.push(`- **${k}**: apiKey (in: ${v.in}, name: ${v.name})`);
@@ -216,7 +216,7 @@ function render(spec) {
   md += `|---|---|---|---|---|---|\n`;
   for (const r of endpoints) {
     md += `| ${mdEscape(r.method)} | \`${mdEscape(r.route)}\` | ${mdEscape(
-      r.summary,
+      r.summary
     )} | ${mdEscape(r.security)} | ${mdEscape(r.request)} | ${mdEscape(r.response)} |\n`;
   }
 

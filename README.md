@@ -170,6 +170,19 @@ pnpm forge tem-guardrails @blue \
 > **Safety levels:** read-only (default), advisory, lab-only (pseudocode), restricted.
 > No live payloads, no destructive steps, no secrets. Passive recon only unless lab gates are met.
 
+### Forge Doctor
+
+Check your environment quickly. Doctor does not require provider keys when run with `--skip-provider`.
+
+```bash
+# Dev (ts-node) or from dist after build
+pnpm run vm -- doctor --skip-provider
+node dist/cli/index.js doctor --skip-provider
+
+# CI/local offline tip: skip remote scans
+FORGE_SKIP_REMOTE_SCANS=1 make forge-prepush
+```
+
 ### Codebase audit scroll
 
 ```bash

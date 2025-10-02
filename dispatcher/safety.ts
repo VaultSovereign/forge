@@ -15,7 +15,7 @@ export function safetyPreflight(t: Template, args: RunArgs): PreflightResult {
   if (t.keyword === 'tem-recon') {
     if (args.scope && String(args.scope).toLowerCase() === 'out-of-scope') {
       throw new Error(
-        'Scope is out-of-scope. Deny-by-default. Provide explicit approval to proceed.',
+        'Scope is out-of-scope. Deny-by-default. Provide explicit approval to proceed.'
       );
     }
     notes.push('Passive-only enforced. No live probing or scanning.');

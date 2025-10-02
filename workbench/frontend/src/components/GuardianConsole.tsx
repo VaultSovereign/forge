@@ -1,12 +1,14 @@
 import { useState } from 'react';
+
 import { useGuardianMode } from '../hooks/useGuardianMode.js';
 
-const BASE = (import.meta as any).env?.VITE_API_BASE ?? 'http://localhost:8787';
+const BASE =
+  (import.meta as { env?: Record<string, unknown> }).env?.VITE_API_BASE ?? 'http://localhost:8787';
 
 export default function GuardianConsole() {
   const { mode, loading, refresh } = useGuardianMode(15000);
   const [input, setInput] = useState('List latest ledger events; flag non-ok.');
-  const [out, setOut] = useState<{ text: string; events: any[] } | null>(null);
+  const [out, setOut] = useState<{ text: string; events: unknown[] } | null>(null);
   const [busy, setBusy] = useState(false);
 
   const ask = async () => {

@@ -1,15 +1,17 @@
 #!/usr/bin/env node
-import { fileURLToPath } from 'node:url';
-import path from 'node:path';
-import fs from 'node:fs/promises';
-import YAML from 'yaml';
-import minimist from 'minimist';
 import crypto from 'node:crypto';
-import { expand } from './expander.js';
-import { safetyPreflight } from './safety.js';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import minimist from 'minimist';
+import YAML from 'yaml';
+
 import { ensureConforms } from './ensureConforms.js';
+import { expand } from './expander.js';
 import { createProviderConfig } from './modelProvider.js';
 import { appendRealityEvent } from './realityLedger.js';
+import { safetyPreflight } from './safety.js';
 import type { Template, Profile, RunArgs } from './types.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -62,7 +64,7 @@ export interface TemplateListing {
 
 async function findTemplate(
   projectRoot: string,
-  keyword: string,
+  keyword: string
 ): Promise<{ tpl: Template; path: string }> {
   const family = keyword.split('-')[0];
   const familyDir = path.join(projectRoot, 'catalog', family);
@@ -100,7 +102,7 @@ async function listTemplatesInternal(projectRoot: string): Promise<TemplateListi
         console.error(
           '[dispatcher] Failed to load template',
           absolute,
-          err instanceof Error ? err.message : err,
+          err instanceof Error ? err.message : err
         );
       }
     }
@@ -168,7 +170,7 @@ function enrichContext(tpl: Template, args: RunArgs, profile: Profile) {
 }
 
 async function expandPrompt(tpl: Template, args: RunArgs, ctx: any) {
-  let sys = expand(tpl.prompt.system, ctx);
+  const sys = expand(tpl.prompt.system, ctx);
   let usr = expand(tpl.prompt.user, ctx);
 
   // Auto-enrichment hooks
@@ -249,7 +251,7 @@ export async function runKeyword(opts: {
       const repair = await callLLM(
         `You are a strict JSON repairer. You ONLY output valid JSON that conforms to a provided JSON Schema. Never include commentary.`,
         `JSON Schema (as JSON):\n\n${JSON.stringify(schema)}\n\n---\nOriginal model output:\n${llmRaw}\n\nReturn ONLY repaired JSON that conforms.`,
-        requestedModel,
+        requestedModel
       );
       const res2 = await ensureConforms(repair, schema);
       if (!res2.ok) {
@@ -301,7 +303,7 @@ export async function runKeyword(opts: {
     } catch (err) {
       console.error(
         '[forge] reality ledger append failed:',
-        err instanceof Error ? err.message : err,
+        err instanceof Error ? err.message : err
       );
     }
   }

@@ -42,10 +42,10 @@ echo "==> Merging ${remote_ref} (allow-unrelated-histories)"
 echo "    This will create merge conflicts. We'll resolve by preferring local (forge) content."
 if ! git merge --allow-unrelated-histories --no-commit "${remote_ref}"; then
   echo "⚠️  Merge conflicts detected (expected). Resolving..."
-  
+
   # Strategy: Prefer LOCAL (our refined forge) for everything
   # EXCEPT preserve remote's GHCR workflows/badges if they don't conflict
-  
+
   echo "==> Accepting LOCAL (forge) versions for core files"
   git checkout --ours README.md || true
   git checkout --ours docs/WORKBENCH.md || true
@@ -55,7 +55,7 @@ if ! git merge --allow-unrelated-histories --no-commit "${remote_ref}"; then
   git checkout --ours .gitignore || true
   git checkout --ours Makefile || true
   git checkout --ours Makefile.mk || true
-  
+
   # Quality tooling (local only)
   git checkout --ours .editorconfig || true
   git checkout --ours .eslintignore || true
@@ -63,22 +63,22 @@ if ! git merge --allow-unrelated-histories --no-commit "${remote_ref}"; then
   git checkout --ours .prettierrc.json || true
   git checkout --ours .prettierignore || true
   git checkout --ours .npmrc || true
-  
+
   # Build configs (local only)
   git checkout --ours pnpm-workspace.yaml || true
   git checkout --ours pnpm-lock.yaml || true
   git checkout --ours vitest.config.ts || true
   git checkout --ours tsconfig.json || true
-  
+
   # Directories that only exist locally
   git checkout --ours workbench/ || true
   git checkout --ours agents/ || true
   git checkout --ours tests/ || true
   git checkout --ours .husky/ || true
-  
+
   # Workflows: Prefer local CI guardrails
   git checkout --ours .github/workflows/ci.yml || true
-  
+
   # If remote has GHCR workflows we don't have, keep them
   for workflow in release-notes.yml image-publish.yml; do
     if git ls-files --error-unmatch ".github/workflows/$workflow" &>/dev/null; then
@@ -86,7 +86,7 @@ if ! git merge --allow-unrelated-histories --no-commit "${remote_ref}"; then
       git checkout --theirs ".github/workflows/$workflow" || true
     fi
   done
-  
+
   echo "==> Staging resolved files"
   git add -A
 fi

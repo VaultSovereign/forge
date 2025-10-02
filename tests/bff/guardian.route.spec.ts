@@ -9,8 +9,8 @@ vi.mock('../../agents/index.ts', () => ({
   }),
 }));
 
-import { postGuardian } from '../../workbench/bff/src/routes/guardian.ts';
 import { askGuardian } from '../../agents/index.ts';
+import { postGuardian } from '../../workbench/bff/src/routes/guardian.ts';
 
 describe('POST /guardian/ask handler (direct)', () => {
   function makeReply() {

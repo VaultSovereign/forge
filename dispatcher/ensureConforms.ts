@@ -6,7 +6,7 @@ addFormats(ajv);
 
 export async function ensureConforms(
   raw: string,
-  schemaObj: any,
+  schemaObj: any
 ): Promise<{ ok: boolean; value?: any; errors?: any[] }> {
   // Try extracting JSON from raw text
   let candidate: any;

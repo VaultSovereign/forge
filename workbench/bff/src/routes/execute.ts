@@ -1,5 +1,6 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
+
 import { authMiddleware } from '../auth/oidc.js';
 import { rbac } from '../auth/rbac.js';
 import { coreExecute } from '../core/client.js';
@@ -13,17 +14,35 @@ const ExecuteReq = z.object({
 export default async function executeRoutes(app: FastifyInstance) {
   app.post(
     '/v1/api/execute',
-    { preHandler: [authMiddleware(), rbac(['execute:run'])] },
+    {
+      preHandler: [authMiddleware(), rbac(['execute:run'])],
+      // Rate limit: bursts allowed but cap sustained abuse per IP
+      config: {
+        rateLimit: {
+          max: Number(process.env.EXECUTE_POST_RPS ?? 30),
+          timeWindow: process.env.EXECUTE_POST_WINDOW ?? '1 minute',
+        },
+      },
+    },
     async (request, reply) => {
       const body = ExecuteReq.parse(request.body ?? {});
       const result = await coreExecute(body);
       return result;
-    },
+    }
   );
 
   app.get(
     '/v1/api/execute/stream',
-    { preHandler: [authMiddleware(), rbac(['execute:run'])] },
+    {
+      preHandler: [authMiddleware(), rbac(['execute:run'])],
+      // Keep SSE connections reasonable per IP to prevent resource exhaustion
+      config: {
+        rateLimit: {
+          max: Number(process.env.EXECUTE_STREAM_RPS ?? 6),
+          timeWindow: process.env.EXECUTE_STREAM_WINDOW ?? '1 minute',
+        },
+      },
+    },
     async (req: FastifyRequest, reply: FastifyReply) => {
       // Use a Zod schema for query parameters for type safety and validation
       const QuerySchema = ExecuteReq.extend({
@@ -99,6 +118,6 @@ export default async function executeRoutes(app: FastifyInstance) {
       }
 
       return reply;
-    },
+    }
   );
 }

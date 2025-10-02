@@ -1,4 +1,5 @@
 import path from 'node:path';
+
 import { listTemplates, TemplateListing } from '../dispatcher/router.js';
 
 const cache = new Map<string, TemplateListing>();
@@ -14,7 +15,7 @@ function slugify(input: string): string {
 
 export async function resolveTemplateMeta(
   projectRoot: string,
-  input: string,
+  input: string
 ): Promise<TemplateListing> {
   const key = `${projectRoot}::${input}`;
   if (cache.has(key)) return cache.get(key)!;

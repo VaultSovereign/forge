@@ -12,13 +12,21 @@
       "Intended for CI/PR review and auditor read-outs."
     ]
   },
-  "tags": ["dora", "tprm", "fintech", "compliance"],
+  "tags": [
+    "dora",
+    "tprm",
+    "fintech",
+    "compliance"
+  ],
   "summary": "Evaluate a vendor's third-party risk posture aligned to DORA. Aggregates evidence, maps to control families, scores risk, and emits an auditable JSON report suitable for the Reality Ledger.\n",
   "inputs": {
     "schema": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "type": "object",
-      "required": ["vendor_name", "criticality"],
+      "required": [
+        "vendor_name",
+        "criticality"
+      ],
       "additionalProperties": false,
       "properties": {
         "vendor_name": {
@@ -27,7 +35,12 @@
         },
         "criticality": {
           "type": "string",
-          "enum": ["low", "moderate", "high", "critical"]
+          "enum": [
+            "low",
+            "moderate",
+            "high",
+            "critical"
+          ]
         },
         "business_services": {
           "type": "array",
@@ -40,7 +53,14 @@
           "type": "array",
           "items": {
             "type": "string",
-            "enum": ["PII", "PCI", "PHI", "Confidential", "Internal", "Public"]
+            "enum": [
+              "PII",
+              "PCI",
+              "PHI",
+              "Confidential",
+              "Internal",
+              "Public"
+            ]
           }
         },
         "regions": {
@@ -118,8 +138,12 @@
       "controls.coverage.dora >= 0.85",
       "risk.level in ['low','moderate']"
     ],
-    "warn_if": ["risk.level == 'high'"],
-    "fail_if": ["risk.level == 'critical'"]
+    "warn_if": [
+      "risk.level == 'high'"
+    ],
+    "fail_if": [
+      "risk.level == 'critical'"
+    ]
   },
   "controls_map": {
     "dora": [
@@ -145,12 +169,23 @@
       "A.15 Supplier relationships",
       "A.17 Information security aspects of business continuity"
     ],
-    "nist80053": ["RA-3, RA-5", "SA-9, SA-12", "CP-2, CP-9, CP-10"]
+    "nist80053": [
+      "RA-3, RA-5",
+      "SA-9, SA-12",
+      "CP-2, CP-9, CP-10"
+    ]
   },
   "output_schema": {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
-    "required": ["vendor", "risk", "coverage", "findings", "recommendations", "acceptance"],
+    "required": [
+      "vendor",
+      "risk",
+      "coverage",
+      "findings",
+      "recommendations",
+      "acceptance"
+    ],
     "properties": {
       "vendor": {
         "type": "object",
@@ -160,7 +195,12 @@
           },
           "criticality": {
             "type": "string",
-            "enum": ["low", "moderate", "high", "critical"]
+            "enum": [
+              "low",
+              "moderate",
+              "high",
+              "critical"
+            ]
           },
           "regions": {
             "type": "array",
@@ -184,7 +224,10 @@
       },
       "risk": {
         "type": "object",
-        "required": ["score", "level"],
+        "required": [
+          "score",
+          "level"
+        ],
         "properties": {
           "score": {
             "type": "number",
@@ -193,7 +236,12 @@
           },
           "level": {
             "type": "string",
-            "enum": ["low", "moderate", "high", "critical"]
+            "enum": [
+              "low",
+              "moderate",
+              "high",
+              "critical"
+            ]
           },
           "rationale": {
             "type": "string"
@@ -224,7 +272,12 @@
         "type": "array",
         "items": {
           "type": "object",
-          "required": ["id", "title", "severity", "control_ids"],
+          "required": [
+            "id",
+            "title",
+            "severity",
+            "control_ids"
+          ],
           "properties": {
             "id": {
               "type": "string"
@@ -234,7 +287,13 @@
             },
             "severity": {
               "type": "string",
-              "enum": ["info", "low", "medium", "high", "critical"]
+              "enum": [
+                "info",
+                "low",
+                "medium",
+                "high",
+                "critical"
+              ]
             },
             "control_ids": {
               "type": "array",
@@ -279,7 +338,10 @@
       },
       "acceptance": {
         "type": "object",
-        "required": ["pass", "reasons"],
+        "required": [
+          "pass",
+          "reasons"
+        ],
         "properties": {
           "pass": {
             "type": "boolean"

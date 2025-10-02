@@ -1,5 +1,7 @@
 import { useEffect, useState, type ChangeEvent } from 'react';
+
 import { executeOnce, listTemplates, streamExecute, type TemplateSummary } from '../api';
+
 import SSEConsole from './SSEConsole';
 
 export default function TemplateRunner() {
@@ -63,7 +65,7 @@ export default function TemplateRunner() {
       (error) => {
         setLogs((prev) => [...prev, `stream error: ${String(error)}`]);
         setStreaming(false);
-      },
+      }
     );
   };
 

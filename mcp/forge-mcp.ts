@@ -1,10 +1,11 @@
-import { createInterface } from 'node:readline';
 import { stdin as In, stdout as Out } from 'node:process';
-import { runForge } from '../tools/forge.js';
-import { searchCodex, getDoc, buildIndex } from '../tools/codex.js';
-import { appendRealityEvent } from '../tools/ledger.js';
-import { planTask } from '../agent/plan.js';
+import { createInterface } from 'node:readline';
+
 import { executePlan } from '../agent/execute.js';
+import { planTask } from '../agent/plan.js';
+import { searchCodex, getDoc, buildIndex } from '../tools/codex.js';
+import { runForge } from '../tools/forge.js';
+import { appendRealityEvent } from '../tools/ledger.js';
 
 // Minimal JSON-RPC 2.0 server over newline-delimited JSON (MCP-compatible for Claude Desktop)
 type RequestPayload = { id: number | string; jsonrpc: '2.0'; method: string; params?: unknown };
@@ -49,7 +50,7 @@ async function handle(req: RequestPayload): Promise<void> {
         const output = await runForge(
           String(scroll ?? ''),
           String(profile ?? '@blue'),
-          args as Record<string, unknown>,
+          args as Record<string, unknown>
         );
         send({ id, jsonrpc: '2.0', result: output });
         return;

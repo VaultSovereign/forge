@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+
 import { listLedger, listTemplates, type LedgerRow, type TemplateSummary } from '../api';
 
 export type DashboardSnapshot = {
@@ -46,6 +47,6 @@ export function useDashboardSnapshot(limit = 25): DashboardSnapshot {
       error,
       refresh,
     }),
-    [templates, ledger, loading, error, refresh],
+    [templates, ledger, loading, error, refresh]
   );
 }

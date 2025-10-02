@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
 import * as grpc from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
 
@@ -76,7 +77,7 @@ function getClient(addr: string) {
           Core: new (
             address: string,
             creds: grpc.ChannelCredentials,
-            options?: grpc.ClientOptions,
+            options?: grpc.ClientOptions
           ) => grpc.Client & {
             Execute: grpc.handleUnaryCall<any, any>;
             LedgerQuery: grpc.handleServerStreamingCall<any, any>;
@@ -98,7 +99,7 @@ function getClient(addr: string) {
     LedgerQuery(request: any): grpc.ClientReadableStream<any>;
     LedgerVerify(
       request: any,
-      callback: (err: grpc.ServiceError | null, response: any) => void,
+      callback: (err: grpc.ServiceError | null, response: any) => void
     ): void;
   };
 }
@@ -114,7 +115,7 @@ function safeJSON(payload: string) {
 export async function executeGRPC(
   addr: string,
   req: ExecuteReq,
-  onLog?: (line: string) => void,
+  onLog?: (line: string) => void
 ): Promise<ExecuteRes> {
   const client = getClient(addr);
   onLog?.(`[grpc] Execute ${req.templateId}`);
@@ -151,7 +152,7 @@ export async function executeGRPC(
 
 export async function ledgerQueryGRPC(
   addr: string,
-  query: { template?: string; limit?: number },
+  query: { template?: string; limit?: number }
 ): Promise<LedgerEvent[]> {
   const client = getClient(addr);
 

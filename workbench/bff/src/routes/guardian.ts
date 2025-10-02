@@ -1,33 +1,26 @@
-import type { FastifyInstance } from 'fastify';
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+
+import type { FastifyInstance } from 'fastify';
+import { limitCfg } from './_limits.js';
+
+import { askGuardian as askGuardianDirect } from '../../../../agents/index.ts';
 import { fromHere } from '../utils/esm-paths.js';
 // Test-only import: used by exported postGuardian handler for unit tests.
 // At runtime, the Fastify route below continues to use dynamic agent resolution.
 // The relative path walks up to repo root from workbench/bff/src/routes.
 // eslint-disable-next-line import/no-relative-packages
-import { askGuardian as askGuardianDirect } from '../../../../agents/index.ts';
 
 type GuardianMode = 'stub' | 'agent' | 'unknown';
 
 const TTL_MS = Number(process.env.GUARDIAN_MODE_TTL_MS ?? 1000);
 
-const agentCandidates: string[] = (() => {
-  const fromEnv = process.env.GUARDIAN_AGENT_ENTRY;
-  const roots = [
-    process.cwd(),
-    path.resolve(process.cwd(), '.'),
-    fromHere(import.meta.url, '../../..', '..', '..'),
-  ];
-  const rels = ['agents/build/index.js', 'agents/index.js'];
-  const acc = new Set<string>();
-  if (fromEnv) acc.add(path.resolve(fromEnv));
-  for (const r of roots) for (const rel of rels) acc.add(path.resolve(r, rel));
-  return Array.from(acc);
-})();
-
 let modeCache: { mode: GuardianMode; ts: number } = { mode: 'unknown', ts: 0 };
+let agentCache: { fn: ((input: string) => Promise<any>) | null; path: string | null } = {
+  fn: null,
+  path: null,
+};
 
 export async function detectMode(): Promise<GuardianMode> {
   const now = Date.now();
@@ -38,16 +31,18 @@ export async function detectMode(): Promise<GuardianMode> {
     modeCache = { mode: 'stub', ts: now };
     return 'stub';
   }
-  for (const candidate of agentCandidates) {
-    if (!fs.existsSync(candidate)) continue;
+
+  const agentPath = process.env.GUARDIAN_AGENT_ENTRY;
+  if (agentPath) {
+    const resolvedPath = path.resolve(agentPath);
     try {
-      const mod: any = await import(pathToFileURL(candidate).href).catch(() => null);
+      const mod: any = await import(pathToFileURL(resolvedPath).href).catch(() => null);
       const askFn = mod?.askGuardian ?? mod?.ask ?? mod?.default?.askGuardian ?? mod?.default?.ask;
       if (typeof askFn === 'function') {
         modeCache = { mode: 'agent', ts: now };
         return 'agent';
       }
-    } catch {
+    } catch (e) {
       // continue
     }
   }
@@ -56,26 +51,25 @@ export async function detectMode(): Promise<GuardianMode> {
 }
 
 async function resolveAgent() {
-  // Try env override, then built artifact, then JS source export
-  const candidates = [
-    ...(process.env.GUARDIAN_AGENT_ENTRY ? [path.resolve(process.env.GUARDIAN_AGENT_ENTRY)] : []),
-    path.resolve(process.cwd(), 'agents/build/index.js'),
-    path.resolve(process.cwd(), 'agents/index.js'),
-    fromHere(import.meta.url, '../../..', '..', '..', 'agents/build/index.js'),
-    fromHere(import.meta.url, '../../..', '..', '..', 'agents/index.js'),
-  ];
+  const agentPath = process.env.GUARDIAN_AGENT_ENTRY;
+  if (!agentPath) {
+    return null;
+  }
 
-  for (const spec of candidates) {
-    try {
-      // @ts-ignore optional runtime import; presence determines agent mode
-      const mod: any = await import(pathToFileURL(spec).href);
-      const askFn = mod?.askGuardian ?? mod?.ask ?? mod?.default?.askGuardian ?? mod?.default?.ask;
-      if (typeof askFn === 'function') {
-        return askFn as (input: string) => Promise<any>;
-      }
-    } catch {
-      // continue to next candidate
+  const resolvedPath = path.resolve(agentPath);
+  if (agentCache.path === resolvedPath && agentCache.fn) {
+    return agentCache.fn;
+  }
+
+  try {
+    const mod: any = await import(pathToFileURL(resolvedPath).href);
+    const askFn = mod?.askGuardian ?? mod?.ask ?? mod?.default?.askGuardian ?? mod?.default?.ask;
+    if (typeof askFn === 'function') {
+      agentCache = { fn: askFn, path: resolvedPath };
+      return askFn as (input: string) => Promise<any>;
     }
+  } catch {
+    // continue to return null
   }
   return null;
 }
@@ -152,25 +146,35 @@ export default async function guardianRoutes(app: FastifyInstance) {
       },
     },
     postGuardian,
+    // Limit agent calls to avoid abuse; defaults allow bursts but protect sustained load
+    ...limitCfg('GUARDIAN_ASK_RPS', 'GUARDIAN_ASK_WINDOW', 30, '1 minute')
   );
 
   // Lightweight mode probe for dashboards
-  app.get('/v1/guardian/mode', async (_req, reply) => {
-    const mode = await detectMode();
-    const ts = Date.now();
-    reply
-      .header('x-guardian-mode', mode)
-      .header('Cache-Control', 'no-cache, max-age=0, must-revalidate')
-      .header('ETag', `W/"${mode}-${Math.floor(ts / 1000)}"`);
-    return reply.send({ mode, ts });
-  });
+  app.get(
+    '/v1/guardian/mode',
+    { ...limitCfg('GUARDIAN_MODE_RPS', 'GUARDIAN_MODE_WINDOW', 60, '1 minute') },
+    async (_req, reply) => {
+      const mode = await detectMode();
+      const ts = Date.now();
+      reply
+        .header('x-guardian-mode', mode)
+        .header('Cache-Control', 'no-cache, max-age=0, must-revalidate')
+        .header('ETag', `W/"${mode}-${Math.floor(ts / 1000)}"`);
+      return reply.send({ mode, ts });
+    }
+  );
 
   // Header-only probe (cheap for dashboards)
-  app.head('/v1/guardian/mode', async (_req, reply) => {
-    const mode = await detectMode();
-    reply
-      .header('x-guardian-mode', mode)
-      .header('Cache-Control', 'no-cache, max-age=0, must-revalidate');
-    return reply.status(204).send();
-  });
+  app.head(
+    '/v1/guardian/mode',
+    { ...limitCfg('GUARDIAN_MODE_RPS', 'GUARDIAN_MODE_WINDOW', 60, '1 minute') },
+    async (_req, reply) => {
+      const mode = await detectMode();
+      reply
+        .header('x-guardian-mode', mode)
+        .header('Cache-Control', 'no-cache, max-age=0, must-revalidate');
+      return reply.status(204).send();
+    }
+  );
 }

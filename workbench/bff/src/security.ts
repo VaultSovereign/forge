@@ -1,5 +1,5 @@
-import type { FastifyInstance } from 'fastify';
 import helmet from '@fastify/helmet';
+import type { FastifyInstance } from 'fastify';
 
 export default async function security(app: FastifyInstance) {
   const isDev = process.env.NODE_ENV === 'development';

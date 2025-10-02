@@ -26,6 +26,6 @@ process.stdout.write(
   JSON.stringify(
     { dockerfile_path: DOCKERFILE, dockerfile_text: dockerfileText, trivy_report: trivy },
     null,
-    2,
-  ) + '\n',
+    2
+  ) + '\n'
 );

@@ -1,13 +1,14 @@
 import { useMemo } from 'react';
-import TemplateRunner from './components/TemplateRunner';
-import LedgerTable from './components/LedgerTable';
-import StreamingBadge from './components/StreamingBadge';
-import Panel from './components/dashboard/Panel.js';
-import OverviewStrip, { type OverviewItem } from './components/dashboard/OverviewStrip.js';
-import QuickLinks from './components/dashboard/QuickLinks.js';
-import { useDashboardSnapshot } from './hooks/useDashboardSnapshot.js';
+
 import type { LedgerRow } from './api';
 import GuardianConsole from './components/GuardianConsole.js';
+import LedgerTable from './components/LedgerTable';
+import StreamingBadge from './components/StreamingBadge';
+import TemplateRunner from './components/TemplateRunner';
+import OverviewStrip, { type OverviewItem } from './components/dashboard/OverviewStrip.js';
+import Panel from './components/dashboard/Panel.js';
+import QuickLinks from './components/dashboard/QuickLinks.js';
+import { useDashboardSnapshot } from './hooks/useDashboardSnapshot.js';
 import { useGuardianMode } from './hooks/useGuardianMode.js';
 import { useTemplateCount } from './hooks/useTemplateCount.js';
 
@@ -150,7 +151,7 @@ export default function App() {
         href: 'https://github.com/VaultSovereign/forge/tree/main/catalog',
       },
     ],
-    [],
+    []
   );
 
   return (

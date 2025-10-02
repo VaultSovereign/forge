@@ -3,4 +3,3 @@ declare module 'fastify-type-provider-zod' {
   // Minimal type-only stub; real package provides full typings
   export interface ZodTypeProvider extends FastifyTypeProvider {}
 }
-

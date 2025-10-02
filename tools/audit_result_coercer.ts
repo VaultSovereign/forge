@@ -84,7 +84,7 @@ export function coerce(result: any) {
       why: typeof risk?.why === 'string' ? risk.why : '',
       where: typeof risk?.where === 'string' ? risk.where : '',
       fix: typeof risk?.fix === 'string' ? risk.fix : '',
-    }),
+    })
   );
 
   const efforts = new Set(['S', 'M', 'L']);
@@ -94,7 +94,7 @@ export function coerce(result: any) {
       value: typeof opp?.value === 'string' ? opp.value : '',
       effort: efforts.has(opp?.effort) ? opp.effort : 'S',
       steps: Array.isArray(opp?.steps) ? opp.steps.filter((s: any) => typeof s === 'string') : [],
-    }),
+    })
   );
 
   if (!['production-ready', 'pilot-ready', 'research-only'].includes(result.verdict)) {

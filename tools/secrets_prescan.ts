@@ -4,11 +4,12 @@
  * Walks a repository, detects candidate secrets using regex + entropy, and prints JSON array of hits.
  */
 
+import { execSync } from 'node:child_process';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
-import { execSync } from 'node:child_process';
-import minimist from 'minimist';
 import { fileURLToPath } from 'node:url';
+
+import minimist from 'minimist';
 
 type Hit = {
   file: string;
@@ -169,7 +170,7 @@ export async function preScan(opts: {
       `git -C ${opts.repositoryPath} log -n ${opts.commitHistoryDepth} --pretty=%H`,
       {
         stdio: ['ignore', 'pipe', 'ignore'],
-      },
+      }
     )
       .toString()
       .split(/\r?\n/)
@@ -180,7 +181,7 @@ export async function preScan(opts: {
         `git -C ${opts.repositoryPath} show ${c} --name-only --pretty=format:`,
         {
           stdio: ['ignore', 'pipe', 'ignore'],
-        },
+        }
       )
         .toString()
         .split(/\r?\n/)
@@ -259,11 +260,11 @@ async function main() {
   const sensitivePatterns = toArray(
     argv.patterns ||
       argv.p ||
-      '["OPENAI_API_KEY=sk-[a-zA-Z0-9]{20,}","OPENROUTER_API_KEY=sk-or-[a-zA-Z0-9]{20,}","GITHUB_TOKEN=(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{36,}","AWS_ACCESS_KEY_ID=AKIA[0-9A-Z]{16}","AWS_SECRET_ACCESS_KEY=[A-Za-z0-9/+=]{40}","password=.*"]',
+      '["OPENAI_API_KEY=sk-[a-zA-Z0-9]{20,}","OPENROUTER_API_KEY=sk-or-[a-zA-Z0-9]{20,}","GITHUB_TOKEN=(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{36,}","AWS_ACCESS_KEY_ID=AKIA[0-9A-Z]{16}","AWS_SECRET_ACCESS_KEY=[A-Za-z0-9/+=]{40}","password=.*"]'
   );
   const commitHistoryDepth = Number(argv.depth || argv.commits || 50);
   const excludedNames = toArray(
-    argv.exclude || 'node_modules,dist,build,.git,.next,.turbo,coverage,.nyc_output',
+    argv.exclude || 'node_modules,dist,build,.git,.next,.turbo,coverage,.nyc_output'
   );
   const ignoreExamples = argv.ignore_examples !== undefined ? Boolean(argv.ignore_examples) : true;
   const entropyThreshold = Number(argv.entropy || 4.0);

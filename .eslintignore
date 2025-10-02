@@ -1,7 +1,10 @@
 node_modules/
 dist/
 build/
-workbench/frontend-dist/
 coverage/
 .nyc_output/
 *.tsbuildinfo
+_backups/**
+workbench/**/dist
+workbench/**/public
+**/package-lock.json

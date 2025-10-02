@@ -8,6 +8,7 @@
 
 import fs from 'fs';
 import path from 'path';
+
 // @ts-ignore - fast-glob doesn't have separate types package
 import fg from 'fast-glob';
 import YAML from 'yaml';

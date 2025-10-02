@@ -1,7 +1,8 @@
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import crypto from 'node:crypto';
 import { pathToFileURL } from 'node:url';
+
 import { fromHere } from '../utils/esm-paths.js';
 
 let yaml: { parse: (s: string) => any } | null = null;
@@ -104,7 +105,7 @@ function applyFilter(items: TemplateMeta[], filter: string | null | undefined): 
     (t) =>
       t.id.toLowerCase().includes(f) ||
       t.name.toLowerCase().includes(f) ||
-      (t.tags || []).some((tag) => tag.toLowerCase().includes(f)),
+      (t.tags || []).some((tag) => tag.toLowerCase().includes(f))
   );
 }
 

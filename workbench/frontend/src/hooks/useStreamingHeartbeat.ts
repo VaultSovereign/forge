@@ -45,7 +45,7 @@ export function useStreamingHeartbeat(path = '/v1/tick/stream', staleMs = 3000) 
           setStatus((prev) => (prev === 'error' ? prev : 'stale'));
         }
       },
-      Math.max(500, Math.floor(staleMs / 2)),
+      Math.max(500, Math.floor(staleMs / 2))
     );
 
     return () => {

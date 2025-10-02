@@ -1,7 +1,9 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 
 function apiBase() {
-  const raw = (import.meta as any).env?.VITE_API_BASE as string | undefined;
+  const raw = (import.meta as { env?: Record<string, unknown> }).env?.VITE_API_BASE as
+    | string
+    | undefined;
   if (!raw) return '';
   return raw.endsWith('/') ? raw.slice(0, -1) : raw;
 }
@@ -24,7 +26,7 @@ export function useGuardianMode(pollMs = 0) {
       // Prefer lightweight GET probe; fallback to POST if not available
       const r = await fetch(`${BASE}/v1/guardian/mode`, { signal: ctrl.signal });
       if (r.ok) {
-        const data = await r.json().catch(() => ({}) as any);
+        const data = (await r.json().catch(() => ({}))) as { mode?: string };
         const m: GuardianMode =
           data?.mode === 'agent' ? 'agent' : data?.mode === 'stub' ? 'stub' : 'unknown';
         setMode(m);
@@ -35,14 +37,15 @@ export function useGuardianMode(pollMs = 0) {
           body: JSON.stringify({ input: 'ping' }),
           signal: ctrl.signal,
         });
-        const data2 = await r2.json().catch(() => ({}) as any);
+        const data2 = (await r2.json().catch(() => ({}))) as { mode?: string };
         const m2: GuardianMode =
           data2?.mode === 'agent' ? 'agent' : data2?.mode === 'stub' ? 'stub' : 'unknown';
         setMode(m2);
       }
-    } catch (e: any) {
-      if (e?.name !== 'AbortError') {
-        setError(e?.message ?? 'network error');
+    } catch (e) {
+      const err = e as { name?: string; message?: string };
+      if (err?.name !== 'AbortError') {
+        setError(err?.message ?? 'network error');
         setMode('unknown');
       }
     } finally {

@@ -103,3 +103,30 @@ Images are built from the `Dockerfile` at the repo root. If you change it, the n
 to `main` will automatically update the `:latest` image.
 
 > > > > > > > origin/main
+
+## Lint and Coverage Policy
+
+- Lint
+  - `pnpm lint` shows issues without failing CI (non-strict).
+  - `pnpm lint:ci` is strict (`--max-warnings=0`) and fails on any warning. Switch CI to this when the warning backlog is reduced.
+- Coverage (Vitest)
+  - Minimal thresholds on main: lines ≥ 25%, statements ≥ 25%, functions ≥ 20%, branches ≥ 20% (see `vitest.config.ts`).
+  - Escape hatch: set `COVERAGE_RELAX=1` (Team lead approval) to relax thresholds in emergencies.
+  - PRs run changed-only tests to keep velocity high.
+
+### Test Modes
+
+| Context | What runs | Thresholds | Toggle |
+|---|---|---|---|
+| `main` (push) | Full suite + coverage | Enforced (see above) | `COVERAGE_RELAX=1` (lead-only) |
+| Pull Requests | Changed-only (`pnpm run test:changed`) | Relaxed (`COVERAGE_RELAX=1`) | n/a |
+
+Local commands:
+
+```bash
+# main-like
+COVERAGE_RELAX=0 pnpm test
+
+# PR-like, changed-only
+pnpm run test:changed
+```

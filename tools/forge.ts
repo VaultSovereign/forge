@@ -7,7 +7,7 @@ type ForgeResult = unknown;
 export async function runForge(
   scroll: string,
   profile = '@blue',
-  args: ForgeArgs = {},
+  args: ForgeArgs = {}
 ): Promise<ForgeResult> {
   if (!scroll) {
     throw new Error('Scroll name is required');

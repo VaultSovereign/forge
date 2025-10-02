@@ -4,11 +4,12 @@
  * Provides template execution, ledger queries, and metadata tools to Claude Code
  */
 
+import path from 'path';
+import { fileURLToPath } from 'url';
+
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { ListToolsRequestSchema, CallToolRequestSchema } from '@modelcontextprotocol/sdk/types.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import { z } from 'zod';
 
 // Dynamic imports to avoid provider initialization issues
@@ -25,7 +26,7 @@ const server = new Server(
     capabilities: {
       tools: {},
     },
-  },
+  }
 );
 
 const RunTemplateArgs = z.object({
@@ -87,7 +88,7 @@ async function listTemplates() {
             } catch (err) {
               console.error(
                 `[mcp] Error reading template ${file}:`,
-                err instanceof Error ? err.message : err,
+                err instanceof Error ? err.message : err
               );
             }
           }
@@ -99,7 +100,7 @@ async function listTemplates() {
   } catch (error) {
     console.error(
       '[mcp] Error listing templates:',
-      error instanceof Error ? error.message : String(error),
+      error instanceof Error ? error.message : String(error)
     );
     return [];
   }
@@ -112,7 +113,7 @@ async function runTemplate(
   templateId: string,
   profile: string = 'vault',
   args: any = {},
-  format: string = 'markdown',
+  format: string = 'markdown'
 ) {
   try {
     // Dynamic import to avoid provider initialization
@@ -150,7 +151,7 @@ async function runTemplate(
   } catch (error) {
     console.error(
       `[mcp] Error running template:`,
-      error instanceof Error ? error.message : String(error),
+      error instanceof Error ? error.message : String(error)
     );
     throw error;
   }
@@ -182,7 +183,7 @@ async function queryLedger(filters: any = {}) {
   } catch (error) {
     console.error(
       `[mcp] Error querying ledger:`,
-      error instanceof Error ? error.message : String(error),
+      error instanceof Error ? error.message : String(error)
     );
     throw error;
   }
@@ -231,7 +232,7 @@ async function renderReport(templateId: string, eventId?: string) {
   } catch (error) {
     console.error(
       `[mcp] Error rendering report:`,
-      error instanceof Error ? error.message : String(error),
+      error instanceof Error ? error.message : String(error)
     );
     throw error;
   }

@@ -1,7 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import YAML from 'yaml';
+
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import YAML from 'yaml';
 
 type RbacDoc = {
   roles: Record<string, string[]>;
@@ -46,7 +47,7 @@ export function rbac(required: string[]) {
 
     // Action-based check
     const ok = required.some((action) =>
-      [...roles].some((role) => (matrix.roles[role] ?? []).includes(action)),
+      [...roles].some((role) => (matrix.roles[role] ?? []).includes(action))
     );
     if (!ok) {
       reply.code(403).send({ ok: false, error: 'forbidden', need: required });

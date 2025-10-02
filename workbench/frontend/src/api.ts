@@ -1,5 +1,7 @@
 function apiBase() {
-  const raw = (import.meta as any).env?.VITE_API_BASE as string | undefined;
+  const raw = (import.meta as { env?: Record<string, unknown> }).env?.VITE_API_BASE as
+    | string
+    | undefined;
   if (!raw) return '';
   return raw.endsWith('/') ? raw.slice(0, -1) : raw;
 }
@@ -49,8 +51,8 @@ export async function executeOnce(body: TemplateExecution) {
 export function streamExecute(
   query: TemplateExecution,
   onLog: (line: string) => void,
-  onDone: (result: { ok?: boolean; id?: string; [k: string]: any }) => void,
-  onError: (error: unknown) => void,
+  onDone: (result: { ok?: boolean; id?: string; [k: string]: unknown }) => void,
+  onError: (error: unknown) => void
 ) {
   const params = new URLSearchParams({
     templateId: query.templateId,

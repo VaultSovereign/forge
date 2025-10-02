@@ -1,6 +1,6 @@
 // workbench/frontend/vite.config.ts
-import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
 
 const DEV_PORT = Number(process.env.VITE_DEV_PORT || process.env.PORT || 5173);
 const BFF_PORT = Number(process.env.BFF_PORT || process.env.VITE_BFF_PORT || 8787);

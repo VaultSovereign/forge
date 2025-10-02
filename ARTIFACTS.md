@@ -20,6 +20,12 @@ The CI pipeline enforces strict security gates:
 - 🟡 **Build warns** on `high` severity findings (configurable via `FORGE_MAX_HIGH`)
 - 🟢 **Build passes** with `medium` and below
 
+### Skipping Remote Scans (Provider-less)
+
+- Local or CI runs without a model provider can skip networked scans by setting `FORGE_SKIP_REMOTE_SCANS=1`.
+- Example: `FORGE_SKIP_REMOTE_SCANS=1 make forge-prepush`
+- In skip mode, artifacts are still archived for traceability. Fields may be empty or counts set to `0`.
+
 ## Downloading Artifacts
 
 1. Go to **Actions** tab in GitHub

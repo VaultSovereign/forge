@@ -17,6 +17,7 @@
     "agent/**/*",
     "tools/**/*",
     "mcp/**/*",
-    "scripts/**/*"
+    "scripts/**/*",
+    "reality_ledger/**/*"
   ]
 }

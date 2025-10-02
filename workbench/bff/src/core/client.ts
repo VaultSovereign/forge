@@ -1,18 +1,19 @@
 import { ExecuteRequest, ExecuteResponse, LedgerEvent } from '../types.js';
+
 import { executeGRPC, ledgerQueryGRPC } from './grpc.js';
 
 const CORE_ADDR = process.env.CORE_GRPC_ADDR;
 
 export async function coreExecute(
   req: ExecuteRequest,
-  onLog?: (line: string) => void,
+  onLog?: (line: string) => void
 ): Promise<ExecuteResponse> {
   if (CORE_ADDR) {
     try {
       const response = await executeGRPC(
         CORE_ADDR,
         { templateId: req.templateId, profile: req.profile, args: req.args },
-        onLog,
+        onLog
       );
       return {
         eventId: response.eventId,
@@ -71,7 +72,7 @@ export async function coreLedgerQuery(query: {
 
 async function simulateExecute(
   req: ExecuteRequest,
-  onLog?: (line: string) => void,
+  onLog?: (line: string) => void
 ): Promise<ExecuteResponse> {
   const eventId = `evt_${Math.random().toString(36).slice(2, 10)}`;
   onLog?.(`[dispatcher] starting ${req.templateId}`);

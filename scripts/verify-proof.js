@@ -27,7 +27,7 @@ try {
 } catch (error) {
   console.error(
     '[verify] failed to read bundle:',
-    error instanceof Error ? error.message : String(error),
+    error instanceof Error ? error.message : String(error)
   );
   process.exit(1);
 }

@@ -4,14 +4,22 @@
  * Execute templates, verify ledger events, query audit trail
  */
 
-import yargs, { Argv } from 'yargs';
-import { hideBin } from 'yargs/helpers';
-// Note: Only import runKeyword when needed to avoid provider initialization
-// import { runKeyword } from '../dispatcher/router.js';
-import { appendEvent, verifyEvent, queryLedger, getLedgerStats } from '../reality_ledger/node.js';
+import { promises as fs, readFileSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { promises as fs, readFileSync } from 'fs';
+
+import yargs, { Argv } from 'yargs';
+import { hideBin } from 'yargs/helpers';
+
+// Note: Only import runKeyword when needed to avoid provider initialization
+// import { runKeyword } from '../dispatcher/router.js';
+async function getLedger() {
+  try {
+    return await import('../reality_ledger/node.js');
+  } catch {
+    return await import('../reality_ledger/node');
+  }
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -85,7 +93,7 @@ async function runTemplate(argv: RunArgs): Promise<void> {
     const profile = argv.profile || 'vault';
 
     console.error(
-      `[vm] Running template: ${meta.keyword} (input: ${argv.template}) with profile: @${profile}`,
+      `[vm] Running template: ${meta.keyword} (input: ${argv.template}) with profile: @${profile}`
     );
 
     const result = await runKeyword({
@@ -99,6 +107,7 @@ async function runTemplate(argv: RunArgs): Promise<void> {
     });
 
     // Append to Reality Ledger
+    const { appendEvent } = await getLedger();
     const eventId = await appendEvent({
       template: argv.template,
       profile: `@${profile}`,
@@ -126,6 +135,7 @@ async function verifyLedgerEvent(argv: { eventId: string }): Promise<void> {
   try {
     console.error(`[vm] Verifying event: ${argv.eventId}`);
 
+    const { verifyEvent } = await getLedger();
     const isValid = await verifyEvent(argv.eventId);
 
     if (isValid) {
@@ -139,7 +149,7 @@ async function verifyLedgerEvent(argv: { eventId: string }): Promise<void> {
   } catch (error) {
     console.error(
       `[vm] Verification error:`,
-      error instanceof Error ? error.message : String(error),
+      error instanceof Error ? error.message : String(error)
     );
     process.exit(1);
   }
@@ -149,6 +159,7 @@ async function queryLedgerEvents(argv: LedgerQueryArgs): Promise<void> {
   try {
     console.error(`[vm] Querying ledger...`);
 
+    const { queryLedger } = await getLedger();
     const events = await queryLedger({
       template: argv.template,
       profile: argv.profile,
@@ -169,8 +180,8 @@ async function queryLedgerEvents(argv: LedgerQueryArgs): Promise<void> {
           events,
         },
         null,
-        2,
-      ),
+        2
+      )
     );
   } catch (error) {
     console.error(`[vm] Query error:`, error instanceof Error ? error.message : String(error));
@@ -182,6 +193,7 @@ async function showLedgerStats(): Promise<void> {
   try {
     console.error(`[vm] Getting ledger statistics...`);
 
+    const { getLedgerStats } = await getLedger();
     const stats = await getLedgerStats();
 
     console.log(
@@ -191,8 +203,8 @@ async function showLedgerStats(): Promise<void> {
           ...stats,
         },
         null,
-        2,
-      ),
+        2
+      )
     );
   } catch (error) {
     console.error(`[vm] Stats error:`, error instanceof Error ? error.message : String(error));
@@ -247,7 +259,7 @@ async function runDoctor(argv: DoctorArgs): Promise<void> {
         const probe = await config.chat(
           config.model,
           'You are VaultMesh Forge doctor. Reply with a short affirmation.',
-          'Respond with the word OK.',
+          'Respond with the word OK.'
         );
         const healthy = typeof probe === 'string' && probe.trim().length > 0;
         checks.push({
@@ -335,7 +347,7 @@ async function scaffoldTemplate(argv: ScaffoldArgs): Promise<void> {
     await fs.mkdir(catalogDir, { recursive: true });
   } catch (error) {
     console.error(
-      `[vm] Failed to ensure catalog directory: ${error instanceof Error ? error.message : String(error)}`,
+      `[vm] Failed to ensure catalog directory: ${error instanceof Error ? error.message : String(error)}`
     );
     process.exit(1);
   }
@@ -344,7 +356,7 @@ async function scaffoldTemplate(argv: ScaffoldArgs): Promise<void> {
     try {
       await fs.access(targetPath);
       console.error(
-        `[vm] Refusing to overwrite existing file at ${targetPath}. Use --force to override.`,
+        `[vm] Refusing to overwrite existing file at ${targetPath}. Use --force to override.`
       );
       process.exit(1);
     } catch {
@@ -391,11 +403,11 @@ outputs:
   try {
     await fs.writeFile(targetPath, scaffold, 'utf8');
     console.log(
-      JSON.stringify({ created: targetPath, id: rawId, keyword, schema: schemaPointer }, null, 2),
+      JSON.stringify({ created: targetPath, id: rawId, keyword, schema: schemaPointer }, null, 2)
     );
   } catch (error) {
     console.error(
-      `[vm] Failed to write scaffold: ${error instanceof Error ? error.message : String(error)}`,
+      `[vm] Failed to write scaffold: ${error instanceof Error ? error.message : String(error)}`
     );
     process.exit(1);
   }
@@ -433,7 +445,7 @@ yargs(hideBin(process.argv))
           default: 'json',
         });
     },
-    runTemplate,
+    runTemplate
   )
   .command(
     'ledger verify <eventId>',
@@ -445,7 +457,7 @@ yargs(hideBin(process.argv))
         demandOption: true,
       });
     },
-    verifyLedgerEvent,
+    verifyLedgerEvent
   )
   .command(
     'ledger query',
@@ -470,7 +482,7 @@ yargs(hideBin(process.argv))
           default: 10,
         });
     },
-    queryLedgerEvents,
+    queryLedgerEvents
   )
   .command('ledger stats', 'Show ledger statistics', () => {}, showLedgerStats)
   .command(
@@ -488,7 +500,7 @@ yargs(hideBin(process.argv))
           type: 'boolean',
           default: false,
         }),
-    (argv) => runDoctor({ skipProvider: Boolean(argv['skip-provider']), json: Boolean(argv.json) }),
+    (argv) => runDoctor({ skipProvider: Boolean(argv['skip-provider']), json: Boolean(argv.json) })
   )
   .command(
     'scaffold template <id>',
@@ -505,15 +517,15 @@ yargs(hideBin(process.argv))
           type: 'boolean',
           default: false,
         }),
-    (argv) => scaffoldTemplate({ id: String(argv.id), force: Boolean(argv.force) }),
+    (argv) => scaffoldTemplate({ id: String(argv.id), force: Boolean(argv.force) })
   )
   .example(
     '$0 run tem-recon -p blue -a \'{"target":"example.org","depth":"shallow"}\'',
-    'Run reconnaissance template',
+    'Run reconnaissance template'
   )
   .example(
     '$0 run dora.ict_risk -a \'{"org_name":"Acme","critical_functions":["Payments"]}\'',
-    'Run DORA ICT Risk template',
+    'Run DORA ICT Risk template'
   )
   .example('$0 ledger verify a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Verify a specific event')
   .example('$0 ledger query --template tem-recon --limit 5', 'Query recent recon events')

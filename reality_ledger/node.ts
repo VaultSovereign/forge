@@ -14,6 +14,7 @@ import {
 } from 'crypto';
 import { promises as fs, constants as FS_CONSTANTS } from 'fs';
 import * as path from 'path';
+
 import stringify from 'safe-stable-stringify';
 
 export interface LedgerEvent {
@@ -44,7 +45,10 @@ export interface LedgerQueryFilters {
   limit?: number;
 }
 
-const LEDGER_DIR = path.resolve(process.env.REALITY_LEDGER_DIR || './reality_ledger');
+function getLedgerDir(): string {
+  // Resolve at call time to respect changes to env during tests/runtime
+  return path.resolve(process.env.REALITY_LEDGER_DIR || './reality_ledger');
+}
 const LEDGER_VERSION = '1.0.0';
 const SHARD_PREFIX = 'events-';
 const SHARD_SUFFIX = '.jsonl';
@@ -62,7 +66,7 @@ async function appendLineAtomic(filePath: string, line: string): Promise<void> {
   const handle = await fs.open(
     filePath,
     FS_CONSTANTS.O_CREAT | FS_CONSTANTS.O_WRONLY | FS_CONSTANTS.O_APPEND,
-    0o600,
+    0o600
   );
 
   try {
@@ -77,7 +81,7 @@ function shardPathFor(date: Date): string {
   const yyyy = date.getUTCFullYear();
   const mm = String(date.getUTCMonth() + 1).padStart(2, '0');
   const dd = String(date.getUTCDate()).padStart(2, '0');
-  return path.join(LEDGER_DIR, `${SHARD_PREFIX}${yyyy}-${mm}-${dd}${SHARD_SUFFIX}`);
+  return path.join(getLedgerDir(), `${SHARD_PREFIX}${yyyy}-${mm}-${dd}${SHARD_SUFFIX}`);
 }
 
 function redactSensitive(value: unknown): unknown {
@@ -104,7 +108,7 @@ function canonicalEventPayload(
   template: string,
   profile: string,
   input: unknown,
-  output: unknown,
+  output: unknown
 ): string {
   const normalized = stringify({ template, profile, input, output });
   return typeof normalized === 'string'
@@ -116,7 +120,7 @@ function generateEventHash(
   template: string,
   profile: string,
   input: unknown,
-  output: unknown,
+  output: unknown
 ): { hash: string; normalized: string } {
   const normalized = canonicalEventPayload(template, profile, input, output);
   const hash = createHash('sha256').update(normalized).digest('hex');
@@ -135,7 +139,7 @@ function signEvent(normalized: string): string | undefined {
   } catch (error) {
     console.error(
       '[reality_ledger] signing failed:',
-      error instanceof Error ? error.message : String(error),
+      error instanceof Error ? error.message : String(error)
     );
     return undefined;
   }
@@ -154,7 +158,7 @@ function verifySignature(normalized: string, signature?: string): boolean {
   } catch (error) {
     console.error(
       '[reality_ledger] signature verification failed:',
-      error instanceof Error ? error.message : String(error),
+      error instanceof Error ? error.message : String(error)
     );
     return false;
   }
@@ -166,20 +170,21 @@ function isShardFile(fileName: string): boolean {
 
 async function listShardFiles(): Promise<string[]> {
   try {
-    await ensureDir(LEDGER_DIR);
-    const entries = await fs.readdir(LEDGER_DIR);
+    const dir = getLedgerDir();
+    await ensureDir(dir);
+    const entries = await fs.readdir(dir);
     return entries.filter(isShardFile).sort().reverse();
   } catch (error) {
     console.error(
       '[reality_ledger] listShardFiles failed:',
-      error instanceof Error ? error.message : String(error),
+      error instanceof Error ? error.message : String(error)
     );
     return [];
   }
 }
 
 async function readShard(fileName: string): Promise<LedgerEvent[]> {
-  const filePath = path.join(LEDGER_DIR, fileName);
+  const filePath = path.join(getLedgerDir(), fileName);
 
   try {
     const content = await fs.readFile(filePath, 'utf8');
@@ -199,7 +204,7 @@ async function readShard(fileName: string): Promise<LedgerEvent[]> {
     if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
       console.error(
         '[reality_ledger] readShard failed:',
-        error instanceof Error ? error.message : String(error),
+        error instanceof Error ? error.message : String(error)
       );
     }
     return [];
@@ -227,7 +232,7 @@ export async function appendEvent(eventInput: EventInput): Promise<string> {
     eventInput.template,
     eventInput.profile,
     safeArgs,
-    eventInput.result,
+    eventInput.result
   );
   const sig = signEvent(normalized);
 
@@ -275,7 +280,7 @@ export async function verifyEvent(eventId: string): Promise<boolean> {
     event.template,
     event.profile,
     event.input,
-    event.output,
+    event.output
   );
   if (hash !== event.hash) {
     return false;

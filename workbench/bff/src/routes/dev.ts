@@ -1,4 +1,5 @@
 import type { FastifyInstance } from 'fastify';
+
 import { jwks, signDevJWT } from '../dev/keys.js';
 
 export default async function devRoutes(app: FastifyInstance) {

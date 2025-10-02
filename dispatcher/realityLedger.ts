@@ -17,7 +17,7 @@ export interface RealityLedgerEvent {
 
 export async function appendRealityEvent(
   projectRoot: string,
-  event: RealityLedgerEvent,
+  event: RealityLedgerEvent
 ): Promise<void> {
   const scriptPath = path.join(projectRoot, 'reality_ledger', 'reality_ledger.py');
   const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';

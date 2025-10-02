@@ -1,6 +1,8 @@
 #!/usr/bin/env ts-node
-import minimist from 'minimist';
 import path from 'node:path';
+
+import minimist from 'minimist';
+
 import { preScan } from '../../tools/secrets_prescan.js';
 
 function toArray(input: string | string[] | undefined, fallback: string[]): string[] {
@@ -67,7 +69,7 @@ function toArray(input: string | string[] | undefined, fallback: string[]): stri
 })().catch((error) => {
   console.error(
     '[pre_scan:secrets] error:',
-    error instanceof Error ? error.message : String(error),
+    error instanceof Error ? error.message : String(error)
   );
   process.exit(1);
 });

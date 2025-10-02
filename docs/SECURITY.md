@@ -114,3 +114,19 @@ Security posture, auth, RBAC, and environment flags.
 - Verify auth-required endpoints return 401/403 without credentials
 
 > > > > > > > origin/main
+
+---
+
+## Secrets Redaction
+
+Sensitive fields are redacted before writing to the ledger and should not appear in console output.
+
+- Recognized key patterns (case-insensitive, applied recursively):
+  - `apiKey`, `token`, `password`, `secret`, `authorization`, `auth`, `bearer`, `clientSecret`
+- Redaction replaces values with `***REDACTED***` (or `null` when empty), preserving the surrounding structure.
+
+Quick check (ledger redaction via tests):
+
+```bash
+pnpm vitest -t "redacts"
+```

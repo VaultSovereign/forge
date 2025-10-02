@@ -18,7 +18,7 @@ export function createProviderConfig(): ProviderConfig {
     const defaultModel = envStr('MODEL') || 'llama3.1:70b';
     if (typeof fetch !== 'function') {
       throw new Error(
-        'Global fetch API is required for Ollama provider (Node 18+). Set OLLAMA_HOST or upgrade runtime.',
+        'Global fetch API is required for Ollama provider (Node 18+). Set OLLAMA_HOST or upgrade runtime.'
       );
     }
 
@@ -82,7 +82,7 @@ export function createProviderConfig(): ProviderConfig {
   const openaiKey = envStr('OPENAI_API_KEY');
   if (!openaiKey) {
     throw new Error(
-      'No provider configured. Set OLLAMA_HOST, OPENROUTER_API_KEY, or OPENAI_API_KEY.',
+      'No provider configured. Set OLLAMA_HOST, OPENROUTER_API_KEY, or OPENAI_API_KEY.'
     );
   }
   const client = new OpenAI({ apiKey: openaiKey });

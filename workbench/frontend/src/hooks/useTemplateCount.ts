@@ -1,7 +1,9 @@
 import { useEffect, useState, useRef } from 'react';
 
 function apiBase() {
-  const raw = (import.meta as any).env?.VITE_API_BASE as string | undefined;
+  const raw = (import.meta as { env?: Record<string, unknown> }).env?.VITE_API_BASE as
+    | string
+    | undefined;
   if (!raw) return '';
   return raw.endsWith('/') ? raw.slice(0, -1) : raw;
 }
@@ -27,9 +29,10 @@ export function useTemplateCount(filter?: string) {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       })
-      .then((j) => setCount(j?.total ?? null))
+      .then((j: { total?: number }) => setCount(j?.total ?? null))
       .catch((e) => {
-        if (e?.name !== 'AbortError') setErr(e?.message ?? 'fetch failed');
+        const err = e as { name?: string; message?: string };
+        if (err?.name !== 'AbortError') setErr(err?.message ?? 'fetch failed');
       })
       .finally(() => setLoading(false));
 

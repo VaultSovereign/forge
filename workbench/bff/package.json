@@ -6,10 +6,11 @@
   "scripts": {
     "dev": "tsx src/dev.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "build": "tsup src/server.ts --format esm --dts --out-dir dist",
+    "build": "tsup --config tsup.config.ts",
     "start": "node ./dist/server.js"
   },
   "dependencies": {
+    "@fastify/rate-limit": "^8.0.3",
     "yaml": "^2.5.1",
     "jose": "^5.9.2",
     "prom-client": "^15.1.3",

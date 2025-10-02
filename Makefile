@@ -1,4 +1,7 @@
-.PHONY: forge-prepush install-git-hooks proposal-verify purge-check quality dev
+.PHONY: forge-prepush install-git-hooks proposal-verify purge-check quality dev lint typecheck doctor prepush-scans \
+        dev-bff dev-web build-bff build-web curl-mode curl-mode-head curl-metrics curl-templates-count \
+        smoke-bff smoke-web smoke-up smoke-guardian smoke-templates smoke-execute docs-internal-dev docs-external-dev \
+        docs-internal-preview docs-external docs-sitemap
 
 FORGE_FAST ?= 0
 
@@ -19,14 +22,34 @@ quality:
 	@pnpm lint
 	@echo "✅ Quality checks passed"
 
-dev:
-	@echo "🚀 Starting local development servers..."
-	@pnpm install
-	@pnpm dev
+## Default dev: alias to frontend dev
+dev: dev-web
+	@:
 
-forge-prepush: purge-check quality
-	@echo "[forge] FAST=$(FORGE_FAST)"
-	@FORGE_FAST=$(FORGE_FAST) bash scripts/forge-prepush.sh
+lint:
+	@echo ">> lint"
+	@pnpm -w run lint
+
+typecheck:
+	@echo ">> typecheck"
+	@pnpm -w run typecheck
+
+doctor: build
+	@echo ">> doctor"
+	@if [ -n "$${OPENAI_API_KEY}$${OPENROUTER_API_KEY}$${OLLAMA_HOST}" ]; then \
+	  node dist/cli/index.js doctor ; \
+	else \
+	  node dist/cli/index.js doctor --skip-provider ; \
+	fi
+
+prepush-scans:
+	@echo ">> prepush-scans (FORGE_FAST=$(FORGE_FAST) FORGE_SKIP_REMOTE_SCANS=$(FORGE_SKIP_REMOTE_SCANS))"
+	@env FORGE_FAST=$(FORGE_FAST) \
+	    FORGE_SKIP_REMOTE_SCANS=$(FORGE_SKIP_REMOTE_SCANS) \
+	    bash scripts/forge-prepush.sh
+
+forge-prepush: purge-check quality typecheck build doctor prepush-scans
+	@echo ">> forge-prepush complete"
 
 install-git-hooks:
 	@mkdir -p .git/hooks
@@ -54,17 +77,18 @@ agent:
 	npm run build:agents
 
 ## Start both services (BFF + Frontend) for dev
-dev: dev:bff dev:web
-dev:bff:
+.PHONY: dev-bff dev-web
+dev-bff:
 	cd workbench/bff && npm i --no-audit --no-fund && npm run dev
-dev:web:
+dev-web:
 	cd workbench/frontend && npm i --no-audit --no-fund && npm run dev
 
 ## Production-style builds (optional)
-build: build:bff build:web
-build:bff:
+.PHONY: build build-bff build-web
+build: build-bff build-web
+build-bff:
 	cd workbench/bff && npm run build
-build:web:
+build-web:
 	cd workbench/frontend && npm run build
 
 ## Run tests (if present)
@@ -75,28 +99,28 @@ test:
 clean:
 	rm -rf workbench/bff/dist workbench/frontend/dist agents/build
 
-.PHONY: curl:mode smoke:guardian
+.PHONY: curl-mode smoke-guardian
 
-curl:mode:
+curl-mode:
 	@curl -s http://localhost:8787/v1/guardian/mode | jq .
 
-smoke:guardian: build:bff
+smoke-guardian: build-bff
 	@node -e "fetch('http://localhost:8787/v1/guardian/mode').then(r=>r.json()).then(j=>{const m=j.mode;const ok=['stub','agent','unknown'].includes(m);console.log('guardian mode:', m); if(!ok) process.exit(1);}).catch(e=>{console.error(e);process.exit(1)})"
 
-.PHONY: curl:mode:head
-curl:mode:head:
+.PHONY: curl-mode-head
+curl-mode-head:
 	@curl -s -I http://localhost:8787/v1/guardian/mode | grep -i x-guardian-mode || true
 
-.PHONY: curl:metrics
-curl:metrics:
+.PHONY: curl-metrics
+curl-metrics:
 	@curl -s http://localhost:8787/metrics | grep -E '^guardian_mode' || true
 
-.PHONY: curl:templates:count
-curl:templates:count:
+.PHONY: curl-templates-count
+curl-templates-count:
 	@curl -s http://localhost:8787/v1/api/templates/count | jq .
 
-.PHONY: smoke:templates smoke:execute
-smoke:templates:
+.PHONY: smoke-templates smoke-execute
+smoke-templates:
 	@echo "→ Canonical: /v1/api/templates"; \
 	curl -s "http://localhost:8787/v1/api/templates?limit=5" | jq '.' | sed -n '1,20p'; \
 	echo "→ Count: /v1/api/templates/count"; \
@@ -104,7 +128,7 @@ smoke:templates:
 	echo "→ Shim: /templates"; \
 	curl -s "http://localhost:8787/templates?limit=5" | jq '.' | sed -n '1,20p'
 
-smoke:execute:
+smoke-execute:
 	@TID=$${SMOKE_TEMPLATE_ID:-demo.echo}; \
 	echo "→ POST /v1/api/execute {templateId: $$TID}"; \
 	curl -s -H 'content-type: application/json' -d "$$(jq -nc --arg id $$TID '{templateId:$$id, args:{msg:"hello"}}')" \
@@ -113,17 +137,17 @@ smoke:execute:
 	curl -s -H 'content-type: application/json' -d "$$(jq -nc '{args:{msg:"hello"}}')" \
 	  http://localhost:8787/run/$$TID | jq '.' | sed -n '1,30p'
 
-.PHONY: smoke:bff smoke:web smoke:up
-smoke:bff:
+.PHONY: smoke-bff smoke-web smoke-up
+smoke-bff:
 	@echo "→ health"; curl -sf http://localhost:8787/health | jq .
 	@echo "→ mode (GET)"; curl -sfI http://localhost:8787/v1/guardian/mode | tr -d '\r' | grep -i x-guardian-mode
 	@echo "→ templates (first 3)"; curl -sf 'http://localhost:8787/v1/api/templates?limit=3' | jq '{ids:[.[0].id] // {}}' >/dev/null 2>&1 || true; \
 	curl -sf 'http://localhost:8787/v1/api/templates?limit=3' | jq '.' | sed -n '1,30p'
 
-smoke:web:
+smoke-web:
 	@echo "→ FE expects Guardian badge & template count visible. Open http://localhost:5000"
 
-smoke:up:
+smoke-up:
 	@pnpm --filter workbench/bff run dev & \
 	 pnpm --filter workbench/frontend run dev & \
 	 sleep 3 && $(MAKE) smoke:bff || true
@@ -212,32 +236,40 @@ env:
 	@node -v || true
 	@$(PKG) -v || true
 
+# compat: old colon build target (no-op wrapper to hyphen target)
+build\:bff: build-bff
+	@:
+
+# compat: old colon build target (no-op wrapper to hyphen target)
+build\:web: build-web
+	@:
+
 # -------------------------------
 # Docs convenience targets
 # -------------------------------
 
 ## Dev duo (HMR) with docs served by BFF at /docs
-docs:internal-dev:
+docs-internal-dev:
 	@echo "=> Dev duo: internal docs via /docs (BFF) | BFF_PORT=$(BFF_PORT) VITE_DEV_PORT=$(VITE_DEV_PORT)"
 	@echo "   shell A: EXPOSE_DOCS=1 PORT=$(BFF_PORT) $(PKG) --prefix workbench/bff run dev"
 	@echo "   shell B: VITE_EXPOSE_DOCS=1 VITE_DEV_PORT=$(VITE_DEV_PORT) VITE_BFF_PORT=$(BFF_PORT) $(PKG) --prefix workbench/frontend run dev"
 
 ## Dev duo (HMR) with external docs URL
-# Usage: make docs:external-dev DOCS_URL=https://mydomain/docs [BFF_PORT=8787 VITE_DEV_PORT=5173]
-docs:external-dev:
+# Usage: make docs-external-dev DOCS_URL=https://mydomain/docs [BFF_PORT=8787 VITE_DEV_PORT=5173]
+docs-external-dev:
 	@[ -n "$(DOCS_URL)" ] || (echo "DOCS_URL is required, e.g. make docs:external-dev DOCS_URL=https://mydomain/docs"; exit 2)
 	@echo "=> Dev duo: external docs at $(DOCS_URL) | BFF_PORT=$(BFF_PORT) VITE_DEV_PORT=$(VITE_DEV_PORT)"
 	@echo "   shell A: PORT=$(BFF_PORT) $(PKG) --prefix workbench/bff run dev"
 	@echo "   shell B: VITE_EXPOSE_DOCS=1 VITE_DOCS_URL=$(DOCS_URL) VITE_DEV_PORT=$(VITE_DEV_PORT) VITE_BFF_PORT=$(BFF_PORT) $(PKG) --prefix workbench/frontend run dev"
 
 ## Single-port preview with docs served by BFF at /docs
-docs:internal-preview: build-all
+docs-internal-preview: build-all
 	@echo "=> Single-port preview with internal docs at /docs on PORT=$(PORT)"
 	@EXPOSE_DOCS=1 PORT=$(PORT) AI_CORE_MODE=$(AI_CORE_MODE) node workbench/bff/dist/server.js
 
 ## Single-port preview with external docs URL
-# Usage: make docs:external DOCS_URL=https://mydomain/docs [PORT=3000]
-docs:external: build-all
+# Usage: make docs-external DOCS_URL=https://mydomain/docs [PORT=3000]
+docs-external: build-all
 	@[ -n "$(DOCS_URL)" ] || (echo "DOCS_URL is required, e.g. make docs:external DOCS_URL=https://mydomain/docs"; exit 2)
 	@echo "=> Single-port preview; Docs link points to $(DOCS_URL) on PORT=$(PORT)"
 	@PORT=$(PORT) AI_CORE_MODE=$(AI_CORE_MODE) node workbench/bff/dist/server.js
@@ -248,7 +280,7 @@ hooks:
 	@$(PKG) -w run prepare || $(PKG) run prepare
 	@npx husky add .husky/pre-commit "bash .husky/_precommit_legacy_guard.sh" || true
 
-.PHONY: docs:sitemap
+.PHONY: docs-sitemap
 ## Generate docs/SITEMAP.md from all Markdown files under docs/
-docs:sitemap:
+docs-sitemap:
 	@$(PKG) run docs:sitemap

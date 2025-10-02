@@ -1,9 +1,10 @@
 import { FastifyInstance } from 'fastify';
+import type { ZodTypeProvider } from 'fastify-type-provider-zod';
+import { z } from 'zod';
+
+import type { TemplateMeta, TemplateCount } from '../../../types/templates.js';
 import { rbac } from '../auth/rbac.js';
 import { listTemplates, countTemplates } from '../providers/catalog.js';
-import { z } from 'zod';
-import type { TemplateMeta, TemplateCount } from '../../../types/templates.js';
-import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 
 export default async function templatesRoutes(app: FastifyInstance) {
   const appZ = app.withTypeProvider<ZodTypeProvider>();
@@ -41,7 +42,7 @@ export default async function templatesRoutes(app: FastifyInstance) {
 
       // Return array of summaries to keep existing UI intact
       return items.map((t) => ({ id: t.id, name: t.name, description: t.description }));
-    },
+    }
   );
 
   // Tiny count endpoint for Overview and dashboards
@@ -55,6 +56,6 @@ export default async function templatesRoutes(app: FastifyInstance) {
       const q = (request.query ?? {}) as Record<string, string>;
       const filter = (q.filter as string | undefined) ?? null;
       return { total: countTemplates(filter) };
-    },
+    }
   );
 }
