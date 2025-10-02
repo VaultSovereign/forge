@@ -2,7 +2,11 @@
 
 ## Project Structure & Module Organization
 
-- TypeScript entry points live in `agent/`, `dispatcher/`, `cli/`, `mcp/`, `tools/`, and `reality_ledger/`; bundles emit to `dist/`.
+- TypeScript entry points live in `agent/`, `agents/`, `dispatcher/`, `cli/`, `mcp/`, `tools/`, and `reality_ledger/`; bundles emit to `dist/`.
+- Agents naming standardization:
+  - `agents/` is the canonical home for runtime Agent SDK code (e.g., Guardian). Build artifact at `agents/build/index.js` is referenced by `GUARDIAN_AGENT_ENTRY`.
+  - `agent/` contains the planner/executor library used by CLI/MCP (e.g., `agent/execute.ts`, `agent/plan.ts`).
+  - Do not cross-import between these roots. Tests should import from `agents/` when exercising the Guardian code.
 - Templates and prompt assets: `catalog/`, `profiles/`, `schemas/`.
 - Tests and helper scripts: `tests/`, `scripts/`.
 - Generated artifacts kept out of VCS: `dist/`, `logs/`, `coverage/`, temporary SBOMs.

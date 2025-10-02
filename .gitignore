@@ -89,3 +89,6 @@ schemas/tprm.v1.json
 workbench/**/dist/
 # If you need to version specific builds, whitelist them explicitly below:
 # !path/to/required/dist/
+
+# Agent SDK build output (runtime uses it via GUARDIAN_AGENT_ENTRY); do not track
+agents/build/
