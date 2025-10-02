@@ -23,6 +23,6 @@ runs:
         version: ${{ inputs.pnpm-version }}
         run_install: false
 
-    - name: Install workspace deps
+    - name: Install workspace deps (recursive)
       shell: bash
-      run: pnpm -w install --frozen-lockfile || pnpm -w install
+      run: pnpm -r install --frozen-lockfile || pnpm -r install
