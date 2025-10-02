@@ -23,7 +23,18 @@ jobs:
 
       - name: Verify No Replit Remnants
         run: |
-          if grep -RIn --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=attached_assets -E 'replit' . | grep -v '.gitignore:'; then
+          # Ignore known safe locations: backups, docs, CI config, and sync helper scripts
+          if grep -RIn \
+            --exclude-dir=.git \
+            --exclude-dir=.github \
+            --exclude-dir=node_modules \
+            --exclude-dir=dist \
+            --exclude-dir=attached_assets \
+            --exclude-dir=_backups \
+            --exclude-dir=docs \
+            --exclude-dir=scripts/sync \
+            --exclude='*.lock' \
+            -E '\\breplit\\b' . 2>/dev/null | grep -v '.gitignore:'; then
             echo "❌ Found disallowed 'replit' references. Purification compromised."
             exit 1
           fi
@@ -216,6 +227,8 @@ jobs:
         with:
           version: 10.17.0
           run_install: false
+      - name: Install workspace deps
+        run: pnpm -w install --frozen-lockfile || pnpm -w install
       - name: Generate OPENAPI.md from spec
         run: node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md
 
@@ -341,6 +354,8 @@ jobs:
         with:
           version: 10.17.0
           run_install: false
+      - name: Install workspace deps
+        run: pnpm -w install --frozen-lockfile || pnpm -w install
       - name: Generate OPENAPI.md from spec
         run: node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md
 

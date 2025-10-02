@@ -1,12 +1,9 @@
 name: pages
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
-    paths:
-      - 'docs/**'
-      - 'scripts/generate-docs-sitemap.mjs'
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -21,29 +18,30 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      # Keep the sitemap always fresh in docs/ before publishing
-      - name: Generate docs sitemap
-        run: node scripts/generate-docs-sitemap.mjs docs SITEMAP.md
-
-      - name: Upload artifact (docs/)
-        uses: actions/upload-pages-artifact@v3
+      - uses: actions/checkout@v4
+      - name: Ensure docs/index.html
+        run: |
+          mkdir -p docs
+          if [ ! -f docs/index.html ]; then
+            cat > docs/index.html <<'HTML'
+            <!doctype html>
+            <meta charset="utf-8">
+            <title>Forge</title>
+            <h1>Forge</h1>
+            <p>VaultSovereign — temporary site placeholder.</p>
+            HTML
+          fi
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: docs
 
   deploy:
+    needs: build
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
