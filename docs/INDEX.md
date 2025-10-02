@@ -19,3 +19,8 @@ Recommended required status checks before merging to `main`:
 - `CI` — basic repo sanity (placeholder)
 - `workbench-smoke` — smoke pass on docs/README changes
 - `docs-link-check` — offline link check for README + docs
+
+## Deployment / Distribution
+
+- GHCR package: https://github.com/orgs/VaultSovereign/packages/container/package/forge
+- Docker instructions: see [README → Docker (GHCR)](../README.md#-docker-ghcr)

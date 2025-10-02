@@ -20,6 +20,7 @@ Thanks for your interest in improving Forge!
 - Tag the release (`git tag -a vX.Y.Z -m "vX.Y.Z — summary"`; `git push origin vX.Y.Z`).
 - CI tag-guard will fail if [Unreleased] is still the top section.
 - Release notes are generated automatically by the release-notes workflow.
+- Confirm `ghcr.io/vaultsovereign/forge` shows the new tag under **Versions** (GHCR package page).
 
 ## CI / CD Workflows
 

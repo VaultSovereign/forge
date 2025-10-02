@@ -88,6 +88,8 @@ Prebuilt multi-arch (amd64 + arm64) images are published automatically to
 [GitHub Container Registry](https://ghcr.io/vaultsovereign/forge) on every push  
 to `main` and on tagged releases. Images carry provenance metadata and tags:
 
+> Built and published by CI (`.github/workflows/image-publish.yml`) with automatic tagging (`latest`, `vX.Y.Z`, and commit `sha`).
+
 - `:latest` — built from `main`  
 - `:vX.Y.Z` — release tags  
 - `:<git-sha>` — every commit  
