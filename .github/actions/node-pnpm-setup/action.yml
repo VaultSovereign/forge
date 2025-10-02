@@ -1,0 +1,29 @@
+name: node-pnpm-setup
+description: Setup Node, pnpm, and install workspace deps
+inputs:
+  node-version:
+    description: Node.js version
+    required: false
+    default: '20'
+  pnpm-version:
+    description: pnpm version
+    required: false
+    default: '10.17.0'
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: ${{ inputs.pnpm-version }}
+        run_install: false
+
+    - name: Install workspace deps
+      shell: bash
+      run: pnpm -w install --frozen-lockfile || pnpm -w install
+
