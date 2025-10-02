@@ -32,17 +32,8 @@ reality_ledger/*.idx
 .DS_Store
 .DS_Store?
 
-# Analysis and backup artifacts (local only)
-_backups/*.txt
-_backups/diffs/
-_backups/vaultmesh-ai-remote/
-_backups/*_dirlist.txt
-_backups/*_filelist.txt
-_backups/*_topdirs.txt
-# Large local backups/archives should not be versioned
-_backups/**/*.tgz
-_backups/**/*.tar.gz
-_backups/**/*.zip
+# Analysis and backups (keep local only)
+_backups/
 ._*
 .Spotlight-V100
 .Trashes
@@ -73,6 +64,9 @@ replit-run.sh
 replit.md
 .local/state/replit/
 .local/share/pnpm/
+
+# Attachments and scratch notes
+attached_assets/
 
 # Local analysis outputs (do not version)
 artifacts/audit/
