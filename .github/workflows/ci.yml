@@ -281,10 +281,20 @@ jobs:
       - name: Build project
         run: pnpm run build
 
+      - name: Decide whether to skip remote scans
+        id: remotes
+        run: |
+          if [ -n "${{ secrets.OPENAI_API_KEY }}" ] || [ -n "${{ secrets.OPENROUTER_API_KEY }}" ] || [ -n "${{ secrets.OLLAMA_HOST }}" ]; then
+            echo "skip=0" >> "$GITHUB_OUTPUT";
+          else
+            echo "skip=1" >> "$GITHUB_OUTPUT";
+          fi
+
       - name: Run prepush gates (FAST)
         env:
           FORGE_FAST: '1'
-        run: bash scripts/forge-prepush.sh
+          FORGE_SKIP_REMOTE_SCANS: ${{ steps.remotes.outputs.skip }}
+        run: make forge-prepush
 
       - name: Upload prepush artifacts
         uses: actions/upload-artifact@v4
