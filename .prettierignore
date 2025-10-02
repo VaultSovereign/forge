@@ -12,3 +12,5 @@ artifacts/
 .github/workflows/pages.yml
 docs/*.html
 .github/pull_request_template.md
+pnpm-lock.yaml
+CONTRIBUTING.md

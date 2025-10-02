@@ -19,6 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -42,6 +44,9 @@ jobs:
 <p>See <a href="INDEX.md">INDEX.md</a> or <a href="SITEMAP.md">SITEMAP.md</a>.</p>
 HTML
           fi
+      - name: Generate XML sitemap
+        run: |
+          node scripts/generate-xml-sitemap.mjs docs docs/sitemap.xml https://doc.vaultmesh.org
       - uses: actions/upload-pages-artifact@v3
         with:
           path: docs
