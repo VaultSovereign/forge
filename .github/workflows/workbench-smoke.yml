@@ -4,8 +4,6 @@ on:
   pull_request:
     paths:
       - 'workbench/**'
-      - 'replit.*'
-      - '.replit'
       - 'pnpm-workspace.yaml'
       - 'package.json'
       - 'docs/WORKBENCH.md'

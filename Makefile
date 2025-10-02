@@ -1,8 +1,30 @@
-.PHONY: forge-prepush install-git-hooks proposal-verify
+.PHONY: forge-prepush install-git-hooks proposal-verify purge-check quality dev
 
 FORGE_FAST ?= 0
 
-forge-prepush:
+# --- Purification & Quality Gates ---
+
+purge-check:
+	@echo "🔍 Checking for disallowed artifacts..."
+	@if grep -RIn --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=attached_assets -E 'replit' . 2>/dev/null | grep -v '.gitignore:'; then \
+		echo "❌ Found disallowed 'replit' references"; \
+		exit 1; \
+	fi
+	@echo "✅ Purge check passed"
+
+quality:
+	@echo "🔧 Running quality checks..."
+	@pnpm install --frozen-lockfile
+	@pnpm format:check
+	@pnpm lint
+	@echo "✅ Quality checks passed"
+
+dev:
+	@echo "🚀 Starting local development servers..."
+	@pnpm install
+	@pnpm dev
+
+forge-prepush: purge-check quality
 	@echo "[forge] FAST=$(FORGE_FAST)"
 	@FORGE_FAST=$(FORGE_FAST) bash scripts/forge-prepush.sh
 

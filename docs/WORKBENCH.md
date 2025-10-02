@@ -181,83 +181,37 @@ The VaultMesh Visual Workbench is the sovereign, auditable interface for explori
 
 This document replaces the previous draft and reflects the current consensus design alongside explicit TODOs required to render the Workbench production-ready.
 
-## Replit Forge — Single‑Click Dev Environment
+## Local Development Environment
 
-**Why Replit here?** Fast iterative UX work, shareable previews, and a disposable sandbox that doesn’t dilute VaultMesh’s guardrails. We develop UI + BFF on Replit, keep secrets in Replit’s Secrets vault, and point at a non‑prod LLM proxy (or mock) while preserving proof‑first flows.
+The Workbench uses local `pnpm` workflows for fast iterative development with HMR and proper TypeScript tooling. All secrets are managed via `.env` files (never commit secrets).
 
-### What we’ll run on Replit
+### Local Architecture
 
-- **Workbench BFF** (Fastify) binding to `process.env.PORT` (Replit allocates this dynamically)
-- **Frontend (Vite)** served by the BFF as static assets in prod build; during dev we use Vite with a proxy to the BFF
-- **@vaultmesh/ai-core (shim)** — mocked adapters by default; can switch to real providers by setting secrets
+- **Workbench BFF** (Fastify) runs on port `3000` (configurable via `PORT` env var)
+- **Frontend (Vite)** dev server on port `5173` with HMR and API proxy to BFF
+- **@vaultmesh/ai-core** — mocked adapters by default; set provider API keys in `.env` to switch to live mode
 
-### Repo expectations
+### Repository Structure
 
-```
+```text
 workbench/
   bff/                 # Fastify service (TypeScript)
   frontend/            # React + Vite + TS
   ai-core/             # Node lib facade (dispatcher + ledger adapters)
-replit.nix             # Nix environment for pnpm + node
-.replit                # (classic) run command (optional)
-replit.yaml            # (new) run + env + services (preferred)
 ```
 
-> If these files don’t exist yet, create them with the snippets below. They’re development‑only and safe to commit.
+### Vite Configuration
 
-### `replit.nix`
+The `workbench/frontend/vite.config.ts` enables HMR and proxies API calls to the BFF:
 
-```nix
-{ pkgs }: {
-  deps = [
-    pkgs.nodejs_20
-    pkgs.nodePackages.pnpm
-    pkgs.git
-    pkgs.cacert
-  ];
-}
-```
-
-### `replit.yaml` (preferred)
-
-```yaml
-# Replit’s newer config format
-run:
-  steps:
-    - pnpm install --frozen-lockfile=false
-    - pnpm -w run build:web # builds frontend
-    - pnpm -w run build:bff # builds backend
-    - node workbench/bff/dist/server.js
-
-# Expose the single web server (Fastify) listening on $PORT
-services:
-  web:
-    env:
-      NODE_ENV: development
-      PORT: 3000
-      LOG_LEVEL: info
-      # OIDC/LLM secrets are provided via the Replit Secrets UI; see list below.
-```
-
-### `.replit` (legacy, optional)
-
-```toml
-run = "pnpm install && pnpm -w run dev"
-lang = "nodejs"
-```
-
-### Frontend dev settings (Vite)
-
-Add (or ensure) the following in `workbench/frontend/vite.config.ts` so the dev server binds externally and proxies API calls to the BFF:
-
-```ts
+```typescript
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
   server: {
-    host: true, // 0.0.0.0 for Replit
+    host: true,
     port: 5173,
     strictPort: false,
     proxy: {
@@ -274,11 +228,11 @@ export default defineConfig({
 });
 ```
 
-### Fastify BFF server (bind to `$PORT`)
+### Fastify BFF Server
 
-Ensure the BFF chooses Replit’s port and serves the SPA in production builds:
+The BFF serves the API and static assets in production:
 
-```ts
+```typescript
 // workbench/bff/src/server.ts
 import fastify from 'fastify';
 import fastifyStatic from '@fastify/static';
@@ -355,31 +309,31 @@ Add scripts to orchestrate dev/prod locally and on Replit:
 }
 ```
 
-### Secrets on Replit
+### Environment Variables
 
-Set these in the **Secrets** panel (never commit):
+Set these in your local `.env` file (never commit):
 
 - `OPENROUTER_API_KEY` (or `OPENAI_API_KEY`, or point to Ollama via gateway URL)
 - `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_AUDIENCE` (optional in dev)
 - `VMESH_RBAC_PATH` (optional; path to checked‑in `config/rbac.yaml`)
 - `AI_CORE_MODE` = `mock` | `live` (default `mock` for safe dev)
 
-### First‑boot Ritual (Dev)
+### First-Time Setup
 
-1. Open the Replit ➜ Shell: `pnpm -w install`
+1. Install dependencies: `pnpm install`
 2. Run dev duo: `pnpm -w run dev`
-3. Replit will show a web preview; navigate to `/` for the SPA, hit `/v1/health` for API check.
+3. Access the app at `http://localhost:5173` (frontend) or `http://localhost:3000/v1/health` (BFF health check)
 4. Flip `AI_CORE_MODE` to `live` only when you’ve set provider keys and are comfortable with receipts.
 
-### Proof & Guardrails on Replit
+### Security & Guardrails
 
 - **Receipts**: write to `artifacts/` in the workspace; expose a **Download Bundle** button in the UI (dev‑only).
 - **No browser LLM calls**: all LLM traffic funnels through BFF just like prod.
 - **Mock mode default**: templates execute with deterministic fixtures; ledger entries are marked `simulated=true` to avoid provenance confusion.
 
-### CI Alignment
+### Production Build
 
-Replit is a dev convenience. The canonical build still runs in CI with the same commands:
+Build all components for production deployment:
 
 ```bash
 pnpm -w run build:web && pnpm -w run build:bff && pnpm -w run workbench:start
@@ -387,4 +341,4 @@ pnpm -w run build:web && pnpm -w run build:bff && pnpm -w run workbench:start
 
 ---
 
-**Operator Note:** Replit previews run behind a single `$PORT`. In dev we run Vite + BFF separately; for production preview, prefer `pnpm -w run build:web && pnpm -w run build:bff && pnpm -w run workbench:start` so Fastify serves the built SPA and the preview uses one port.
+**Note:** In production, the BFF serves the built frontend as static assets on a single port.
