@@ -37,6 +37,12 @@
     "node": ">=20 <23",
     "pnpm": ">=10.17.0"
   },
+  "pnpm": {
+    "overrides": {
+      "cross-spawn": ">=7.0.5",
+      "brace-expansion": ">=2.0.2"
+    }
+  },
   "scripts": {
     "docs:sitemap": "node scripts/generate-docs-sitemap.mjs docs SITEMAP.md",
     "prepare": "husky install",
