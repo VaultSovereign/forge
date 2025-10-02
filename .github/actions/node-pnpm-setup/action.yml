@@ -26,4 +26,3 @@ runs:
     - name: Install workspace deps
       shell: bash
       run: pnpm -w install --frozen-lockfile || pnpm -w install
-
