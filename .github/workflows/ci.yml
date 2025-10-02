@@ -40,16 +40,16 @@ jobs:
           fi
           echo "✅ No Replit remnants found"
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10.17.0
           run_install: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
       - name: Install workspace deps
         run: pnpm -w install --frozen-lockfile || pnpm -w install
       - name: Install workspace deps
@@ -217,16 +217,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10.17.0
           run_install: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
       - name: Install workspace deps
         run: pnpm -w install --frozen-lockfile || pnpm -w install
       - name: Generate OPENAPI.md from spec
