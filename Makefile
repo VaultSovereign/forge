@@ -1,7 +1,7 @@
 .PHONY: forge-prepush install-git-hooks proposal-verify purge-check quality dev lint typecheck doctor prepush-scans \
         dev-bff dev-web build-bff build-web curl-mode curl-mode-head curl-metrics curl-templates-count \
         smoke-bff smoke-web smoke-up smoke-guardian smoke-templates smoke-execute docs-internal-dev docs-external-dev \
-        docs-internal-preview docs-external docs-sitemap status
+        docs-internal-preview docs-external docs-sitemap status commits
 
 FORGE_FAST ?= 0
 
@@ -63,6 +63,11 @@ status:
 	MSG=$$(git log -1 --pretty=%s); S=$${MSG%%:*}; [ "$$S" = "$$MSG" ] && S=unknown; \
 	CI=$$(gh run list --branch "$$BR" --workflow .github/workflows/ci.yml -L 1 --json status,conclusion 2>/dev/null | jq -r 'if length==0 then "no_run/-" else (.[0].status+"/"+(.[0].conclusion // "-")) end'); \
 	printf "%s → CI %s (%s)\n" "$$S" "$$CI" "$$BR"
+
+# Group the last 15 commits by scope (prefix before ':')
+commits:
+	@git log --no-merges --pretty=format:'%h %s' -n 15 \
+	| awk -F: '{ if ($$2=="") scope="unknown"; else scope=$$1; msg=$$0; sub(/^[^:]+:[ ]?/,"",msg); commits[scope]=(commits[scope]?commits[scope] ORS:"") "  - " $$1 " " msg } END { for (s in commits) { print s ":"; print commits[s]; print "" } }'
 
 proposal-verify:
 	@python3 unforged_forge_genesis/scripts/proposal_verify.py \
