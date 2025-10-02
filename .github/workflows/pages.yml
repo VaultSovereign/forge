@@ -19,17 +19,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Ensure docs/index.html
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build docs HTML (INDEX, SITEMAP)
         run: |
+          set -euo pipefail
           mkdir -p docs
-          if [ ! -f docs/index.html ]; then
+          # Convert Markdown → HTML using marked CLI
+          npx --yes marked -i docs/INDEX.md -o docs/index.html --gfm || true
+          npx --yes marked -i docs/SITEMAP.md -o docs/SITEMAP.html --gfm || true
+          # Fallback minimal index if conversion failed
+          if ! [ -s docs/index.html ]; then
             cat > docs/index.html <<'HTML'
-            <!doctype html>
-            <meta charset="utf-8">
-            <title>Forge</title>
-            <h1>Forge</h1>
-            <p>VaultSovereign — temporary site placeholder.</p>
-            HTML
+<!doctype html>
+<meta charset="utf-8">
+<title>Forge Docs</title>
+<h1>Forge Docs</h1>
+<p>See <a href="INDEX.md">INDEX.md</a> or <a href="SITEMAP.md">SITEMAP.md</a>.</p>
+HTML
           fi
       - uses: actions/upload-pages-artifact@v3
         with:
