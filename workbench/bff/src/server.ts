@@ -89,10 +89,15 @@ export async function buildServer(): Promise<FastifyInstance> {
       const retrySec = Math.ceil(Number(tw) / 1000) || 60;
       try {
         if (typeof res?.header === 'function') res.header('Retry-After', String(retrySec));
-        else if (typeof res?.setHeader === 'function') res.setHeader('Retry-After', String(retrySec));
+        else if (typeof res?.setHeader === 'function')
+          res.setHeader('Retry-After', String(retrySec));
       } catch {}
       try {
-        const routeLabel = (req as any).routerPath || (req.routeOptions && req.routeOptions.url) || req.url || 'unknown';
+        const routeLabel =
+          (req as any).routerPath ||
+          (req.routeOptions && req.routeOptions.url) ||
+          req.url ||
+          'unknown';
         rateLimitExceeded.labels({ route: String(routeLabel) }).inc();
       } catch {}
     },

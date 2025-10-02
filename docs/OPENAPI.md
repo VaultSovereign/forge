@@ -1,53 +1,32 @@
-<<<<<<< HEAD
+<!-- ⚠️ AUTO-GENERATED: do not edit. Generated 2025-10-02T08:00:05.647Z by scripts/generate-openapi-md.mjs -->
 
-# Workbench API — OpenAPI Reference
+# VaultMesh Workbench BFF (v0.1.0)
 
-This API reference is sourced from `docs/openapi/workbench.yaml` and describes the Workbench BFF (`/v1/*`) including templates, execute (REST + SSE), ledger, health, guardian, and metrics.
+**Servers:** http://localhost:8787
 
-- Source spec: `docs/openapi/workbench.yaml`
-- Suggested viewers: Redocly, Swagger UI, VS Code OpenAPI extension
+## Security Schemes
 
-## Quick View Options
+- **bearerAuth**: http (bearer) — JWT
 
-- VS Code: install an OpenAPI viewer and open `docs/openapi/workbench.yaml`
-- Local Redoc (example):
-  ```bash
-  npx redoc-cli serve docs/openapi/workbench.yaml --watch
-  ```
-- Swagger UI (Docker):
-  ```bash
-  docker run -p 8080:8080 -e SWAGGER_JSON=/spec/workbench.yaml \
-    -v $(pwd)/docs/openapi:/spec swaggerapi/swagger-ui
-  # then open http://localhost:8080
-  ```
+## Endpoints
 
-## Sanity Check
+| Method | Path                      | Summary                                           | Security   | Request                             | Response                                 |
+| ------ | ------------------------- | ------------------------------------------------- | ---------- | ----------------------------------- | ---------------------------------------- |
+| POST   | `/guardian/ask`           | Ask Guardian (agent/stub)                         |            | application/json GuardianAskRequest | 200 application/json GuardianAskResponse |
+| POST   | `/v1/api/execute`         | Execute a template                                | bearerAuth | application/json ExecuteRequest     | 200 application/json ExecuteResponse     |
+| GET    | `/v1/api/execute/stream`  | Execute with Server-Sent Events — params q3/p0/h0 | bearerAuth |                                     | 200 text/event-stream string             |
+| GET    | `/v1/api/health`          | API health                                        |            |                                     | 200 application/json object              |
+| GET    | `/v1/api/health/deep`     | Deep health incl. core reachability               |            |                                     | 200 application/json object              |
+| GET    | `/v1/api/ledger/events`   | Query ledger events — params q2/p0/h0             | bearerAuth |                                     | 200 application/json LedgerRows          |
+| GET    | `/v1/api/templates`       | List templates — params q3/p0/h0                  | bearerAuth |                                     | 200 application/json TemplateArray       |
+| GET    | `/v1/api/templates/count` | Count templates — params q1/p0/h0                 | bearerAuth |                                     | 200 application/json TemplateCount       |
+| GET    | `/v1/guardian/mode`       | Guardian mode probe                               |            |                                     | 200 application/json object              |
+| GET    | `/v1/health`              | Liveness/readiness                                |            |                                     | 200 application/json HealthResponse      |
 
-- Health:
-  ```bash
-  curl -fsS http://127.0.0.1:8787/v1/health | jq .
-  ```
-- SSE ticks:
-  ```bash
-  curl -Ns http://127.0.0.1:8787/v1/tick/stream | head -n 5
-  ```
-- Templates:
-  ```bash
-  curl -fsS http://127.0.0.1:8787/v1/api/templates | jq . | head -n 20
-  ```
+---
 
-## Notes
+**Notes**
 
-- In development, `AUTH_DEV_BYPASS=1` allows testing without a token.
-- # For production-like tests, enable the dev signer and mint a short‑lived JWT, then call the APIs with `Authorization: Bearer <token>`.
-
-# API — OpenAPI (Placeholder)
-
-This repository publishes the API specification as Markdown and JSON when available.
-
-- Machine-readable spec: `/v1/openapi.json` (dev; prod when `EXPOSE_OPENAPI=1`)
-- Markdown overview: this file
-
-> Note: This is a placeholder. Replace with generated or authored spec when API is ready.
-
-> > > > > > > origin/main
+- All /v1/api/\* routes require Bearer JWT in production (see RBAC in `config/rbac.yaml`).
+- In dev, `AUTH_DEV_BYPASS=1` disables auth; CI tokened smoke uses a local dev signer + JWKS.
+- SSE endpoints stream events; use EventSource in the browser or `curl -N` for CLI.

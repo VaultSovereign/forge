@@ -116,10 +116,10 @@ to `main` will automatically update the `:latest` image.
 
 ### Test Modes
 
-| Context | What runs | Thresholds | Toggle |
-|---|---|---|---|
-| `main` (push) | Full suite + coverage | Enforced (see above) | `COVERAGE_RELAX=1` (lead-only) |
-| Pull Requests | Changed-only (`pnpm run test:changed`) | Relaxed (`COVERAGE_RELAX=1`) | n/a |
+| Context       | What runs                              | Thresholds                   | Toggle                         |
+| ------------- | -------------------------------------- | ---------------------------- | ------------------------------ |
+| `main` (push) | Full suite + coverage                  | Enforced (see above)         | `COVERAGE_RELAX=1` (lead-only) |
+| Pull Requests | Changed-only (`pnpm run test:changed`) | Relaxed (`COVERAGE_RELAX=1`) | n/a                            |
 
 Local commands:
 

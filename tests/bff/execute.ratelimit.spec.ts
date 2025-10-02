@@ -49,7 +49,8 @@ describe('execute route rate limit', () => {
         const tw = (this && this.timeWindow) || 60000;
         const retrySec = Math.ceil(Number(tw) / 1000) || 60;
         if (typeof res?.header === 'function') res.header('Retry-After', String(retrySec));
-        else if (typeof res?.setHeader === 'function') res.setHeader('Retry-After', String(retrySec));
+        else if (typeof res?.setHeader === 'function')
+          res.setHeader('Retry-After', String(retrySec));
       },
     });
 
@@ -64,11 +65,23 @@ describe('execute route rate limit', () => {
 
   it('returns standard 429 JSON and Retry-After when exceeded', async () => {
     // First two should pass
-    await app.inject({ method: 'POST', url: '/v1/api/execute', payload: { templateId: 'tem.noop' } });
-    await app.inject({ method: 'POST', url: '/v1/api/execute', payload: { templateId: 'tem.noop' } });
+    await app.inject({
+      method: 'POST',
+      url: '/v1/api/execute',
+      payload: { templateId: 'tem.noop' },
+    });
+    await app.inject({
+      method: 'POST',
+      url: '/v1/api/execute',
+      payload: { templateId: 'tem.noop' },
+    });
 
     // Third should be rate-limited within same window
-    const hit = await app.inject({ method: 'POST', url: '/v1/api/execute', payload: { templateId: 'tem.noop' } });
+    const hit = await app.inject({
+      method: 'POST',
+      url: '/v1/api/execute',
+      payload: { templateId: 'tem.noop' },
+    });
 
     // status should be 429 with JSON body shape
     expect(hit.statusCode).toBe(429);
