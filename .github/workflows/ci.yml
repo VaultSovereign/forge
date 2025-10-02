@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Verify No Replit Remnants
         run: |
           if grep -RIn --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=attached_assets -E 'replit' . | grep -v '.gitignore:'; then
@@ -28,7 +28,7 @@ jobs:
             exit 1
           fi
           echo "✅ No Replit remnants found"
-      
+
       - uses: ./.github/actions/setup-pnpm
         with:
           node-version: 20

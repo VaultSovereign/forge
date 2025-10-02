@@ -75,29 +75,10 @@ async function resolveAgent() {
   return null;
 }
 
-export default async function guardianRoutes(app: FastifyInstance) {
-  app.post(
-    '/guardian/ask',
-    {
-      schema: {
-        body: {
-          type: 'object',
-          required: ['input'],
-          properties: { input: { type: 'string', minLength: 1 } },
-        },
-        response: {
-          200: {
-            type: 'object',
-            properties: {
-              text: { type: 'string' },
-              events: { type: 'array', items: { type: 'object' } },
-              mode: { type: 'string' },
-            },
-          },
-        },
-      },
-    },
-    async (req, reply) => {
+/**
+ * POST /guardian/ask handler - exported for testing
+ */
+export async function postGuardian(req: any, reply: any) {
       const { input } = (req.body ?? {}) as { input?: string };
       if (!input || input.trim().length === 0) {
         return reply.code(400).send({ error: 'input is required' });
@@ -134,7 +115,31 @@ export default async function guardianRoutes(app: FastifyInstance) {
 
       reply.header('x-guardian-mode', currentMode);
       return reply.send({ text: `Guardian (stub): ${input}`, events: [], mode: 'stub' });
+}
+
+export default async function guardianRoutes(app: FastifyInstance) {
+  app.post(
+    '/guardian/ask',
+    {
+      schema: {
+        body: {
+          type: 'object',
+          required: ['input'],
+          properties: { input: { type: 'string', minLength: 1 } },
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              text: { type: 'string' },
+              events: { type: 'array', items: { type: 'object' } },
+              mode: { type: 'string' },
+            },
+          },
+        },
+      },
     },
+    postGuardian,
   );
 
   // Lightweight mode probe for dashboards
