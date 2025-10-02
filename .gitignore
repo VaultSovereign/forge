@@ -57,3 +57,9 @@ replit-run.sh
 replit.md
 .local/state/replit/
 .local/share/pnpm/
+
+# Build outputs (prefer not versioning)
+**/dist/
+workbench/**/dist/
+# If you need to version specific builds, whitelist them explicitly below:
+# !path/to/required/dist/
