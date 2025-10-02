@@ -54,4 +54,3 @@ describe('execute SSE route', () => {
     expect(Array.isArray(body.issues)).toBe(true);
   });
 });
-

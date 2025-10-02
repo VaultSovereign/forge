@@ -39,9 +39,7 @@ export async function detectMode(): Promise<GuardianMode> {
 }
 
 // Dependency-injected handler used by unit tests
-export function makePostGuardian(
-  resolve: () => Promise<(input: string) => Promise<any>>
-) {
+export function makePostGuardian(resolve: () => Promise<(input: string) => Promise<any>>) {
   return async function postGuardian(req: any, reply: any) {
     // Small adapter to work with Fastify reply or minimal Express-like fakes in tests
     const send = (status: number, payload: unknown) => {
@@ -72,11 +70,18 @@ export function makePostGuardian(
     } catch (e: any) {
       const code = e?.code;
       if (typeof reply?.header === 'function') {
-        if (code === 'GUARDIAN_DISABLED') reply.header('x-guardian-mode', 'disabled');
-        else if (code === 'GUARDIAN_RESOLUTION_FAILED') reply.header('x-guardian-mode', 'unavailable');
+        if (code === 'GUARDIAN_DISABLED') {
+          reply.header('x-guardian-mode', 'disabled');
+        } else if (code === 'GUARDIAN_RESOLUTION_FAILED') {
+          reply.header('x-guardian-mode', 'unavailable');
+        }
       }
-      if (code === 'GUARDIAN_DISABLED') return send(503, { error: 'guardian_disabled' });
-      if (code === 'GUARDIAN_RESOLUTION_FAILED') return send(503, { error: 'guardian_unavailable' });
+      if (code === 'GUARDIAN_DISABLED') {
+        return send(503, { error: 'guardian_disabled' });
+      }
+      if (code === 'GUARDIAN_RESOLUTION_FAILED') {
+        return send(503, { error: 'guardian_unavailable' });
+      }
       // Unknown resolution error
       req?.log?.error?.(e);
       if (typeof reply?.header === 'function') reply.header('x-guardian-mode', 'error');
@@ -87,7 +92,9 @@ export function makePostGuardian(
       const result = await ask(input);
       try {
         if (typeof reply?.header === 'function') reply.header('x-guardian-mode', 'agent');
-      } catch {}
+      } catch (_e) {
+        void 0;
+      }
       return send(200, {
         text: result?.outputText ?? 'Agent responded.',
         events: Array.isArray(result?.events) ? result.events : [],

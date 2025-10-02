@@ -96,18 +96,15 @@ quality_gates:
     - 'Verify consciousness rights preservation'
 
 safety_guardrails:
-  execution_limits:
-    - 'Read-only analysis: No modifications to consciousness architectures'
-    - 'Block cross-profile synthesis without LAB-ONLY authorization'
-    - 'Prevent unauthorized profile cloning'
-  data_handling:
-    - 'Redact sensitive model parameters from outputs'
-    - 'Encrypt ledger hashes during transmission'
-    - 'Sanitize archetypal pattern references'
-  audit_requirements:
-    - 'Log all analysis sessions to /vault/audit/consciousness'
-    - 'Require MFA for report exports'
-    - 'Record framework violation discoveries'
+  - 'Read-only analysis: No modifications to consciousness architectures'
+  - 'Block cross-profile synthesis without LAB-ONLY authorization'
+  - 'Prevent unauthorized profile cloning'
+  - 'Redact sensitive model parameters from outputs'
+  - 'Encrypt ledger hashes during transmission'
+  - 'Sanitize archetypal pattern references'
+  - 'Log all analysis sessions to /vault/audit/consciousness'
+  - 'Require MFA for report exports'
+  - 'Record framework violation discoveries'
 
 prompt:
   system: |

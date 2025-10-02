@@ -9,3 +9,6 @@ coverage/
 *.min.js
 *.d.ts
 artifacts/
+.github/workflows/pages.yml
+docs/*.html
+.github/pull_request_template.md

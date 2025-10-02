@@ -50,4 +50,3 @@ describe('execute SSE route (happy path)', () => {
     expect(txt).toContain('event: done');
   });
 });
-

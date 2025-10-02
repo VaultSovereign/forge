@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import type { AnySchema } from 'ajv';
 import crypto from 'node:crypto';
-import fs from 'node:fs/promises';
 import fsSync from 'node:fs';
+import fs from 'node:fs/promises';
 import path from 'node:path';
 import YAML from 'yaml';
 
@@ -269,8 +269,10 @@ export async function runKeyword(opts: {
   const args = normalizeArgs(flags, tpl, profile, notes);
 
   // Auto-inline bundle_path → bundle_content (size-capped) for audit-like templates
-  if (typeof (args as Record<string, unknown>).bundle_path === 'string' &&
-      !(args as Record<string, unknown>).bundle_content) {
+  if (
+    typeof (args as Record<string, unknown>).bundle_path === 'string' &&
+    !(args as Record<string, unknown>).bundle_content
+  ) {
     const { text, truncated } = readMaybe((args as Record<string, unknown>).bundle_path);
     if (text) {
       (args as Record<string, unknown>).bundle_content = text;
