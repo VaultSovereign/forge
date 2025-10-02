@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 
-import { rbac } from '../auth/rbac.js';
 import { limitCfg } from './_limits.js';
+import { rbac } from '../auth/rbac.js';
 import { coreLedgerQuery } from '../core/client.js';
 
 export default async function ledgerRoutes(app: FastifyInstance) {

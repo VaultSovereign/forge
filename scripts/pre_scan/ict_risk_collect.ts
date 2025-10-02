@@ -12,10 +12,9 @@
  * - Counts items; attempts to classify "major" incidents when JSON has { severity: "major" }
  */
 
+import fg from 'fast-glob';
 import fs from 'fs';
 import path from 'path';
-
-import fg from 'fast-glob';
 
 type Input = {
   org_name: string;

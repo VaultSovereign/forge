@@ -4,12 +4,11 @@
  * Walks a repository, detects candidate secrets using regex + entropy, and prints JSON array of hits.
  */
 
+import minimist from 'minimist';
 import { execSync } from 'node:child_process';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-
-import minimist from 'minimist';
 
 type Hit = {
   file: string;

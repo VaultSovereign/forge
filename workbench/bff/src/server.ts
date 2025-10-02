@@ -1,13 +1,12 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { pathToFileURL } from 'node:url';
-
 import cors from '@fastify/cors';
 import rateLimit from '@fastify/rate-limit';
-import { Counter } from 'prom-client';
 import fastifyStatic from '@fastify/static';
 import Fastify, { type FastifyInstance } from 'fastify';
 import type { ZodTypeProvider } from 'fastify-type-provider-zod';
+import fs from 'node:fs';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { Counter } from 'prom-client';
 
 import { authPreHandler } from './auth/oidc.js';
 import { loadRbacMatrix } from './auth/rbac.js';

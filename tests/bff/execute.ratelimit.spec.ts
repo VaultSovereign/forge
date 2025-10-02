@@ -1,14 +1,14 @@
-import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
-import Fastify from 'fastify';
 import rateLimit from '@fastify/rate-limit';
+import Fastify from 'fastify';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 
 // Bypass core execution implementation for tests
 vi.mock('../../workbench/bff/src/core/client.js', () => ({
   coreExecute: vi.fn().mockResolvedValue({ ok: true, id: 'test' }),
 }));
 
-import executeRoutes from '../../workbench/bff/src/routes/execute.ts';
 import { loadRbacMatrix } from '../../workbench/bff/src/auth/rbac.ts';
+import executeRoutes from '../../workbench/bff/src/routes/execute.ts';
 
 describe('execute route rate limit', () => {
   let app: any;

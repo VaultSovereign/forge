@@ -4,12 +4,11 @@
  * Provides template execution, ledger queries, and metadata tools to Claude Code
  */
 
-import path from 'path';
-import { fileURLToPath } from 'url';
-
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { ListToolsRequestSchema, CallToolRequestSchema } from '@modelcontextprotocol/sdk/types.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { z } from 'zod';
 
 // Dynamic imports to avoid provider initialization issues

@@ -1,8 +1,7 @@
 #!/usr/bin/env node
+import minimist from 'minimist';
 import path from 'path';
 import { fileURLToPath } from 'url';
-
-import minimist from 'minimist';
 
 import { runKeyword } from '../dispatcher/router.js';
 
@@ -11,6 +10,7 @@ const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '..');
 
 function help() {
+  // eslint-disable-next-line no-console
   console.log(`
 Forge — minimal Prompt OS
 
@@ -43,7 +43,7 @@ async function main() {
 
   for (const t of tokens) {
     if (t.startsWith('@')) profile = t.slice(1);
-    else if (!keyword && /^[a-z]+-[a-z]+(\-[a-z]+)?$/.test(t)) keyword = t;
+    else if (!keyword && /^[a-z]+-[a-z]+(-[a-z]+)?$/.test(t)) keyword = t;
     else free.push(t);
   }
 
@@ -53,21 +53,28 @@ async function main() {
   }
 
   const notes = free.join(' ');
-  const { _, ...restFlags } = argv;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { _: _unused, ...restFlags } = argv;
   const flags = { ...restFlags } as Record<string, unknown>;
 
   try {
     const out = await runKeyword({ projectRoot, keyword, profileName: profile, flags, notes });
     if (typeof out === 'string') {
+      // eslint-disable-next-line no-console
       console.log(out);
     } else {
       const fmt = typeof flags.format === 'string' ? flags.format.toLowerCase() : '';
+      // eslint-disable-next-line no-console
       if (fmt === 'json') console.log(JSON.stringify(out, null, 2));
+      // eslint-disable-next-line no-console
       else if (out && typeof out === 'object' && 'markdown' in out)
+        // eslint-disable-next-line no-console
         console.log((out as any).markdown);
+      // eslint-disable-next-line no-console
       else console.log(JSON.stringify(out, null, 2));
     }
   } catch (e: any) {
+    // eslint-disable-next-line no-console
     console.error('[forge] ERROR:', e?.message || e);
     process.exit(1);
   }

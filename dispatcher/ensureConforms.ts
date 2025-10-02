@@ -1,4 +1,4 @@
-import Ajv from 'ajv';
+import { default as Ajv } from 'ajv';
 import addFormats from 'ajv-formats';
 
 const ajv = new Ajv({ allErrors: true, strict: false });

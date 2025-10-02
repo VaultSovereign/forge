@@ -1,7 +1,6 @@
+import lunr from 'lunr';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-
-import lunr from 'lunr';
 
 type CorpusDoc = {
   id: string;

@@ -1,10 +1,9 @@
+import type { FastifyInstance } from 'fastify';
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-import type { FastifyInstance } from 'fastify';
 import { limitCfg } from './_limits.js';
-
 import { askGuardian as askGuardianDirect } from '../../../../agents/index.ts';
 import { fromHere } from '../utils/esm-paths.js';
 // Test-only import: used by exported postGuardian handler for unit tests.

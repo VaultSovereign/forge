@@ -7,7 +7,6 @@
 import { promises as fs, readFileSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-
 import yargs, { Argv } from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
