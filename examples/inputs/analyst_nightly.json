@@ -1,0 +1,10 @@
+{
+  "topic": "Nightly CI validation - Research Analyst schema compliance",
+  "sources": [
+    "ESLint strict mode results",
+    "Build artifacts validation",
+    "Template catalog integrity"
+  ],
+  "scope": "concise",
+  "output_format": "json"
+}

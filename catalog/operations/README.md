@@ -4,9 +4,9 @@
 
 The Research Analyst template provides well-sourced, evidence-driven analysis with executive-ready summaries. It's designed to aggregate information from multiple sources, assign confidence levels, and highlight escalations or blockers.
 
-**Guardian:** Tem (Remembrance)  
-**Profile:** `@analyst` (profiles/research-analyst.yaml)  
-**Template:** `operations-research-analyst`  
+**Guardian:** Tem (Remembrance)
+**Profile:** `@analyst` (profiles/research-analyst.yaml)
+**Template:** `operations-research-analyst`
 **Schema:** `schemas/output.schema.json#/definitions/operations/research_analyst`
 
 ## Features

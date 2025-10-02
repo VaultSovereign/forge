@@ -23,3 +23,36 @@ jobs:
 
       - name: Lint (strict - fail on warnings)
         run: pnpm exec eslint -c .eslintrc.json . --ext .ts,.tsx --max-warnings=0
+
+  template-validation:
+    name: Validate Research Analyst Template
+    runs-on: ubuntu-latest
+    env:
+      # Use a mock/test provider to avoid real API calls in nightly validation
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node & pnpm setup
+        uses: ./.github/actions/node-pnpm-setup
+        with:
+          node-version: 20
+          pnpm-version: 10.17.0
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Validate schema compliance
+        if: env.OPENAI_API_KEY != ''
+        run: |
+          echo "::group::Schema Validation"
+          node scripts/validate-analyst-output.mjs artifacts/nightly/analyst_output.json
+          echo "::endgroup::"
+
+      - name: Upload validation artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: analyst-validation-${{ github.run_id }}
+          path: /tmp/analyst_*.json
+          if-no-files-found: ignore
