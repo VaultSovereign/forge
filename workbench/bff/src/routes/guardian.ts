@@ -4,12 +4,6 @@ import { pathToFileURL } from 'node:url';
 
 // eslint-disable-next-line import/no-relative-packages
 import { limitCfg } from './_limits.js';
-import { askGuardian as askGuardianDirect } from '../../../../agents/index';
-
-// Test-only import: used by exported postGuardian handler for unit tests.
-// At runtime, the Fastify route below continues to use dynamic agent resolution.
-// The relative path walks up to repo root from workbench/bff/src/routes.
-// eslint-disable-next-line import/no-relative-packages
 
 type GuardianMode = 'stub' | 'agent' | 'unknown';
 
@@ -44,60 +38,93 @@ export async function detectMode(): Promise<GuardianMode> {
   return 'stub';
 }
 
-/**
- * POST /guardian/ask handler - exported for testing
- */
-export async function postGuardian(req: any, reply: any) {
-  // Small adapter to work with Fastify reply or minimal Express-like fakes in tests
-  const send = (status: number, payload: unknown) => {
-    try {
-      if (typeof reply?.code === 'function' && typeof reply?.send === 'function') {
-        return reply.code(status).send(payload);
+// Dependency-injected handler used by unit tests
+export function makePostGuardian(
+  resolve: () => Promise<(input: string) => Promise<any>>
+) {
+  return async function postGuardian(req: any, reply: any) {
+    // Small adapter to work with Fastify reply or minimal Express-like fakes in tests
+    const send = (status: number, payload: unknown) => {
+      try {
+        if (typeof reply?.code === 'function' && typeof reply?.send === 'function') {
+          return reply.code(status).send(payload);
+        }
+        if (typeof reply?.status === 'function' && typeof reply?.json === 'function') {
+          return reply.status(status).json(payload);
+        }
+      } catch {
+        // ignore and fall through
       }
-      if (typeof reply?.status === 'function' && typeof reply?.json === 'function') {
-        return reply.status(status).json(payload);
-      }
-    } catch {
-      // ignore and fall through
+      // Fallback for ultra-minimal fakes
+      reply.statusCode = status;
+      reply.body = payload;
+      return reply;
+    };
+
+    const { input } = (req.body ?? {}) as { input?: string };
+    if (!input || input.trim().length === 0) {
+      return send(400, { error: 'bad_request', message: 'input is required' });
     }
-    // Fallback for ultra-minimal fakes
-    reply.statusCode = status;
-    reply.body = payload;
-    return reply;
+
+    let ask: ((input: string) => Promise<any>) | undefined;
+    try {
+      ask = await resolve();
+    } catch (e: any) {
+      const code = e?.code;
+      if (typeof reply?.header === 'function') {
+        if (code === 'GUARDIAN_DISABLED') reply.header('x-guardian-mode', 'disabled');
+        else if (code === 'GUARDIAN_RESOLUTION_FAILED') reply.header('x-guardian-mode', 'unavailable');
+      }
+      if (code === 'GUARDIAN_DISABLED') return send(503, { error: 'guardian_disabled' });
+      if (code === 'GUARDIAN_RESOLUTION_FAILED') return send(503, { error: 'guardian_unavailable' });
+      // Unknown resolution error
+      req?.log?.error?.(e);
+      if (typeof reply?.header === 'function') reply.header('x-guardian-mode', 'error');
+      return send(500, { error: 'guardian_error', message: String(e?.message || e) });
+    }
+
+    try {
+      const result = await ask(input);
+      try {
+        if (typeof reply?.header === 'function') reply.header('x-guardian-mode', 'agent');
+      } catch {}
+      return send(200, {
+        text: result?.outputText ?? 'Agent responded.',
+        events: Array.isArray(result?.events) ? result.events : [],
+      });
+    } catch (e: any) {
+      req?.log?.error?.(e);
+      if (typeof reply?.header === 'function') reply.header('x-guardian-mode', 'error');
+      return send(500, { error: 'guardian_error', message: String(e?.message || e) });
+    }
   };
-
-  const { input } = (req.body ?? {}) as { input?: string };
-  if (!input || input.trim().length === 0) {
-    return send(400, { error: 'input is required' });
-  }
-
-  try {
-    // In tests, askGuardian is vi.mock()-ed from ../../agents/index.ts
-    const result = await askGuardianDirect(input);
-    // emulate Fastify header behavior if available
-    try {
-      if (typeof reply?.header === 'function') reply.header('x-guardian-mode', 'agent');
-    } catch {
-      // Reply may be a minimal mock without header support
-    }
-    return send(200, {
-      text: result?.outputText ?? 'Agent responded.',
-      events: Array.isArray(result?.events) ? result.events : [],
-    });
-  } catch (error) {
-    try {
-      if (typeof reply?.header === 'function') reply.header('x-guardian-mode', 'stub');
-    } catch {
-      // Ignore header failures on mocks
-    }
-    return send(200, {
-      text: `Guardian (stub due to agent error): ${String(
-        (error as Error)?.message ?? error
-      )}. Echo: ${input}`,
-      events: [],
-    });
-  }
 }
+
+// Runtime resolver for production route
+async function resolveGuardian(): Promise<(input: string) => Promise<any>> {
+  const agentPath = process.env.GUARDIAN_AGENT_ENTRY;
+  if (!agentPath) {
+    const err: any = new Error('guardian disabled');
+    err.code = 'GUARDIAN_DISABLED';
+    throw err;
+  }
+  const resolved = path.resolve(agentPath);
+  const mod: any = await import(pathToFileURL(resolved).href).catch((e) => {
+    const err: any = new Error(`guardian resolution failed: ${e?.message || e}`);
+    err.code = 'GUARDIAN_RESOLUTION_FAILED';
+    throw err;
+  });
+  const ask = mod?.askGuardian ?? mod?.ask ?? mod?.default?.askGuardian ?? mod?.default?.ask;
+  if (typeof ask !== 'function') {
+    const err: any = new Error('guardian resolution failed: ask function not found');
+    err.code = 'GUARDIAN_RESOLUTION_FAILED';
+    throw err;
+  }
+  return ask as (input: string) => Promise<any>;
+}
+
+// Back-compat export used by route registration
+export const postGuardian = makePostGuardian(resolveGuardian);
 
 export default async function guardianRoutes(app: FastifyInstance) {
   app.post(
