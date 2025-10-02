@@ -12,8 +12,7 @@ RUN corepack enable && corepack prepare pnpm@10.17.0 --activate
 FROM base AS builder
 
 # Copy package manifests first for better caching
-COPY pnpm-lock.yaml package.json tsconfig.json ./
-COPY pnpm-workspace.yaml* ./
+COPY pnpm-lock.yaml package.json tsconfig.json pnpm-workspace.yaml ./
 
 # Install all dependencies (including dev for build)
 RUN pnpm install --frozen-lockfile
@@ -32,8 +31,7 @@ RUN addgroup -g 1001 -S vaultmesh && \
     adduser -S vaultmesh -u 1001 -G vaultmesh
 
 # Copy package manifests
-COPY pnpm-lock.yaml package.json ./
-COPY pnpm-workspace.yaml* ./
+COPY pnpm-lock.yaml package.json pnpm-workspace.yaml ./
 
 # Install production dependencies only
 RUN pnpm install --frozen-lockfile --prod --ignore-scripts
