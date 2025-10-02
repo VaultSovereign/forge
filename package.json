@@ -112,7 +112,8 @@
     "build:bff:npm": "npm --prefix workbench/bff run build",
     "start:bff:npm": "node workbench/bff/dist/server.js",
     "docs:openapi:md": "node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md",
-    "docs:openapi:check": "node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md && git diff --exit-code -- docs/OPENAPI.md"
+    "docs:openapi:check": "node scripts/generate-openapi-md.mjs docs/openapi/workbench.yaml docs/OPENAPI.md && git diff --exit-code -- docs/OPENAPI.md",
+    "issues:investigate": "node scripts/gh-issues-investigate.mjs"
   },
   "bin": {
     "vm": "dist/cli/index.js"

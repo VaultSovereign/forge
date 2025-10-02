@@ -81,7 +81,6 @@ export async function buildServer(): Promise<FastifyInstance> {
         windowSeconds: retrySec,
       };
     },
-    // @ts-expect-error fastify-rate-limit augments this handler at runtime
     onExceeded: function (this: { timeWindow?: number }, req: unknown, res: unknown) {
       // Ensure Retry-After is present for clients/backoff logic
       const tw = typeof this?.timeWindow === 'number' ? this.timeWindow : 60000; // default 60s
@@ -191,6 +190,7 @@ export async function buildServer(): Promise<FastifyInstance> {
   const { default: guardianRoute } = await import('./routes/guardian.js');
   const { default: metricsRoutes } = await import('./routes/metrics.js');
   const { default: openapiRoutes } = await import('./routes/openapi.js');
+  const { default: riskPolicyRoutes } = await import('./routes/risk-policy.js');
   const { default: devRoutes } = await import('./routes/dev.js');
 
   await app.register(healthRoutes);
@@ -201,6 +201,7 @@ export async function buildServer(): Promise<FastifyInstance> {
   await app.register(tickRoutes);
   await app.register(guardianRoute);
   await app.register(metricsRoutes);
+  await app.register(riskPolicyRoutes, { prefix: '/' });
   // Expose OpenAPI JSON only in dev unless explicitly enabled
   if (process.env.NODE_ENV !== 'production' || process.env.EXPOSE_OPENAPI === '1') {
     await app.register(openapiRoutes);
