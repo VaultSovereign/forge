@@ -39,24 +39,7 @@ export default async function executeRoutes(app: FastifyInstance) {
             }
           })
           .default('{}'),
-      // Use a Zod schema for query parameters for type safety and validation.
-      // This replaces the manual JSON parsing block.
-      const QuerySchema = z.object({
-        templateId: z.string().min(1),
-        profile: z.string().default('vault'),
-        args: z.string().default('{}').transform((val, ctx) => {
-          try {
-            return JSON.parse(val);
-          } catch (e) {
-            ctx.addIssue({
-              code: 'custom',
-              message: 'Invalid JSON in "args" query parameter.',
-            });
-            return z.NEVER;
-          }
-        }),
       });
-      const parseResult = QuerySchema.safeParse(req.query);
       const parseResult = QuerySchema.safeParse(req.query ?? {});
       if (!parseResult.success) {
         return reply.code(400).send({ error: 'invalid_query', issues: parseResult.error.issues });

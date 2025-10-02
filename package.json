@@ -55,6 +55,7 @@
     "build:bff": "pnpm --prefix workbench/bff run build",
     "dev": "concurrently -k \"pnpm --prefix workbench/bff run dev\" \"pnpm --prefix workbench/frontend run dev\"",
     "build:workbench": "pnpm --prefix workbench/frontend run build && pnpm --prefix workbench/bff run build && mkdir -p workbench/bff/public && cp -R workbench/frontend/dist/* workbench/bff/public/ || true",
+    "deck:build": "pnpm run build:sales",
     "build:sales": "pnpm run sales:deck && pnpm run sales:onepager",
     "sales:deck": "npx @marp-team/marp-cli docs/SALES/DECK.marp.md -o dist/sales-deck.html --allow-local-files --theme docs/SALES/theme.css && npx @marp-team/marp-cli docs/SALES/DECK.marp.md -o dist/sales-deck.pdf --allow-local-files --pdf --theme docs/SALES/theme.css && cp dist/sales-deck.html dist/index.html || true",
     "sales:onepager": "npx @marp-team/marp-cli docs/SALES/ONE_PAGER.marp.md -o dist/one-pager.html --allow-local-files --theme docs/SALES/theme.css",
