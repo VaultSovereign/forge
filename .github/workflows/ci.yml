@@ -135,10 +135,24 @@ jobs:
           name: sbom
           path: sbom.json
 
+      - name: Install gitleaks
+        run: |
+          set -euo pipefail
+          GITLEAKS_VERSION=8.24.3
+          curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+            | tar -xz gitleaks
+          sudo mv gitleaks /usr/local/bin/gitleaks
+          gitleaks version
+
       - name: Scan secrets (gitleaks)
-        uses: gitleaks/gitleaks-action@v2
+        run: gitleaks detect --redact --no-git --exit-code 1 --report-format sarif --report-path gitleaks.sarif
+
+      - name: Upload gitleaks report
+        uses: actions/upload-artifact@v4
         with:
-          args: detect --source=. --redact --no-git --exit-code 1
+          name: gitleaks-${{ github.run_id }}-${{ github.run_attempt }}
+          path: gitleaks.sarif
+          if-no-files-found: ignore
 
       - name: Security audit
         run: pnpm audit --prod || echo "Audit warnings found"
