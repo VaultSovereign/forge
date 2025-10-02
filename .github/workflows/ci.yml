@@ -83,7 +83,8 @@ jobs:
 
       - name: Verify OPENAPI.md is up to date
         run: |
-          git diff --exit-code -- docs/OPENAPI.md || {
+          # Ignore whitespace-only diffs to account for Markdown table reflows
+          git diff -w --exit-code -- docs/OPENAPI.md || {
             echo "::error file=docs/OPENAPI.md::docs/OPENAPI.md is out of date. Run 'pnpm -w run docs:openapi:md' and commit.";
             exit 1;
           }
@@ -213,7 +214,7 @@ jobs:
 
       - name: Verify OPENAPI.md is up to date
         run: |
-          git diff --exit-code -- docs/OPENAPI.md || {
+          git diff -w --exit-code -- docs/OPENAPI.md || {
             echo "::error file=docs/OPENAPI.md::docs/OPENAPI.md is out of date. Run 'pnpm -w run docs:openapi:md' and commit.";
             exit 1;
           }
@@ -343,7 +344,7 @@ jobs:
 
       - name: Verify OPENAPI.md is up to date
         run: |
-          git diff --exit-code -- docs/OPENAPI.md || {
+          git diff -w --exit-code -- docs/OPENAPI.md || {
             echo "::error file=docs/OPENAPI.md::docs/OPENAPI.md is out of date. Run 'pnpm -w run docs:openapi:md' and commit.";
             exit 1;
           }
@@ -778,7 +779,7 @@ jobs:
 
       - name: Verify OPENAPI.md is up to date
         run: |
-          git diff --exit-code -- docs/OPENAPI.md || {
+          git diff -w --exit-code -- docs/OPENAPI.md || {
             echo "::error file=docs/OPENAPI.md::docs/OPENAPI.md is out of date. Run 'pnpm -w run docs:openapi:md' and commit.";
             exit 1;
           }
@@ -839,7 +840,7 @@ jobs:
 
       - name: Verify OPENAPI.md is up to date
         run: |
-          git diff --exit-code -- docs/OPENAPI.md || {
+          git diff -w --exit-code -- docs/OPENAPI.md || {
             echo "::error file=docs/OPENAPI.md::docs/OPENAPI.md is out of date. Run 'pnpm -w run docs:openapi:md' and commit.";
             exit 1;
           }
@@ -868,7 +869,7 @@ jobs:
 
       - name: Verify OPENAPI.md is up to date
         run: |
-          git diff --exit-code -- docs/OPENAPI.md || {
+          git diff -w --exit-code -- docs/OPENAPI.md || {
             echo "::error file=docs/OPENAPI.md::docs/OPENAPI.md is out of date. Run 'pnpm -w run docs:openapi:md' and commit.";
             exit 1;
           }
