@@ -14,3 +14,9 @@ Thanks for your interest in improving Forge!
 - Reference related issues if applicable.
 - Ensure CI and link checks are green.
 
+## Release process
+- Update `CHANGELOG.md`: move items from [Unreleased] to a new section with version + date.
+- Commit and push the changelog update.
+- Tag the release (`git tag -a vX.Y.Z -m "vX.Y.Z — summary"`; `git push origin vX.Y.Z`).
+- CI tag-guard will fail if [Unreleased] is still the top section.
+- Release notes are generated automatically by the release-notes workflow.

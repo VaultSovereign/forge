@@ -5,6 +5,7 @@ Welcome to the Forge documentation hub.
 - Quickstart: see [QUICKSTART.md](QUICKSTART.md)
 - Image tags and publishing: see Quickstart and CI notes
 - Authentication to GHCR: requires a GitHub Personal Access Token (PAT) with `read:packages` (pull) and `write:packages` (push)
+ - [Changelog](../CHANGELOG.md) — notable changes per release
 
 ## GitHub Pages (optional)
 
