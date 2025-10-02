@@ -19,7 +19,7 @@
 <li>Single‑port preview: <code>make docs:external DOCS_URL=https://mydomain/docs</code></li>
 <li>Dev duo: <code>make docs:external-dev DOCS_URL=https://mydomain/docs</code></li>
 </ul>
-<!-- publish trigger: ${GITHUB_SHA:-local}-$(date -u +%Y%m%dT%H%M%SZ) -->
+<!-- publish trigger: bump-$(date -u +%s) -->
 <p>Notes</p>
 <ul>
 <li>API link appears when <code>import.meta.env.DEV</code> or <code>VITE_EXPOSE_OPENAPI=1</code>; server route gated by <code>EXPOSE_OPENAPI=1</code> (or dev).</li>
