@@ -83,20 +83,21 @@ make docs:external-dev DOCS_URL=https://mydomain/docs  # duo
 
 🐳 Docker (GHCR)
 
-Prebuilt images are published automatically to GitHub Container Registry:
+Prebuilt multi-arch (amd64 + arm64) images are published automatically to  
+[GitHub Container Registry](https://ghcr.io/vaultsovereign/forge) on every push  
+to `main` and on tagged releases. Images carry provenance metadata and tags:
+
+- `:latest` — built from `main`  
+- `:vX.Y.Z` — release tags  
+- `:<git-sha>` — every commit  
+
+Run the image locally:
 
 ```bash
 docker pull ghcr.io/vaultsovereign/forge:latest
 docker run --rm -p 3000:3000 ghcr.io/vaultsovereign/forge:latest
 # open http://localhost:3000/v1/health
 ```
-
-Tags
-	•	:latest — built from main
-	•	:vX.Y.Z — release tags
-	•	:<git-sha> — every push
-
-Multi-arch images (amd64 + arm64) with build provenance.
 
 ⸻
 
