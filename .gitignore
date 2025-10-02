@@ -64,6 +64,7 @@ Thumbs.db
 # Test coverage
 coverage/
 .nyc_output/
+.pytest_cache/
 
 # Replit artifacts (disabled)
 .replit
@@ -78,6 +79,9 @@ artifacts/audit/
 artifacts/prepush/
 artifacts/reports/
 artifacts/seals/
+
+# Local/derived registry files
+artifact_index.json
 
 # Generated from YAML at build time; keep out of VCS
 schemas/ict_risk.v1.json
