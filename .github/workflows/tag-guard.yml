@@ -1,0 +1,22 @@
+name: tag-guard
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fail if [Unreleased] is still the top section
+        run: |
+          # Get first heading after the header blurb
+          H1=$(awk '/^## \[/{print; exit}' CHANGELOG.md)
+          echo "Top section: $H1"
+          if echo "$H1" | grep -q '\[Unreleased\]'; then
+            echo "::error ::[Unreleased] is still the top section. Cut a release section before tagging."
+            exit 1
+          fi
+          echo "OK: top section is a release, not [Unreleased]."
+
