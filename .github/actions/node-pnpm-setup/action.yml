@@ -23,6 +23,16 @@ runs:
         version: ${{ inputs.pnpm-version }}
         run_install: false
 
+    - name: Ensure pnpm available (fallback via corepack)
+      shell: bash
+      run: |
+        if ! command -v pnpm >/dev/null 2>&1; then
+          echo "[setup] pnpm not on PATH; enabling via corepack"
+          corepack enable || true
+          corepack prepare pnpm@${{ inputs.pnpm-version }} --activate || true
+        fi
+        pnpm -v || (echo "pnpm still missing" && exit 1)
+
     - name: Install workspace deps (recursive)
       shell: bash
       run: pnpm -r install --frozen-lockfile || pnpm -r install

@@ -198,6 +198,82 @@ evolution-journal:
 	@node scripts/journal_append.mjs
 	@tail -n 5 artifacts/evolution/template_journal.jsonl || true
 
+.PHONY: gif:risk-flow
+# Records a ~12s GIF of Risk Gate panel interactions.
+# macOS uses avfoundation; Linux uses x11grab. Requires ffmpeg.
+gif:risk-flow:
+	@echo "Recording Risk Gate flow…"
+	@if [ "$$(uname)" = "Darwin" ]; then \
+	  echo "Open the Workbench in a visible window, then recording starts in 3s…"; \
+	  sleep 3; \
+	  ffmpeg -f avfoundation -framerate 30 -t 12 -i "1:none" -vf "scale=1280:-1:flags=lanczos,fps=15" /tmp/risk-flow.mp4 -y >/dev/null 2>&1 || true; \
+	  ffmpeg -i /tmp/risk-flow.mp4 -vf "fps=12,scale=960:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" /tmp/risk-flow.gif -y >/dev/null 2>&1 || true; \
+	else \
+	  echo "Linux capture (X11): set $$DISPLAY and ensure ffmpeg installed"; \
+	  sleep 3; \
+	  ffmpeg -video_size 1280x800 -framerate 30 -f x11grab -i $$DISPLAY -t 12 /tmp/risk-flow.mp4 -y >/dev/null 2>&1 || true; \
+	  ffmpeg -i /tmp/risk-flow.mp4 -vf "fps=12,scale=960:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" /tmp/risk-flow.gif -y >/dev/null 2>&1 || true; \
+	fi; \
+	echo "→ GIF at /tmp/risk-flow.gif"
+
+.PHONY: curl:risk:latest curl:risk:gate
+curl:risk:latest:
+	@curl -sS http://localhost:8787/v1/risk/latest | jq
+
+curl:risk:gate:
+	@curl -sS -X POST http://localhost:8787/v1/risk/policy-gate \
+	  -H 'content-type: application/json' --data '{}' | jq
+
+.PHONY: curl:risk:receipts
+# Optional date window: make curl:risk:receipts FROM=2025-10-01T00:00:00Z TO=2025-10-03T00:00:00Z
+curl:risk:receipts:
+	@URL="http://localhost:8787/v1/risk/receipts/export"; \
+	[ -n "$(FROM)" ] && URL="$$URL?from=$(FROM)"; \
+	[ -n "$(TO)" ] && URL="$${URL}$$([ -n "$(FROM)" ] && echo '&' || echo '?')to=$(TO)"; \
+	echo "→ GET $$URL"; \
+	curl -sS "$$URL" | jq '.generated_at, .count'
+
+.PHONY: curl:risk:verify
+# KIND=register|gate (optional). Default: latest of either.
+curl:risk:verify:
+	@URL="http://localhost:8787/v1/risk/verify"; \
+	[ -n "$(KIND)" ] && BODY="$$(jq -nc --arg k "$(KIND)" '{kind:$$k}')" || BODY="{}"; \
+	echo "→ POST $$URL  body=$$BODY"; \
+	curl -sS -X POST "$$URL" -H 'content-type: application/json' --data "$$BODY" | jq
+
+.PHONY: curl:risk:verify-line
+# Use: make curl:risk:verify-line LINE='{"keyword":"operations-risk-register",...}'
+curl:risk:verify-line:
+	@URL="http://localhost:8787/v1/risk/verify"; \
+	BODY=$$(jq -nc --arg line '$(LINE)' '{line:$$line}'); \
+	echo "→ POST $$URL"; \
+	curl -sS -X POST "$$URL" -H 'content-type: application/json' --data "$$BODY" | jq
+
+.PHONY: curl:risk:list
+curl:risk:list:
+	@curl -sS "http://localhost:8787/v1/risk/list?limit=$${LIMIT:-25}" | jq '.count, (.events[0] | {keyword,ts,stored_hash})'
+
+.PHONY: curl:risk:list:page
+# Usage: make curl:risk:list:page LIMIT=50 CURSOR="events-2025-10-02.jsonl:42" KEYWORD=register BEFORE=2025-10-02T23:59:59Z SINCE=2025-10-01T00:00:00Z
+curl:risk:list:page:
+	@URL="http://localhost:8787/v1/risk/list?limit=$${LIMIT:-50}"; \
+	[ -n "$(KEYWORD)" ] && URL="$$URL&keyword=$(KEYWORD)"; \
+	[ -n "$(BEFORE)" ] && URL="$$URL&before_ts=$(BEFORE)"; \
+	[ -n "$(SINCE)" ] && URL="$$URL&since_ts=$(SINCE)"; \
+	[ -n "$(CURSOR)" ] && URL="$$URL&cursor=$(CURSOR)"; \
+	echo "→ GET $$URL"; \
+	curl -sS "$$URL" | jq '{count, next_cursor, prev_cursor, window}'
+
+.PHONY: run:risk-policy-gate
+# Usage: make run:risk-policy-gate REPORT=path/to/risk_register.json [PROFILE=vault]
+run:risk-policy-gate:
+	@if [ -z "$(REPORT)" ]; then echo "Set REPORT=path/to/risk_register.json"; exit 2; fi
+	@if [ ! -f "$(REPORT)" ]; then echo "REPORT file not found: $(REPORT)"; exit 2; fi
+	@PROFILE_ARG=$${PROFILE:-vault}; \
+	ARGS=$$(jq -c --argfile r "$(REPORT)" '{report: $$r}'); \
+	echo "→ Running policy gate with $$PROFILE_ARG on $(REPORT)"; \
+	pnpm run vm -- run operations-risk-policy-gate -p $$PROFILE_ARG -a "$$ARGS" -f json
+
 
 # -------------------------------
 # Developer convenience targets

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { listLedger, type LedgerRow } from '../api';
+import { useRiskGate } from '../hooks/useRiskGate';
 
 type LedgerTableProps = {
   rows?: LedgerRow[];
@@ -15,6 +16,7 @@ export default function LedgerTable({
 }: LedgerTableProps) {
   const [rows, setRows] = useState<LedgerRow[]>(providedRows ?? []);
   const shouldFetch = providedRows === undefined;
+  const { verifyEvent } = useRiskGate();
 
   useEffect(() => {
     if (!shouldFetch) return;
@@ -52,6 +54,7 @@ export default function LedgerTable({
               <th>Profile</th>
               <th>Timestamp</th>
               <th>Status</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -74,6 +77,30 @@ export default function LedgerTable({
                   <td>{row.profile ?? '—'}</td>
                   <td>{new Date(row.ts).toLocaleString()}</td>
                   <td>{renderStatus(row.status)}</td>
+                  <td>
+                    <button
+                      type="button"
+                      title="Verify this event"
+                      onClick={() => {
+                        type AugRow = LedgerRow &
+                          Partial<{ raw_line: string; stored_hash: string; event: unknown }>;
+                        const r = row as AugRow;
+                        void verifyEvent({
+                          line: r.raw_line,
+                          stored_hash: r.stored_hash,
+                          event: r.event ?? {
+                            keyword: row.template,
+                            template: row.template,
+                            profile: row.profile,
+                            ts: row.ts,
+                            id: row.id,
+                          },
+                        });
+                      }}
+                    >
+                      Verify
+                    </button>
+                  </td>
                 </tr>
               ))
             )}
