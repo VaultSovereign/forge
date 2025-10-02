@@ -1,4 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://doc.vaultmesh.org/sitemap.xml
-# updated: $(date -u +%FT%TZ)
+Sitemap: https://vaultsovereign.github.io/forge/sitemap.xml
