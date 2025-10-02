@@ -3,10 +3,13 @@
 
 # syntax=docker/dockerfile:1
 
-# Base stage with pnpm
-FROM node:20-alpine AS base
+# Base stage with pnpm - use specific Alpine version with security patches
+FROM node:20.19.5-alpine3.22 AS base
 WORKDIR /app
-RUN corepack enable && corepack prepare pnpm@10.17.0 --activate
+
+# Update Alpine packages to get latest security patches, then enable pnpm
+RUN apk update && apk upgrade --no-cache && \
+    corepack enable && corepack prepare pnpm@10.17.0 --activate
 
 # Build stage
 FROM base AS builder
