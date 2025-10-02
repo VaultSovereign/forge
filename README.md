@@ -2,7 +2,7 @@
 
 Sovereign prompt orchestration for compliance and cybersecurity — short, focused README with links to full docs.
 
-[CI](.github/workflows/ci.yml) · [Releases](https://github.com/VaultSovereign/forge/releases) · [Docs Index](https://VaultSovereign.github.io/forge/INDEX.html) · [OpenAPI](docs/OPENAPI.md)
+[CI](.github/workflows/ci.yml) · [Releases](https://github.com/VaultSovereign/forge/releases) · [Docs Index](https://VaultSovereign.github.io/forge/index.html) · [OpenAPI](docs/OPENAPI.md)
 
 ## Quickstart
 
@@ -76,4 +76,3 @@ docker run --rm -p 3000:3000 ghcr.io/vaultsovereign/forge:latest
 ## Contributing
 
 See `CONTRIBUTING.md`, `AGENTS.md`, and `docs/` for full guides and run modes.
-
