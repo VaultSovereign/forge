@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 VaultMesh Forge — Operations Runbook
 
 This runbook provides step-by-step operational responses for common VaultMesh Forge incidents. It assumes the production checklist (docs/PROD_CHECKLIST.md) has been followed.
@@ -157,4 +158,26 @@ kubectl logs deploy/forge-bff -f
 
 ⸻
 
-⚠️ Note: This runbook will evolve as monitoring and operational maturity increase. Update after every incident post-mortem.
+# ⚠️ Note: This runbook will evolve as monitoring and operational maturity increase. Update after every incident post-mortem.
+
+# Operations Runbook (Placeholder)
+
+Incident response and common operations tasks.
+
+## On-call Quick Start
+
+- Identify impact and scope
+- Roll back to previous image tag if needed
+- Capture logs and metrics for postmortem
+
+## Common Tasks
+
+- Restart deployment
+- Roll out new image tag
+- Verify health endpoints
+
+## Postmortems
+
+- Record timeline, root cause, and mitigations
+
+> > > > > > > origin/main

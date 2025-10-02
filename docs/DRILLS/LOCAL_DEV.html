@@ -1,132 +1,147 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LOCAL_DEV Drill - VaultMesh Forge</title>
-  <style>
-    @media print {
-      body { font-size: 12pt; }
-      .no-print { display: none; }
-      h1 { page-break-before: always; }
-      h1:first-of-type { page-break-before: avoid; }
-    }
-    body {
-      font-family: 'Courier New', Courier, monospace;
-      max-width: 800px;
-      margin: 40px auto;
-      padding: 20px;
-      background: #0a0a0a;
-      color: #00ff00;
-      line-height: 1.6;
-    }
-    h1 {
-      color: #ffff00;
-      border-bottom: 2px solid #00ff00;
-      padding-bottom: 10px;
-    }
-    h2 {
-      color: #00ffff;
-      margin-top: 30px;
-    }
-    h3 {
-      color: #ff00ff;
-    }
-    code {
-      background: #1a1a1a;
-      padding: 2px 6px;
-      border-radius: 3px;
-      color: #ffaa00;
-    }
-    pre {
-      background: #1a1a1a;
-      padding: 15px;
-      border-left: 4px solid #00ff00;
-      overflow-x: auto;
-    }
-    .checkpoint {
-      background: #1a3a1a;
-      padding: 10px;
-      margin: 15px 0;
-      border-left: 4px solid #ffff00;
-    }
-    .warning {
-      background: #3a1a1a;
-      padding: 10px;
-      margin: 15px 0;
-      border-left: 4px solid #ff0000;
-    }
-    .success {
-      color: #00ff00;
-      font-weight: bold;
-    }
-    .fail {
-      color: #ff0000;
-      font-weight: bold;
-    }
-    @media screen {
-      body {
-        box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LOCAL_DEV Drill - VaultMesh Forge</title>
+    <style>
+      @media print {
+        body {
+          font-size: 12pt;
+        }
+        .no-print {
+          display: none;
+        }
+        h1 {
+          page-break-before: always;
+        }
+        h1:first-of-type {
+          page-break-before: avoid;
+        }
       }
-    }
-  </style>
-</head>
-<body>
+      body {
+        font-family: 'Courier New', Courier, monospace;
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 20px;
+        background: #0a0a0a;
+        color: #00ff00;
+        line-height: 1.6;
+      }
+      h1 {
+        color: #ffff00;
+        border-bottom: 2px solid #00ff00;
+        padding-bottom: 10px;
+      }
+      h2 {
+        color: #00ffff;
+        margin-top: 30px;
+      }
+      h3 {
+        color: #ff00ff;
+      }
+      code {
+        background: #1a1a1a;
+        padding: 2px 6px;
+        border-radius: 3px;
+        color: #ffaa00;
+      }
+      pre {
+        background: #1a1a1a;
+        padding: 15px;
+        border-left: 4px solid #00ff00;
+        overflow-x: auto;
+      }
+      .checkpoint {
+        background: #1a3a1a;
+        padding: 10px;
+        margin: 15px 0;
+        border-left: 4px solid #ffff00;
+      }
+      .warning {
+        background: #3a1a1a;
+        padding: 10px;
+        margin: 15px 0;
+        border-left: 4px solid #ff0000;
+      }
+      .success {
+        color: #00ff00;
+        font-weight: bold;
+      }
+      .fail {
+        color: #ff0000;
+        font-weight: bold;
+      }
+      @media screen {
+        body {
+          box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🔥 LOCAL_DEV DRILL 🔥</h1>
+    <p><strong>VaultMesh Forge - Local Development Environment</strong></p>
+    <p><em>Version: 1.0 | Last Updated: 2025-01-30</em></p>
 
-<h1>🔥 LOCAL_DEV DRILL 🔥</h1>
-<p><strong>VaultMesh Forge - Local Development Environment</strong></p>
-<p><em>Version: 1.0 | Last Updated: 2025-01-30</em></p>
+    <div class="warning">
+      <strong>⚠️ PREREQUISITE VERIFICATION</strong><br />
+      Before starting this drill, verify you have:
+      <ul>
+        <li>Node.js ≥20.11.1 installed (<code>node --version</code>)</li>
+        <li>
+          pnpm@10.17.0+ activated (<code
+            >corepack enable && corepack prepare pnpm@latest --activate</code
+          >)
+        </li>
+        <li>Git configured with your identity</li>
+        <li>Clone of https://github.com/VaultSovereign/forge</li>
+      </ul>
+    </div>
 
-<div class="warning">
-  <strong>⚠️ PREREQUISITE VERIFICATION</strong><br>
-  Before starting this drill, verify you have:
-  <ul>
-    <li>Node.js ≥20.11.1 installed (<code>node --version</code>)</li>
-    <li>pnpm@10.17.0+ activated (<code>corepack enable && corepack prepare pnpm@latest --activate</code>)</li>
-    <li>Git configured with your identity</li>
-    <li>Clone of https://github.com/VaultSovereign/forge</li>
-  </ul>
-</div>
+    <h2>Phase 1: Environment Initialization</h2>
 
-<h2>Phase 1: Environment Initialization</h2>
-
-<h3>Step 1.1: Repository Clone & Verification</h3>
-<pre>
+    <h3>Step 1.1: Repository Clone & Verification</h3>
+    <pre>
 git clone https://github.com/VaultSovereign/forge.git
 cd forge
 git status
 git log --oneline -5
-</pre>
+</pre
+    >
 
-<div class="checkpoint">
-  <strong>✓ CHECKPOINT:</strong> You should see a clean working tree and recent commits.<br>
-  If not, resolve conflicts or stashed changes before proceeding.
-</div>
+    <div class="checkpoint">
+      <strong>✓ CHECKPOINT:</strong> You should see a clean working tree and recent commits.<br />
+      If not, resolve conflicts or stashed changes before proceeding.
+    </div>
 
-<h3>Step 1.2: Package Manager Activation</h3>
-<pre>
+    <h3>Step 1.2: Package Manager Activation</h3>
+    <pre>
 corepack enable
 corepack prepare pnpm@10.17.0 --activate
 pnpm --version
-</pre>
+</pre
+    >
 
-<div class="checkpoint">
-  <strong>✓ CHECKPOINT:</strong> <code>pnpm --version</code> should show 10.17.0 or higher.
-</div>
+    <div class="checkpoint">
+      <strong>✓ CHECKPOINT:</strong> <code>pnpm --version</code> should show 10.17.0 or higher.
+    </div>
 
-<h3>Step 1.3: Dependency Installation</h3>
-<pre>
+    <h3>Step 1.3: Dependency Installation</h3>
+    <pre>
 pnpm install --frozen-lockfile
-</pre>
+</pre
+    >
 
-<div class="checkpoint">
-  <strong>✓ CHECKPOINT:</strong> All packages installed without errors. Check for peer dependency warnings.
-</div>
+    <div class="checkpoint">
+      <strong>✓ CHECKPOINT:</strong> All packages installed without errors. Check for peer
+      dependency warnings.
+    </div>
 
-<h2>Phase 2: Environment Configuration</h2>
+    <h2>Phase 2: Environment Configuration</h2>
 
-<h3>Step 2.1: Create Local .env File</h3>
-<pre>
+    <h3>Step 2.1: Create Local .env File</h3>
+    <pre>
 cp .env.example .env
 # OR create manually:
 cat &gt; .env &lt;&lt;'EOF'
@@ -147,48 +162,52 @@ AI_CORE_MODE=mock
 # RBAC (optional)
 # VMESH_RBAC_PATH=config/rbac.yaml
 EOF
-</pre>
+</pre
+    >
 
-<div class="warning">
-  <strong>⚠️ NEVER COMMIT .env FILES</strong><br>
-  Verify <code>.env</code> is in <code>.gitignore</code> before adding any real secrets.
-</div>
+    <div class="warning">
+      <strong>⚠️ NEVER COMMIT .env FILES</strong><br />
+      Verify <code>.env</code> is in <code>.gitignore</code> before adding any real secrets.
+    </div>
 
-<h3>Step 2.2: Verify Quality Tooling</h3>
-<pre>
+    <h3>Step 2.2: Verify Quality Tooling</h3>
+    <pre>
 make quality
 # OR manually:
 pnpm format:check
 pnpm lint
-</pre>
+</pre
+    >
 
-<div class="checkpoint">
-  <strong>✓ CHECKPOINT:</strong> All quality checks pass. If not, run <code>pnpm format</code> to auto-fix.
-</div>
+    <div class="checkpoint">
+      <strong>✓ CHECKPOINT:</strong> All quality checks pass. If not, run
+      <code>pnpm format</code> to auto-fix.
+    </div>
 
-<h2>Phase 3: Local Development Servers</h2>
+    <h2>Phase 3: Local Development Servers</h2>
 
-<h3>Step 3.1: Start Development Environment</h3>
-<pre>
+    <h3>Step 3.1: Start Development Environment</h3>
+    <pre>
 # Option A: Using Makefile
 make dev
 
 # Option B: Using pnpm directly
 pnpm dev
-</pre>
+</pre
+    >
 
-<div class="checkpoint">
-  <strong>✓ CHECKPOINT:</strong> You should see:
-  <ul>
-    <li>BFF (Fastify) running on <code>http://localhost:3000</code></li>
-    <li>Frontend (Vite) running on <code>http://localhost:5173</code></li>
-    <li>HMR (Hot Module Replacement) active</li>
-  </ul>
-</div>
+    <div class="checkpoint">
+      <strong>✓ CHECKPOINT:</strong> You should see:
+      <ul>
+        <li>BFF (Fastify) running on <code>http://localhost:3000</code></li>
+        <li>Frontend (Vite) running on <code>http://localhost:5173</code></li>
+        <li>HMR (Hot Module Replacement) active</li>
+      </ul>
+    </div>
 
-<h3>Step 3.2: Verify Services</h3>
-<p>Open separate terminal and run:</p>
-<pre>
+    <h3>Step 3.2: Verify Services</h3>
+    <p>Open separate terminal and run:</p>
+    <pre>
 # Check BFF health
 curl http://localhost:3000/v1/health
 
@@ -198,169 +217,192 @@ curl http://localhost:3000/v1/health
 curl http://localhost:5173
 
 # Expected: HTML content of the SPA
-</pre>
+</pre
+    >
 
-<div class="checkpoint">
-  <strong>✓ CHECKPOINT:</strong> Both services respond successfully.
-</div>
+    <div class="checkpoint"><strong>✓ CHECKPOINT:</strong> Both services respond successfully.</div>
 
-<h2>Phase 4: Development Workflow</h2>
+    <h2>Phase 4: Development Workflow</h2>
 
-<h3>Step 4.1: Make a Code Change</h3>
-<pre>
+    <h3>Step 4.1: Make a Code Change</h3>
+    <pre>
 # Example: Edit a frontend file
 echo "// Test comment" &gt;&gt; workbench/frontend/src/App.tsx
-</pre>
+</pre
+    >
 
-<div class="checkpoint">
-  <strong>✓ CHECKPOINT:</strong> Vite HMR should detect the change and reload the browser automatically.
-</div>
+    <div class="checkpoint">
+      <strong>✓ CHECKPOINT:</strong> Vite HMR should detect the change and reload the browser
+      automatically.
+    </div>
 
-<h3>Step 4.2: Run Tests</h3>
-<pre>
+    <h3>Step 4.2: Run Tests</h3>
+    <pre>
 pnpm test
 # OR for specific packages:
 pnpm --filter @vaultmesh/dispatcher test
-</pre>
+</pre
+    >
 
-<h3>Step 4.3: Build for Production</h3>
-<pre>
+    <h3>Step 4.3: Build for Production</h3>
+    <pre>
 pnpm build
 # Check output in dist/ directories
-</pre>
+</pre
+    >
 
-<div class="checkpoint">
-  <strong>✓ CHECKPOINT:</strong> Build completes without errors. Check <code>dist/</code> directories for output.
-</div>
+    <div class="checkpoint">
+      <strong>✓ CHECKPOINT:</strong> Build completes without errors. Check
+      <code>dist/</code> directories for output.
+    </div>
 
-<h2>Phase 5: Quality Gates</h2>
+    <h2>Phase 5: Quality Gates</h2>
 
-<h3>Step 5.1: Pre-Push Verification</h3>
-<pre>
+    <h3>Step 5.1: Pre-Push Verification</h3>
+    <pre>
 # Full security + quality gate
 make forge-prepush
 
 # Fast mode (skips AI security scans)
 FORGE_FAST=1 make forge-prepush
-</pre>
+</pre
+    >
 
-<div class="checkpoint">
-  <strong>✓ CHECKPOINT:</strong> All gates pass. Artifacts generated in <code>artifacts/prepush/</code>.
-</div>
+    <div class="checkpoint">
+      <strong>✓ CHECKPOINT:</strong> All gates pass. Artifacts generated in
+      <code>artifacts/prepush/</code>.
+    </div>
 
-<h3>Step 5.2: Purification Check</h3>
-<pre>
+    <h3>Step 5.2: Purification Check</h3>
+    <pre>
 make purge-check
-</pre>
+</pre
+    >
 
-<div class="checkpoint">
-  <strong>✓ CHECKPOINT:</strong> No disallowed artifacts (e.g., Replit references) found.
-</div>
+    <div class="checkpoint">
+      <strong>✓ CHECKPOINT:</strong> No disallowed artifacts (e.g., Replit references) found.
+    </div>
 
-<h2>Phase 6: Commit & Push</h2>
+    <h2>Phase 6: Commit & Push</h2>
 
-<h3>Step 6.1: Stage Changes</h3>
-<pre>
+    <h3>Step 6.1: Stage Changes</h3>
+    <pre>
 git add .
 git status
-</pre>
+</pre
+    >
 
-<h3>Step 6.2: Commit with Pre-Commit Hook</h3>
-<pre>
+    <h3>Step 6.2: Commit with Pre-Commit Hook</h3>
+    <pre>
 git commit -m "feat: your feature description"
-</pre>
+</pre
+    >
 
-<div class="checkpoint">
-  <strong>✓ CHECKPOINT:</strong> Pre-commit hook runs and passes (no Replit remnants).
-</div>
+    <div class="checkpoint">
+      <strong>✓ CHECKPOINT:</strong> Pre-commit hook runs and passes (no Replit remnants).
+    </div>
 
-<h3>Step 6.3: Push to Remote</h3>
-<pre>
+    <h3>Step 6.3: Push to Remote</h3>
+    <pre>
 git push origin main
 # OR your feature branch:
 # git push origin feature/your-branch
-</pre>
+</pre
+    >
 
-<div class="checkpoint">
-  <strong>✓ CHECKPOINT:</strong> CI workflow triggers on GitHub and passes all checks.
-</div>
+    <div class="checkpoint">
+      <strong>✓ CHECKPOINT:</strong> CI workflow triggers on GitHub and passes all checks.
+    </div>
 
-<h2>🎯 Success Criteria</h2>
+    <h2>🎯 Success Criteria</h2>
 
-<div class="success">
-  <p><strong>✅ DRILL COMPLETE</strong> when all checkpoints pass:</p>
-  <ol>
-    <li>Repository cloned and clean</li>
-    <li>pnpm@10.17.0+ active</li>
-    <li>Dependencies installed</li>
-    <li>.env configured (never committed)</li>
-    <li>Quality checks pass</li>
-    <li>Dev servers running (BFF:3000, Frontend:5173)</li>
-    <li>HMR working</li>
-    <li>Tests pass</li>
-    <li>Production build succeeds</li>
-    <li>forge-prepush gate passes</li>
-    <li>purge-check passes</li>
-    <li>Commits pushed to GitHub with CI passing</li>
-  </ol>
-</div>
+    <div class="success">
+      <p><strong>✅ DRILL COMPLETE</strong> when all checkpoints pass:</p>
+      <ol>
+        <li>Repository cloned and clean</li>
+        <li>pnpm@10.17.0+ active</li>
+        <li>Dependencies installed</li>
+        <li>.env configured (never committed)</li>
+        <li>Quality checks pass</li>
+        <li>Dev servers running (BFF:3000, Frontend:5173)</li>
+        <li>HMR working</li>
+        <li>Tests pass</li>
+        <li>Production build succeeds</li>
+        <li>forge-prepush gate passes</li>
+        <li>purge-check passes</li>
+        <li>Commits pushed to GitHub with CI passing</li>
+      </ol>
+    </div>
 
-<h2>🚨 Troubleshooting</h2>
+    <h2>🚨 Troubleshooting</h2>
 
-<h3>Port Already in Use</h3>
-<pre>
+    <h3>Port Already in Use</h3>
+    <pre>
 # Find and kill process on port 3000 or 5173
 lsof -ti:3000 | xargs kill -9
 lsof -ti:5173 | xargs kill -9
-</pre>
+</pre
+    >
 
-<h3>pnpm Install Fails</h3>
-<pre>
+    <h3>pnpm Install Fails</h3>
+    <pre>
 # Clear cache and retry
 pnpm store prune
 rm -rf node_modules pnpm-lock.yaml
 pnpm install
-</pre>
+</pre
+    >
 
-<h3>Quality Checks Fail</h3>
-<pre>
+    <h3>Quality Checks Fail</h3>
+    <pre>
 # Auto-fix formatting
 pnpm format
 
 # Check for linting errors
 pnpm lint --fix
-</pre>
+</pre
+    >
 
-<h3>Pre-Commit Hook Blocks Commit</h3>
-<pre>
+    <h3>Pre-Commit Hook Blocks Commit</h3>
+    <pre>
 # If you need to commit .gitignore changes with "replit" pattern:
 git commit --no-verify -m "chore: update gitignore"
 
 # Otherwise, remove the Replit reference and retry
-</pre>
+</pre
+    >
 
-<h2>📚 Reference</h2>
+    <h2>📚 Reference</h2>
 
-<ul>
-  <li><strong>Repository:</strong> https://github.com/VaultSovereign/forge</li>
-  <li><strong>Documentation:</strong> <code>docs/</code> directory</li>
-  <li><strong>Workbench Guide:</strong> <code>docs/WORKBENCH.md</code></li>
-  <li><strong>MCP Integration:</strong> <code>docs/MCP_WIRING.md</code></li>
-  <li><strong>Security Checklist:</strong> <code>docs/PROD_CHECKLIST.md</code></li>
-</ul>
+    <ul>
+      <li><strong>Repository:</strong> https://github.com/VaultSovereign/forge</li>
+      <li><strong>Documentation:</strong> <code>docs/</code> directory</li>
+      <li><strong>Workbench Guide:</strong> <code>docs/WORKBENCH.md</code></li>
+      <li><strong>MCP Integration:</strong> <code>docs/MCP_WIRING.md</code></li>
+      <li><strong>Security Checklist:</strong> <code>docs/PROD_CHECKLIST.md</code></li>
+    </ul>
 
-<hr>
+    <hr />
 
-<p style="text-align: center; color: #ffff00; margin-top: 40px;">
-  <strong>END OF DRILL</strong><br>
-  Print this document for offline reference during power outages or network failures.
-</p>
+    <p style="text-align: center; color: #ffff00; margin-top: 40px">
+      <strong>END OF DRILL</strong><br />
+      Print this document for offline reference during power outages or network failures.
+    </p>
 
-<p class="no-print" style="text-align: center; margin-top: 20px;">
-  <button onclick="window.print()" style="padding: 10px 20px; background: #00ff00; color: #0a0a0a; border: none; cursor: pointer; font-weight: bold;">
-    🖨️ PRINT DRILL
-  </button>
-</p>
-
-</body>
+    <p class="no-print" style="text-align: center; margin-top: 20px">
+      <button
+        onclick="window.print()"
+        style="
+          padding: 10px 20px;
+          background: #00ff00;
+          color: #0a0a0a;
+          border: none;
+          cursor: pointer;
+          font-weight: bold;
+        "
+      >
+        🖨️ PRINT DRILL
+      </button>
+    </p>
+  </body>
 </html>

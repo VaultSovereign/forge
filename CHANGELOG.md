@@ -1,6 +1,11 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+<<<<<<< HEAD
+
+=======
+
+> > > > > > > origin/main
+> > > > > > > All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -8,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+<<<<<<< HEAD
 
 - (placeholder)
 
@@ -60,4 +67,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - To enable remote scanners in CI, set one of: `OPENROUTER_API_KEY`, `OPENAI_API_KEY`, or `OLLAMA_HOST`.
 - Optional ledger signing: set `VAULTMESH_SIGNING_KEY`/`VAULTMESH_VERIFY_KEY`.
 
-[1.0.1]: https://github.com/VaultSovereign/forge/releases/tag/v1.0.1
+# [1.0.1]: https://github.com/VaultSovereign/forge/releases/tag/v1.0.1
+
+- (placeholder)
+
+### Changed
+
+- (placeholder)
+
+### Fixed
+
+- (placeholder)
+
+### Security
+
+- (placeholder)
+
+### Docs
+
+- Document GHCR image workflow and auto release-notes in README, CONTRIBUTING, and PROD_CHECKLIST.
+
+<!--
+Cut a new section on release, e.g.:
+
+## [1.1.0] - 2025-10-02
+### Added
+- …
+
+### Changed
+- …
+
+### Security
+- …
+-->
+
+> > > > > > > origin/main

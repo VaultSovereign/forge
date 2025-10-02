@@ -1,3 +1,5 @@
+<<<<<<< HEAD
+
 # Security Overview
 
 VaultMesh Workbench enforces JWT-based auth (OIDC), declarative RBAC, and sensible defaults for local/dev. This document summarizes the security‑relevant env flags, RBAC mapping, and quick tests.
@@ -88,3 +90,27 @@ TOKEN=$(curl -s -X POST -H "content-type: application/json" \
 
 curl -H "Authorization: Bearer $TOKEN" http://localhost:3000/v1/api/templates | jq .
 ```
+
+=======
+
+# Security Overview (Placeholder)
+
+Security posture, auth, RBAC, and environment flags.
+
+## Authentication
+
+- Define auth modes (bypass vs tokened)
+
+## RBAC
+
+- Roles and permissions overview
+
+## Environment Flags
+
+- `EXPOSE_OPENAPI=1` — expose API spec in prod
+
+## Quick Tests
+
+- Verify auth-required endpoints return 401/403 without credentials
+
+> > > > > > > origin/main

@@ -71,6 +71,7 @@ Merges divergent histories between local refined forge and remote origin/main.
 ## Key Changes
 
 ### From Local (Forge)
+
 - ✅ Complete Replit purification (docs, CI guardrails, hooks)
 - ✅ Workbench application (BFF + frontend)
 - ✅ Agent system (guardian, runner)
@@ -81,6 +82,7 @@ Merges divergent histories between local refined forge and remote origin/main.
 - ✅ Enhanced documentation (DRILLS, runbooks)
 
 ### From Remote (Origin)
+
 - ✅ GHCR publishing workflows (preserved)
 - ✅ Release automation (preserved)
 - ✅ Container documentation (merged)

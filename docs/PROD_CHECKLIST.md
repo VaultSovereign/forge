@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 VaultMesh Forge — Production Readiness Checklist
 
 Use this document to gate production rollouts. Treat every checkbox as must-pass unless explicitly marked optional.
@@ -206,4 +207,18 @@ Appendix: Known flags
 • CORE_GRPC_ADDR (required in prod)
 • VMESH_RBAC_PATH
 
-⸻
+# ⸻
+
+# Production Checklist (Placeholder)
+
+Minimum gates to pass before promoting to production:
+
+- [ ] CI green on `main`
+- [ ] Smoke tests passing
+- [ ] Docs link check passing
+- [ ] Image published to GHCR with semantic tag
+- [ ] Verify GHCR image builds (see [Docker (GHCR)](../README.md#-docker-ghcr)).
+- [ ] Confirm GitHub Release notes were generated correctly from CHANGELOG.
+- [ ] Rollback plan documented
+- [ ] Security review complete (see SECURITY.md)
+  > > > > > > > origin/main

@@ -111,13 +111,17 @@ export async function postGuardian(req: any, reply: any) {
     // In tests, askGuardian is vi.mock()-ed from ../../agents/index.ts
     const result = await askGuardianDirect(input);
     // emulate Fastify header behavior if available
-    try { if (typeof reply?.header === 'function') reply.header('x-guardian-mode', 'agent'); } catch {}
+    try {
+      if (typeof reply?.header === 'function') reply.header('x-guardian-mode', 'agent');
+    } catch {}
     return send(200, {
       text: result?.outputText ?? 'Agent responded.',
       events: Array.isArray(result?.events) ? result.events : [],
     });
   } catch (e: any) {
-    try { if (typeof reply?.header === 'function') reply.header('x-guardian-mode', 'stub'); } catch {}
+    try {
+      if (typeof reply?.header === 'function') reply.header('x-guardian-mode', 'stub');
+    } catch {}
     return send(200, {
       text: `Guardian (stub due to agent error): ${String(e?.message || e)}. Echo: ${input}`,
       events: [],

@@ -27,14 +27,17 @@ export default async function executeRoutes(app: FastifyInstance) {
     async (req: FastifyRequest, reply: FastifyReply) => {
       // Use a Zod schema for query parameters for type safety and validation
       const QuerySchema = ExecuteReq.extend({
-        args: z.string().transform((val, ctx) => {
-          try {
-            return JSON.parse(val);
-          } catch (e) {
-            ctx.addIssue({ code: 'custom', message: 'Invalid JSON in args' });
-            return z.NEVER;
-          }
-        }).default('{}'),
+        args: z
+          .string()
+          .transform((val, ctx) => {
+            try {
+              return JSON.parse(val);
+            } catch (e) {
+              ctx.addIssue({ code: 'custom', message: 'Invalid JSON in args' });
+              return z.NEVER;
+            }
+          })
+          .default('{}'),
       });
       const parseResult = QuerySchema.safeParse(req.query);
       if (!parseResult.success) {

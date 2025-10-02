@@ -1,3 +1,5 @@
+<<<<<<< HEAD
+
 # Curated Docs Index
 
 <div style="margin:16px 0; display:flex; gap:12px; flex-wrap:wrap;">
@@ -57,4 +59,34 @@ Notes
 
 - API link (/v1/openapi.json) appears when import.meta.env.DEV or VITE_EXPOSE_OPENAPI=1; server route gated by EXPOSE_OPENAPI=1 (or dev).
 - Docs link appears when VITE_EXPOSE_DOCS=1. Defaults to /docs/OPENAPI.md; override with VITE_DOCS_URL.
-- For internal docs, set EXPOSE_DOCS=1 on the BFF to serve /docs/\*.
+- # For internal docs, set EXPOSE_DOCS=1 on the BFF to serve /docs/\*.
+
+# Documentation Index
+
+Welcome to the Forge documentation hub.
+
+- Quickstart: see [QUICKSTART.md](QUICKSTART.md)
+- Image tags and publishing: see Quickstart and CI notes
+- Authentication to GHCR: requires a GitHub Personal Access Token (PAT) with `read:packages` (pull) and `write:packages` (push)
+- [Changelog](../CHANGELOG.md) — notable changes per release
+
+## GitHub Pages (optional)
+
+If you want these docs served via GitHub Pages:
+
+- Settings → Pages → Build and deployment → Source: `Deploy from a branch`
+- Branch: `main` and folder: `/docs`
+
+## Branch Protection
+
+Recommended required status checks before merging to `main`:
+
+- `CI` — basic repo sanity (placeholder)
+- `workbench-smoke` — smoke pass on docs/README changes
+- `docs-link-check` — offline link check for README + docs
+
+## Deployment / Distribution
+
+- GHCR package: https://github.com/orgs/VaultSovereign/packages/container/package/forge
+- Docker instructions: see [README → Docker (GHCR)](../README.md#-docker-ghcr)
+  > > > > > > > origin/main

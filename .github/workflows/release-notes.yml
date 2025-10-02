@@ -1,46 +1,31 @@
 name: release-notes
-
 on:
   push:
-    tags: ['v*'] # run on semver-ish tags
-
+    tags: ['v*']
 permissions:
   contents: write
-
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Extract notes from CHANGELOG for this tag
+      - name: Extract notes for this tag
         id: notes
         run: |
-          TAG="${GITHUB_REF##*/}"          # e.g. v1.1.0
-          DATE=$(date +%Y-%m-%d)
+          TAG="${GITHUB_REF##*/}"
           awk -v tag="$TAG" '
             BEGIN { in=0 }
-            /^## \[.*\]/ {
-              if ($0 ~ "\\[" tag "\\]") { in=1; next }
-              if (in) exit
-            }
+            /^## \[.*\]/ { if ($0 ~ "\\[" tag "\\]") { in=1; next } if (in) exit }
             in { print }
           ' CHANGELOG.md | sed '/^$/q' > RELEASE_NOTES.md
-
-          echo "== RELEASE_NOTES =="
-          cat RELEASE_NOTES.md
           echo "notes<<EOF" >> $GITHUB_OUTPUT
           cat RELEASE_NOTES.md >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          name: ${{ github.ref_name }} — Docs Hub, GHCR publishing, guardrails
-          body: |
-            Cleaner docs and faster start: browse from a friendly landing page, pull a ready-to-run container, and rely on CI checks that prevent broken or outdated links.
-
-            ${{ steps.notes.outputs.notes }}
+          name: ${{ github.ref_name }}
+          body: ${{ steps.notes.outputs.notes }}
           draft: false
           prerelease: false
