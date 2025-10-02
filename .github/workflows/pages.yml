@@ -30,6 +30,8 @@ jobs:
           # Convert Markdown → HTML using marked CLI
           npx --yes marked -i docs/INDEX.md -o docs/index.html --gfm || true
           npx --yes marked -i docs/SITEMAP.md -o docs/SITEMAP.html --gfm || true
+          # Provide uppercase alias for legacy links
+          cp -f docs/index.html docs/INDEX.html || true
           # Fallback minimal index if conversion failed
           if ! [ -s docs/index.html ]; then
             cat > docs/index.html <<'HTML'
