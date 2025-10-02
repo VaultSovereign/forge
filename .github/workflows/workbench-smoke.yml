@@ -1,0 +1,19 @@
+name: workbench-smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'README.md'
+      - 'docs/**'
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Smoke placeholder
+        run: |
+          echo "Workbench smoke OK"
+

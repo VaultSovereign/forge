@@ -1,0 +1,25 @@
+name: docs-link-check
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - 'README.md'
+      - 'docs/**'
+  pull_request:
+    paths:
+      - 'README.md'
+      - 'docs/**'
+
+jobs:
+  link-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check links (offline)
+        uses: lycheeverse/lychee-action@v1.9.3
+        with:
+          args: --no-progress --offline --verbose README.md docs/**/*.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
