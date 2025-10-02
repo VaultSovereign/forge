@@ -51,7 +51,7 @@
 - [Contributing](CONTRIBUTING.md) — setup, hooks, Make targets, commit style  
 - [Branch Protection](docs/INDEX.md#branch-protection) — required CI checks  
 - [Docs Sitemap](docs/SITEMAP.md) — exhaustive listing of all docs  
- - <a href="CHANGELOG.md">Changelog</a> — notable changes per release  
+ - [Changelog](CHANGELOG.md) — notable changes per release  
 
 ---
 
