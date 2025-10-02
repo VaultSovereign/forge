@@ -1,0 +1,26 @@
+<h1>Forge Docs Index</h1>
+<p>Quick links:</p>
+<ul>
+<li>Run Modes: README_RUN_MODES.md</li>
+<li>Production Checklist: PROD_CHECKLIST.md</li>
+<li>Operations Runbook: OPERATIONS_RUNBOOK.md</li>
+<li>Security Overview: SECURITY.md</li>
+<li>API Reference: OPENAPI.md</li>
+<li>Full Sitemap: SITEMAP.md</li>
+</ul>
+<h2>Run Modes Shortcuts (Makefile)</h2>
+<p>Internal (served by BFF at /docs):</p>
+<ul>
+<li>Single‑port preview: <code>make docs:internal-preview</code></li>
+<li>Dev duo: <code>make docs:internal-dev</code></li>
+</ul>
+<p>External (e.g., GitHub Pages):</p>
+<ul>
+<li>Single‑port preview: <code>make docs:external DOCS_URL=https://mydomain/docs</code></li>
+<li>Dev duo: <code>make docs:external-dev DOCS_URL=https://mydomain/docs</code></li>
+</ul>
+<p>Notes</p>
+<ul>
+<li>API link appears when <code>import.meta.env.DEV</code> or <code>VITE_EXPOSE_OPENAPI=1</code>; server route gated by <code>EXPOSE_OPENAPI=1</code> (or dev).</li>
+<li>Docs link appears when <code>VITE_EXPOSE_DOCS=1</code>. Default is <code>/docs/OPENAPI.md</code>; override with <code>VITE_DOCS_URL</code>.</li>
+</ul>
