@@ -85,9 +85,11 @@ make docs:external-dev DOCS_URL=https://mydomain/docs  # duo
 
 Prebuilt images are published automatically to GitHub Container Registry:
 
+```bash
 docker pull ghcr.io/vaultsovereign/forge:latest
 docker run --rm -p 3000:3000 ghcr.io/vaultsovereign/forge:latest
 # open http://localhost:3000/v1/health
+```
 
 Tags
 	•	:latest — built from main

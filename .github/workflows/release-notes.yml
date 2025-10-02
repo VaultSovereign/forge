@@ -1,0 +1,32 @@
+name: release-notes
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract notes for this tag
+        id: notes
+        run: |
+          TAG="${GITHUB_REF##*/}"
+          awk -v tag="$TAG" '
+            BEGIN { in=0 }
+            /^## \[.*\]/ { if ($0 ~ "\\[" tag "\\]") { in=1; next } if (in) exit }
+            in { print }
+          ' CHANGELOG.md | sed '/^$/q' > RELEASE_NOTES.md
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          cat RELEASE_NOTES.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body: ${{ steps.notes.outputs.notes }}
+          draft: false
+          prerelease: false
+
