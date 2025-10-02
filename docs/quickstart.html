@@ -1,0 +1,43 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Forge Quickstart</title>
+<style>
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;max-width:840px;margin:40px auto;padding:0 16px;line-height:1.5}
+  code,pre{background:#f6f8fa;border-radius:6px;padding:0 4px}
+  pre{padding:12px;overflow:auto}
+  a.btn{display:inline-block;margin-top:8px;padding:8px 12px;background:#0969da;color:#fff;text-decoration:none;border-radius:6px}
+  ul{margin:0 0 1em 1.2em}
+</style>
+<h1>Quickstart</h1>
+
+<h2>1) Install toolchain</h2>
+<pre><code># Node 22 and pnpm
+corepack enable
+corepack prepare pnpm@10.17.0 --activate
+</code></pre>
+
+<h2>2) Install deps and build</h2>
+<pre><code>pnpm install --frozen-lockfile
+pnpm run build</code></pre>
+
+<h2>3) Run tests</h2>
+<pre><code>pnpm test             # unit tests
+pnpm run test:forge  # optional Python-based deterministic checks
+</code></pre>
+
+<h2>4) Run Workbench</h2>
+<p>Dev (fast refresh):</p>
+<pre><code>pnpm run dev</code></pre>
+<p>Prod-like single port:</p>
+<pre><code>pnpm run build
+pnpm run workbench:start</code></pre>
+
+<h2>5) Common scripts</h2>
+<ul>
+  <li><code>pnpm run typecheck</code> — TypeScript typecheck</li>
+  <li><code>pnpm run lint</code> — Lint</li>
+  <li><code>make forge-prepush</code> — Local CI gate (sets <code>FORGE_SKIP_REMOTE_SCANS=1</code> if no provider)</li>
+</ul>
+
+<p><a class="btn" href="./dev-workflow.html">Next: Dev Workflow →</a></p>
+

@@ -1,0 +1,46 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Forge Basics</title>
+<style>
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;max-width:840px;margin:40px auto;padding:0 16px;line-height:1.5}
+  h1,h2{margin-top:1.2em}
+  code,pre{background:#f6f8fa;border-radius:6px;padding:0 4px}
+  pre{padding:12px;overflow:auto}
+  a.btn{display:inline-block;margin-top:8px;padding:8px 12px;background:#0969da;color:#fff;text-decoration:none;border-radius:6px}
+  ul{margin:0 0 1em 1.2em}
+</style>
+<h1>Forge Basics</h1>
+<p>Quick orientation for working with the Forge repository.</p>
+
+<h2>Requirements</h2>
+<ul>
+  <li>Node 22.x</li>
+  <li>pnpm 10.17+</li>
+  <li>Python 3.10+ (only for optional tests and tools)</li>
+</ul>
+
+<h2>Install</h2>
+<pre><code>pnpm install --frozen-lockfile
+pnpm run build
+pnpm test
+</code></pre>
+
+<h2>Run the Workbench</h2>
+<p>Development (two processes, hot reload):</p>
+<pre><code>pnpm run dev</code></pre>
+<p>Production-like single port:</p>
+<pre><code>pnpm run build
+pnpm run workbench:start</code></pre>
+
+<h2>Repo Layout (very short)</h2>
+<ul>
+  <li><code>agents/</code> Guardian/runner agents</li>
+  <li><code>agent/</code> planner/executor library (CLI/MCP)</li>
+  <li><code>dispatcher/</code> prompt expansion + validation</li>
+  <li><code>workbench/</code> BFF + frontend</li>
+  <li><code>catalog/</code> templates; <code>schemas/</code> JSON schemas</li>
+  <li><code>docs/</code> docs site (this)</li>
+</ul>
+
+<p><a class="btn" href="./quickstart.html">Next: Quickstart →</a></p>
+
