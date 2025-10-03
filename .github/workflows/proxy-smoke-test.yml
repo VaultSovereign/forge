@@ -1,0 +1,107 @@
+name: AI Companion Proxy - Nightly Smoke Test
+
+on:
+  schedule:
+    # Run at 02:00 UTC daily (Nigredo hour — deep audit)
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    # Allow manual trigger
+
+permissions:
+  contents: read
+  id-token: write  # Required for Workload Identity Federation
+
+jobs:
+  guardian-drill:
+    name: Guardian Drill — Proxy Health & Auth
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+      
+      - name: Run Guardian Drill
+        id: drill
+        env:
+          VM_SLACK_WEBHOOK_URL: ${{ secrets.VM_SLACK_WEBHOOK_URL }}
+          GITHUB_ACTIONS: true
+        run: |
+          cd ai-companion-proxy-starter
+          chmod +x scripts/guardian-drill.sh
+          bash scripts/guardian-drill.sh
+      
+      - name: Validate receipts (schema)
+        run: make proxy-receipts:validate --
+
+      - name: Compute Merkle root (daily)
+        run: make proxy-receipts:root --
+
+      - name: Upload Guardian Receipts + Roots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: proxy-guardian-${{ github.run_id }}
+          path: |
+            ai-companion-proxy-starter/artifacts/drills/proxy-guardian-*.json
+            ai-companion-proxy-starter/artifacts/drills/proxy-guardian-*.json.prov
+            ai-companion-proxy-starter/artifacts/drills/proxy-guardian-*.json.minisig
+            ai-companion-proxy-starter/artifacts/roots/root-*.json
+          if-no-files-found: warn
+          retention-days: 30
+      
+      - name: Record Result to Reality Ledger
+        if: always()
+        run: |
+          # Legacy compatibility - create smoke test summary
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          DRILL_STATUS="${{ steps.drill.outcome }}"
+          
+          mkdir -p artifacts/smoke-tests
+          
+          # Copy latest receipt to smoke-tests for compatibility
+          LATEST_RECEIPT=$(ls -1t ai-companion-proxy-starter/artifacts/drills/proxy-guardian-*.json 2>/dev/null | head -n1 || echo "")
+          if [ -n "$LATEST_RECEIPT" ]; then
+            cp "$LATEST_RECEIPT" artifacts/smoke-tests/proxy-smoke-${TIMESTAMP}.json
+            echo "📝 Smoke test receipt recorded: proxy-smoke-${TIMESTAMP}.json"
+          else
+            cat > artifacts/smoke-tests/proxy-smoke-${TIMESTAMP}.json <<EOF
+          {
+            "timestamp": "$TIMESTAMP",
+            "service": "ai-companion-proxy",
+            "region": "europe-west1",
+            "drill_status": "$DRILL_STATUS",
+            "workflow_run": "${{ github.run_id }}",
+            "triggered_by": "${{ github.event_name }}"
+          }
+          EOF
+            echo "📝 Fallback smoke test receipt recorded"
+          fi
+      
+      - name: Upload Smoke Test Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: proxy-smoke-test-${{ github.run_id }}
+          path: artifacts/smoke-tests/
+          retention-days: 30
+      
+      - name: Notify on Failure
+        if: failure()
+        run: |
+          echo "❌ Guardian Drill FAILED — AI Companion Proxy health check"
+          echo "   Run ID: ${{ github.run_id }}"
+          echo "   Time: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          echo ""
+          echo "   Check the workflow logs for details."
+          exit 1

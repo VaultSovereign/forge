@@ -1,0 +1,37 @@
+name: guard-run-auth-only
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Auth to Google Cloud (WIF)
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+      - name: Assert no public invokers
+        env:
+          REGION: europe-west3
+        run: |
+          set -euo pipefail
+          SVC_LIST=(vaultmesh-workbench ai-companion-proxy)
+          for SVC in "${SVC_LIST[@]}"; do
+            echo "Checking $SVC in $REGION…"
+            POL=$(gcloud run services get-iam-policy "$SVC" --region="$REGION" --format=json || echo '{}')
+            if echo "$POL" | jq -e '.bindings[]? | select(.role=="roles/run.invoker") | .members[]? | contains("allUsers")' >/dev/null; then
+              echo "❌ $SVC has public invoker (allUsers)"; exit 1;
+            else
+              echo "✅ $SVC auth-only (no allUsers)";
+            fi
+          done
