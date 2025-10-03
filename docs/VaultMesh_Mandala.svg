@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  VaultMesh Mandala — Five Pillars of the Polis
+  License: CC-BY-SA 4.0 (adjust as you wish)
+  Author: Vault Sovereign + Guardian Scribe
+  Notes:
+    • Golden-ratio radii: R, R/φ, R/φ²
+    • Accessible: high-contrast palette + titles/aria labels
+    • Editable: groups (g) per pillar, CSS variables, defs for markers
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     viewBox="-700 -700 1400 1400"
+     role="img" aria-labelledby="title desc">
+  <title id="title">VaultMesh Mandala — Five Pillars of the Polis</title>
+  <desc id="desc">A circular mandala diagram showing the Polis Core at center and five surrounding pillars: Deployment, Guardian, Alerting, Covenant, Evolution. Arcs, receipts, and Merkle roots connect the system.</desc>
+
+  <!-- ============ Theme ============ -->
+  <defs>
+    <style><![CDATA[
+      :root {
+        --bg: #0b0f14;           /* deep slate */
+        --fg: #e6edf3;           /* near-white */
+        --muted: #8da2b5;        /* steel blue */
+        --accent1: #7bdcb5;      /* jade */
+        --accent2: #7aa2f7;      /* indigo */
+        --accent3: #f7c948;      /* amber */
+        --accent4: #f47c7c;      /* coral */
+        --accent5: #a78bfa;      /* violet */
+        --grid: rgba(255,255,255,0.06);
+      }
+      svg { background: var(--bg); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial; }
+      text { fill: var(--fg); letter-spacing: 0.2px; }
+      .muted { fill: var(--muted); }
+      .ring { fill: none; stroke: var(--grid); stroke-width: 2; }
+      .core { fill: none; stroke: var(--fg); stroke-opacity: 0.18; stroke-width: 12; }
+      .pillar-node { fill: none; stroke-width: 5; }
+      .label { font-size: 22px; font-weight: 600; }
+      .sublabel { font-size: 14px; fill: var(--muted); }
+      .caption { font-size: 13px; fill: var(--muted); }
+      .chip { fill: none; stroke: var(--fg); stroke-opacity: 0.35; stroke-width: 2.5; rx: 6; }
+      .chip text { font-size: 12px; fill: var(--fg); }
+      .merkle { stroke: var(--accent3); stroke-width: 3; fill: none; }
+      .receipt { fill: var(--accent3); opacity: 0.85; }
+      .arrow { stroke: var(--muted); stroke-width: 2.5; fill: none; marker-end: url(#arrowHead); opacity: 0.75; }
+      .arc { fill: none; stroke: var(--accent2); stroke-width: 3.5; stroke-linecap: round; opacity: 0.5; }
+      .glow { filter: url(#glow); }
+      .dot { fill: var(--fg); opacity: 0.8; }
+      
+      /* Light theme support */
+      @media (prefers-color-scheme: light) {
+        :root {
+          --bg: #f8fafc;
+          --fg: #0b1020;
+          --grid: rgba(0,0,0,0.08);
+        }
+        .core { stroke-opacity: 0.25; }
+      }
+      
+      /* Hover animations */
+      @keyframes pulse { 0%{opacity:.35} 50%{opacity:.75} 100%{opacity:.35} }
+      #flows .arc { animation: pulse 6s ease-in-out infinite; }
+      #flows .arc:hover { opacity: 1; animation-duration: 2.5s; }
+      
+      /* Link affordances */
+      a { cursor: pointer; }
+      a:hover .pillar-node { filter: url(#glow); }
+    ]]></style>
+
+    <!-- Glow filter -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <!-- Arrow marker -->
+    <marker id="arrowHead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--muted)" />
+    </marker>
+  </defs>
+
+  <!-- ============ Golden ratio radii ============ -->
+  <!-- R = 520, R/φ ≈ 321, R/φ² ≈ 199 -->
+  <g id="grid">
+    <circle class="ring" r="520"/>
+    <circle class="ring" r="321"/>
+    <circle class="ring" r="199"/>
+    <!-- cardinal ticks -->
+    <g stroke="var(--grid)" stroke-width="2">
+      <line x1="-620" y1="0" x2="620" y2="0"/>
+      <line x1="0" y1="-620" x2="0" y2="620"/>
+    </g>
+  </g>
+
+  <!-- ============ Polis Core ============ -->
+  <g id="core" transform="translate(0,0)">
+    <circle class="core glow" r="120" />
+    <text x="0" y="-6" text-anchor="middle" class="label">Polis Core</text>
+    <text x="0" y="20" text-anchor="middle" class="sublabel">VaultMesh Ledger • Sovereign OS</text>
+
+    <!-- Core chips (capabilities) -->
+    <g transform="translate(-140,56)">
+      <rect class="chip" x="-72" y="-16" width="144" height="28"/>
+      <text x="0" y="2" text-anchor="middle">Boxes • CRDT • Treasury</text>
+    </g>
+    <g transform="translate(140,56)">
+      <rect class="chip" x="-92" y="-16" width="184" height="28"/>
+      <text x="0" y="2" text-anchor="middle">Receipts • Merkle • Proofs</text>
+    </g>
+  </g>
+
+  <!-- ============ Arcs (flows) ============ -->
+  <g id="flows" class="arc">
+    <path d="M -320,-185 A 370 370 0 0 1 320,-185"/>  <!-- north arc -->
+    <path d="M -380,  80 A 430 430 0 0 0 380, 80"/>  <!-- south arc -->
+  </g>
+
+  <!-- ============ Pillars ============ -->
+  <!-- Positions: equally spaced around radius 400 -->
+  <!-- 1) Deployment -->
+  <a xlink:href="DEPLOY_GCP.md" href="DEPLOY_GCP.md" target="_top">
+    <g id="pillar-deployment" transform="translate(0,-400)">
+      <circle r="72" class="pillar-node" stroke="var(--accent1)"/>
+      <text y="-92" text-anchor="middle" class="label">Deployment</text>
+      <text y="-70" text-anchor="middle" class="sublabel">Cloud Run • AR • IAM</text>
+      <g class="caption" text-anchor="middle" transform="translate(0,98)">
+        <text>Temples (services)</text>
+      </g>
+    </g>
+  </a>
+
+  <!-- 2) Guardian -->
+  <a xlink:href="RECEIPTS.md" href="RECEIPTS.md" target="_top">
+    <g id="pillar-guardian" transform="translate(380,-120)">
+      <circle r="72" class="pillar-node" stroke="var(--accent2)"/>
+      <text y="-92" text-anchor="middle" class="label">Guardian</text>
+      <text y="-70" text-anchor="middle" class="sublabel">Health • Auth • 60s</text>
+      <g class="caption" text-anchor="middle" transform="translate(0,98)">
+        <text>Wall patrols</text>
+      </g>
+      <!-- Receipt icons -->
+      <circle class="receipt" cx="-24" cy="28" r="6"/>
+      <circle class="receipt" cx="0" cy="28" r="6"/>
+      <circle class="receipt" cx="24" cy="28" r="6"/>
+    </g>
+  </a>
+
+  <!-- 3) Alerting -->
+  <a xlink:href="GUARDIAN_ALERTING.md" href="GUARDIAN_ALERTING.md" target="_top">
+    <g id="pillar-alerting" transform="translate(240,320)">
+      <circle r="72" class="pillar-node" stroke="var(--accent3)"/>
+      <text y="-92" text-anchor="middle" class="label">Alerting</text>
+      <text y="-70" text-anchor="middle" class="sublabel">Slack • GH Actions</text>
+      <g class="caption" text-anchor="middle" transform="translate(0,98)">
+        <text>Heralds (signals)</text>
+      </g>
+    </g>
+  </a>
+
+  <!-- 4) Covenant -->
+  <a xlink:href="CIVILIZATION_COVENANT.md" href="CIVILIZATION_COVENANT.md" target="_top">
+    <g id="pillar-covenant" transform="translate(-240,320)">
+      <circle r="72" class="pillar-node" stroke="var(--accent4)"/>
+      <text y="-92" text-anchor="middle" class="label">Covenant</text>
+      <text y="-70" text-anchor="middle" class="sublabel">Pillars • Rituals</text>
+      <g class="caption" text-anchor="middle" transform="translate(0,98)">
+        <text>Living constitution</text>
+      </g>
+    </g>
+  </a>
+
+  <!-- 5) Evolution -->
+  <a xlink:href="CIVILIZATION_COVENANT.md#vi-nigredo--albedo--rubedo"
+     href="CIVILIZATION_COVENANT.md#vi-nigredo--albedo--rubedo" target="_top">
+    <g id="pillar-evolution" transform="translate(-380,-120)">
+      <circle r="72" class="pillar-node" stroke="var(--accent5)"/>
+      <text y="-92" text-anchor="middle" class="label">Evolution</text>
+      <text y="-70" text-anchor="middle" class="sublabel">Nigredo → Rubedo</text>
+      <g class="caption" text-anchor="middle" transform="translate(0,98)">
+        <text>Alchemical phases</text>
+      </g>
+    </g>
+  </a>
+
+  <!-- ============ Merkle roots ============ -->
+  <a xlink:href="RECEIPTS.md#merkle-rollup" href="RECEIPTS.md#merkle-rollup" target="_top">
+    <g id="merkle-tree" transform="translate(0,180)">
+      <path class="merkle" d="M -80,-40 L 0,0 L 80,-40"/>
+      <circle class="dot" cx="-80" cy="-40" r="5"/>
+      <circle class="dot" cx="80" cy="-40" r="5"/>
+      <circle class="dot" cx="0" cy="0" r="7"/>
+      <text x="0" y="26" text-anchor="middle" class="caption">Merkle Root (daily)</text>
+    </g>
+  </a>
+
+  <!-- ============ Arrows (flows) ============ -->
+  <g id="arrows" class="arrow">
+    <path d="M 0,-280 L 0,-200"/>              <!-- Deployment → Core -->
+    <path d="M 300,-100 L 140,-30"/>           <!-- Guardian → Core -->
+    <path d="M 180,280 L 60,140"/>             <!-- Alerting → Core -->
+    <path d="M -180,280 L -60,140"/>           <!-- Covenant → Core -->
+    <path d="M -300,-100 L -140,-30"/>         <!-- Evolution → Core -->
+  </g>
+
+  <!-- ============ Legend ============ -->
+  <g id="legend" transform="translate(-650,580)">
+    <text x="0" y="0" class="sublabel" font-size="15px" font-weight="600">Legend</text>
+    <g transform="translate(0,25)">
+      <circle r="8" fill="none" stroke="var(--accent1)" stroke-width="3"/>
+      <text x="20" y="5" class="caption">Deployment</text>
+    </g>
+    <g transform="translate(0,48)">
+      <circle r="8" fill="none" stroke="var(--accent2)" stroke-width="3"/>
+      <text x="20" y="5" class="caption">Guardian</text>
+    </g>
+    <g transform="translate(0,71)">
+      <circle r="8" fill="none" stroke="var(--accent3)" stroke-width="3"/>
+      <text x="20" y="5" class="caption">Alerting</text>
+    </g>
+    <g transform="translate(140,25)">
+      <circle r="8" fill="none" stroke="var(--accent4)" stroke-width="3"/>
+      <text x="20" y="5" class="caption">Covenant</text>
+    </g>
+    <g transform="translate(140,48)">
+      <circle r="8" fill="none" stroke="var(--accent5)" stroke-width="3"/>
+      <text x="20" y="5" class="caption">Evolution</text>
+    </g>
+  </g>
+
+  <!-- ============ Footer ============ -->
+  <g id="footer" transform="translate(0,650)">
+    <text id="rootText" x="0" y="0" text-anchor="middle" class="caption">φ • π • e — Sacred Ratios;  Merkle root: {{ROOT}} • count: {{COUNT}}</text>
+  </g>
+</svg>
