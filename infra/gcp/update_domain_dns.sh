@@ -8,7 +8,7 @@ fi
 
 DOMAIN="$1"
 ZONE="$2"
-REGION="${3:-europe-west1}"
+REGION="${3:-europe-west3}"
 TTL="${TTL:-300}"
 
 TMP_DIR="$(mktemp -d)"

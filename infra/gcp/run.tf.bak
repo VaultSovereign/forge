@@ -1,11 +1,12 @@
+variable "workbench_image_tag" {
+  type        = string
+  description = "Docker image tag (e.g., git SHA) for the workbench service."
+}
 
 resource "google_cloud_run_v2_service" "workbench" {
   name     = "vaultmesh-workbench"
   location = var.region
   project  = var.project_id
-
-  # Keep ingress reachable; IAM enforces auth-only
-  ingress = "INGRESS_TRAFFIC_ALL"
 
   template {
     service_account = google_service_account.workbench.email
@@ -16,7 +17,7 @@ resource "google_cloud_run_v2_service" "workbench" {
     }
 
     containers {
-      image = coalesce(var.workbench_image, "${var.region}-docker.pkg.dev/${var.project_id}/vaultmesh/workbench:${var.workbench_image_tag}")
+      image = "${var.region}-docker.pkg.dev/${var.project_id}/vaultmesh/workbench:${var.workbench_image_tag}"
 
       ports {
         container_port = 8787
@@ -51,25 +52,15 @@ resource "google_cloud_run_v2_service" "workbench" {
       #   }
       # }
     }
-
-    # Route all egress via the Serverless VPC Access connector -> NAT
-    vpc_access {
-      connector = google_vpc_access_connector.vmesh_sls.id
-      egress    = "ALL_TRAFFIC"
-    }
   }
 }
 
-# Auth-only: grant invoker to explicitly allowed service accounts
-resource "google_cloud_run_v2_service_iam_binding" "workbench_invokers" {
+resource "google_cloud_run_service_iam_member" "workbench_public" {
+  project  = google_cloud_run_v2_service.workbench.project
+  location = google_cloud_run_v2_service.workbench.location
   service  = google_cloud_run_v2_service.workbench.name
-  location = var.region
   role     = "roles/run.invoker"
-  members = compact([
-    var.publisher_sa_email != "" ? "serviceAccount:${var.publisher_sa_email}" : null,
-    var.scheduler_sa_email != "" ? "serviceAccount:${var.scheduler_sa_email}" : null,
-  ])
-  depends_on = [google_cloud_run_v2_service.workbench]
+  member   = "allUsers"
 }
 
 output "workbench_url" {
