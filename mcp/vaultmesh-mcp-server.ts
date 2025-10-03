@@ -354,6 +354,30 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         additionalProperties: false,
       },
     },
+    {
+      name: 'companion_invoke',
+      description: 'Invoke Google AI Companion via Cloud Run proxy (OAuth on server)',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          path: { type: 'string', description: 'Companion API path starting with /' },
+          method: { type: 'string', description: 'HTTP method (default POST)', default: 'POST' },
+          body: { type: 'object', description: 'JSON body for the request', default: {} },
+          query: {
+            anyOf: [
+              { type: 'string', description: 'Raw query string (k=v&k2=v2)' },
+              {
+                type: 'object',
+                description: 'Key/value query parameters',
+                additionalProperties: { type: 'string' },
+              },
+            ],
+          },
+        },
+        required: ['path'],
+        additionalProperties: false,
+      },
+    },
   ],
 }));
 
@@ -450,6 +474,49 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: 'text',
               text: JSON.stringify(result),
+            },
+          ],
+        };
+      }
+
+      case 'companion_invoke': {
+        const schema = z.object({
+          path: z.string().min(1),
+          method: z.string().optional().default('POST'),
+          body: z.record(z.unknown()).optional().default({}),
+          query: z.union([z.string(), z.record(z.string())]).optional(),
+        });
+        const { path: proxyPath, method, body, query } = schema.parse(args ?? {});
+
+        const base = (process.env.AI_COMPANION_PROXY_URL || '').replace(/\/$/, '');
+        if (!base) {
+          throw new Error('AI_COMPANION_PROXY_URL not set');
+        }
+
+        const payload: Record<string, unknown> = { path: proxyPath, method: method.toUpperCase(), body };
+        if (query) payload.query = query as unknown;
+
+        const r = await fetch(`${base}/invoke`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const text = await r.text();
+        let data: unknown = text;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          // leave as text
+        }
+        if (!r.ok) {
+          throw new Error(`companion proxy error: ${r.status}`);
+        }
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: typeof data === 'string' ? data : JSON.stringify(data),
             },
           ],
         };

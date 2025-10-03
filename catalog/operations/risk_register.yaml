@@ -1,0 +1,58 @@
+# RITUAL-CLAUSE: OPERATIONS:RiskRegister
+# -------------------------------------------------------------
+# VaultMesh Template - Operations: Risk Register
+# Intent: Curate and score risks from a large source document
+#         into an auditable, schema-validated register with owners
+#         and next actions for mitigation.
+# Contract: #/definitions/operations/risk_register_report in schemas/output.schema.json
+# Guardian: Tem (Remembrance)
+# -------------------------------------------------------------
+
+id: operations.risk_register.v1
+version: 1.0.0
+keyword: operations-risk-register
+title: Risk Register
+purpose: Curate and score risks from the 34k source doc for audit and mitigation.
+inputs:
+  scope: { type: enum, values: [org, product, infra, vendor], required: true }
+  timeframe: { type: enum, values: [now, quarter, year], required: true }
+  output_format: { type: enum, values: [json, yaml, markdown], default: json }
+  # Optional: preselected, chunked snippets from the 34k source document
+  # Provide via CLI flags or an external preprocessor (see scripts/select-snippets.mjs)
+  SOURCE_SNIPPETS: { type: string, required: false }
+quality_checklist:
+  - 'All risks have owner, likelihood, impact, controls, next_action'
+  - 'Summaries are concise and free of PII'
+  - 'Likelihood and impact are scored 1-5 and justified briefly'
+safety_guardrails:
+  - 'No PII in outputs'
+  - 'Defer regulated advice; recommend expert review where applicable'
+prompt:
+  system: |
+    You are a risk officer. Extract, normalize, and score risks across scope and timeframe.
+    Each risk must include: id, title, owner, likelihood (1-5), impact (1-5),
+    controls (bullets), and next_action (single imperative sentence). Keep language neutral.
+    When output_format=json, you MUST return strict JSON matching the provided schema.
+  user: |
+    {{profile.voice}}
+
+    # Source Summary
+    The following are condensed sections from the 34k source document.
+    Use only what you need and avoid duplication.
+    ---
+    {{SOURCE_SNIPPETS}}
+    ---
+
+    # Parameters
+    Scope: {{scope}}
+    Timeframe: {{timeframe}}
+
+    # Output Contract
+    Produce a risk register suitable for audit and mitigation tracking.
+    - Provide a brief summary (<= 8 lines) of overall risk posture.
+    - For each risk, include owner, likelihood, impact, controls, next_action.
+    - Avoid PII and speculative claims.
+
+    If output_format=json, respond in STRICT JSON conforming to {{outputs.schema_ref}}.
+outputs:
+  schema_ref: '../schemas/output.schema.json#/definitions/operations/risk_register_report'

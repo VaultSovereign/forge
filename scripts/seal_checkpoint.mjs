@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 /**
  * VaultMesh checkpoint sealer — deterministic Merkle root from archive.
+ *
+ * Used in CI: .github/workflows/ci.yml (evolution checkpoint sealing)
  */
 import fs from 'fs';
 import path from 'path';

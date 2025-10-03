@@ -1,4 +1,8 @@
-import { default as Ajv } from 'ajv';
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
+
+const ajv = new Ajv({ allErrors: true });
+addFormats(ajv);
 
 import { ExecReportSchema } from './schemas.js';
 import { searchCodex, getDoc } from '../tools/codex.js';

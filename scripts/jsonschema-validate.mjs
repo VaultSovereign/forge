@@ -3,20 +3,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import Ajv from 'ajv';
-
-const [dir, schemaPath, pointer] = process.argv.slice(2);
-if (!dir || !schemaPath || !pointer) {
-  console.error('Usage: jsonschema-validate.mjs <dir> <schema.json> <json-pointer>');
-  process.exit(2);
-}
-
-const raw = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
-let schema = raw;
-for (const k of pointer.replace(/^#\//, '').split('/')) {
-  schema = schema[k];
-}
+import addFormats from 'ajv-formats';
 
 const ajv = new Ajv({ strict: false, allowUnionTypes: true });
+addFormats(ajv);
 const validate = ajv.compile(schema);
 
 let YAML;

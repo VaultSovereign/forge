@@ -2,6 +2,8 @@
 /**
  * Validate Research Analyst output against schema
  * Usage: node scripts/validate-analyst-output.mjs <output-file.json>
+ *
+ * Used in CI: .github/workflows/lint-nightly.yml
  */
 
 import { readFile } from 'fs/promises';

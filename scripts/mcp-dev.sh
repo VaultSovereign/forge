@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Manual development helper for MCP server - not used in CI/CD
+# Redundant with package script mcp:dev but uses different build target
 set -euo pipefail
 
 export REALITY_LEDGER_COMPACT="${REALITY_LEDGER_COMPACT:-1}"

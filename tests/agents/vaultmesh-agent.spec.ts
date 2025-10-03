@@ -39,7 +39,7 @@ vi.mock('@openai/agents', () => {
 });
 
 // Now import the module under test (it will see the mocked SDK)
-import { triageAgent, runnerAgent, askGuardian } from '../../agents/index.ts';
+import { triageAgent, runnerAgent, askGuardian } from '../../agents/vaultmesh-agent';
 
 type MockedAgent = {
   run: (args: AgentRunArgs) => Promise<AgentRunResult>;

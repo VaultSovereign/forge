@@ -1,0 +1,42 @@
+# RITUAL-CLAUSE: OPERATIONS:RiskPolicyGate
+# -------------------------------------------------------------
+# VaultMesh Template - Operations: Risk Policy Gate
+# Intent: Enforce governance by failing when high-severity risks lack next actions.
+# Contract: #/definitions/operations/risk_policy_gate_result in schemas/output.schema.json
+# Guardian: Tem (Remembrance)
+# -------------------------------------------------------------
+
+id: operations.risk_policy_gate.v1
+version: 1.0.0
+keyword: operations-risk-policy-gate
+title: Risk Policy Gate
+purpose: Enforce that high-severity risks (likelihood*impact ≥ 12) have a next_action.
+inputs:
+  report: { type: object, required: true }
+  # helper (auto-provided by dispatcher for prompt stability)
+  REPORT_JSON: { type: string, required: false }
+  output_format: { type: enum, values: [json, yaml, markdown], default: json }
+quality_checklist:
+  - 'Fails if any high-severity risk is missing next_action'
+  - 'Return a machine-checkable result with explicit violations'
+safety_guardrails:
+  - 'Only inspect structured JSON, not raw PII or secrets'
+  - 'Do not invent risks; evaluate only provided report'
+prompt:
+  system: |
+    You are a compliance gate. Review the provided risk register JSON.
+    Fail if any risk has likelihood*impact ≥ 12 AND lacks next_action.
+    Output only the result JSON. No additional commentary.
+  user: |
+    {{profile.voice}}
+
+    Risk Register JSON (compact):
+    {{REPORT_JSON}}
+
+    Determine:
+      - passed: boolean
+      - violations: array of { id, title, reason }
+
+    If output_format=json, respond in STRICT JSON conforming to {{outputs.schema_ref}}.
+outputs:
+  schema_ref: '../schemas/output.schema.json#/definitions/operations/risk_policy_gate_result'

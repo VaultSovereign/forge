@@ -25,6 +25,34 @@ FAST="${FORGE_FAST:-0}"
 SKIP_DOCTOR="${FORGE_SKIP_DOCTOR:-0}"
 SKIP_REMOTE="${FORGE_SKIP_REMOTE_SCANS:-0}"
 
+# Prefer local tool shims (e.g., .bin/pnpm)
+export PATH="$ROOT/.bin:$PATH"
+
+forge_pnpm() {
+  if command -v pnpm >/dev/null 2>&1; then
+    command pnpm "$@"
+    return $?
+  elif command -v corepack >/dev/null 2>&1; then
+    command corepack pnpm "$@"
+    return $?
+  fi
+  return 127
+}
+
+ensure_pnpm() {
+  if command -v pnpm >/dev/null 2>&1; then
+    return 0
+  fi
+  if command -v corepack >/dev/null 2>&1; then
+    say "Enabling pnpm via corepack..."
+    corepack enable >/dev/null 2>&1 || true
+    corepack prepare pnpm@10.17.0 --activate >/dev/null 2>&1 || true
+    hash -r
+  fi
+  command -v pnpm >/dev/null 2>&1 && return 0
+  return 1
+}
+
 HAVE_PROVIDER=0
 if [ -n "${OPENAI_API_KEY:-}" ] || [ -n "${OPENROUTER_API_KEY:-}" ] || [ -n "${OLLAMA_HOST:-}" ]; then
   HAVE_PROVIDER=1
@@ -42,29 +70,33 @@ git diff --cached --quiet || die "Staged changes not committed."
 # B) Toolchains
 say "Validating toolchains..."
 node -v >/dev/null || die "Node missing."
-pnpm -v >/dev/null || die "pnpm missing."
+# Ensure pnpm is available (prefer local shim via corepack)
+if ! ensure_pnpm; then
+  die "pnpm missing."
+fi
+forge_pnpm -v >/dev/null || die "pnpm missing."
 python3 --version >/dev/null || die "python3 missing."
 
 # C) Install & static checks
 say "Installing deps (frozen lockfile)..."
-pnpm install --frozen-lockfile >/dev/null
+forge_pnpm install --frozen-lockfile >/dev/null
 
 echo "[prepush] lint & format check (pnpm)"
 if ! command -v pnpm >/dev/null 2>&1; then
   echo "[prepush] pnpm not found; enabling via corepack"
-  corepack enable && corepack prepare pnpm@10.17.0 --activate
+  ensure_pnpm
 fi
 
 say "Typecheck..."
-pnpm run -s typecheck
+forge_pnpm run -s typecheck
 
 say "Format check..."
-pnpm format:check || { echo "[prepush] prettier check failed — run pnpm format"; exit 1; }
+forge_pnpm format:check || { echo "[prepush] prettier check failed — run pnpm format"; exit 1; }
 say "Lint..."
-pnpm lint || { echo "[prepush] eslint failed — run pnpm lint:fix"; exit 1; }
+forge_pnpm lint || { echo "[prepush] eslint failed — run pnpm lint:fix"; exit 1; }
 
 say "Tests (record status to reuse later)..."
-if pnpm test; then
+if forge_pnpm test; then
   TEST_STATUS="pass"
   write_gate_flag tests_passed true
 else
@@ -75,7 +107,7 @@ fi
 
 # D) Build & doctor
 say "Build..."
-pnpm run -s build
+forge_pnpm run -s build
 
 say "Doctor..."
 if [ "$SKIP_DOCTOR" = "1" ]; then
@@ -127,7 +159,7 @@ printf "\n\033[1;36m[forge:summary]\033[0m secrets.critical=%s, review.high=%s\n
 # F) Supply-chain (optional in FAST)
 if [ "$FAST" != "1" ]; then
   say "SBOM..."
-  pnpm run -s sbom || true
+  forge_pnpm run -s sbom || true
 
   if [ "$HAVE_PROVIDER" = "1" ]; then
     say "Container advisory..."

@@ -22,6 +22,10 @@ const ledgerEligibleKeywords = new Set([
   'tem-sonic',
   'consciousness-template',
   'consciousness-spectrum-analyzer',
+  // Operations: risk register is ledger-worthy for audit trails
+  'operations-risk-register',
+  // Operations: policy gate decision should be anchored
+  'operations-risk-policy-gate',
 ]);
 
 const SENSITIVE_KEY_PATTERN = /(key|secret|token|password)/i;
@@ -280,6 +284,20 @@ export async function runKeyword(opts: {
     }
     // Remove path to avoid leaking filesystem details to the LLM
     delete (args as Record<string, unknown>).bundle_path;
+  }
+  // Policy gate helper: provide compact JSON string for prompt stability
+  if (
+    tpl.keyword === 'operations-risk-policy-gate' &&
+    isRecord(args) &&
+    isRecord((args as Record<string, unknown>).report)
+  ) {
+    try {
+      (args as Record<string, unknown>).REPORT_JSON = JSON.stringify(
+        (args as Record<string, unknown>).report
+      );
+    } catch {
+      // ignore stringify errors; prompt will simply omit
+    }
   }
   const ctx = enrichContext(tpl, args, profile);
 

@@ -8,6 +8,8 @@ import TemplateRunner from './components/TemplateRunner';
 import OverviewStrip, { type OverviewItem } from './components/dashboard/OverviewStrip.js';
 import Panel from './components/dashboard/Panel.js';
 import QuickLinks from './components/dashboard/QuickLinks.js';
+import RiskGateCard from './components/RiskGateCard';
+import RiskEventsTable from './components/RiskEventsTable';
 import { useDashboardSnapshot } from './hooks/useDashboardSnapshot.js';
 import { useGuardianMode } from './hooks/useGuardianMode.js';
 import { useTemplateCount } from './hooks/useTemplateCount.js';
@@ -189,6 +191,24 @@ export default function App() {
         </header>
 
         <OverviewStrip items={overviewItems} />
+
+        <Panel
+          id="risk-gate"
+          label="Governance"
+          title="Risk Gate"
+          description="View the latest risk register and run the policy gate."
+        >
+          <RiskGateCard />
+        </Panel>
+
+        <Panel
+          id="risk-events"
+          label="Governance"
+          title="Risk Events"
+          description="Deterministic list of risk-related ledger events with per-row verify."
+        >
+          <RiskEventsTable />
+        </Panel>
 
         {snapshot.error ? (
           <div className="callout" role="alert">
