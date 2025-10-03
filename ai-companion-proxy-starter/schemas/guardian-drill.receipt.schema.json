@@ -1,0 +1,40 @@
+{
+  "$id": "https://vaultmesh/guardian-drill.receipt.schema.json",
+  "type": "object",
+  "required": ["kind","id","ts","project","region","service","audience","checks","status"],
+  "properties": {
+    "kind": { "const": "vaultmesh.receipt.guardian_drill.v1" },
+    "id": { "type": "string", "pattern": "^proxy\\.guardian\\.[0-9T]+Z$" },
+    "ts": { "type": "string", "format": "date-time" },
+    "project": { "type": "string" },
+    "region": { "type": "string" },
+    "service": { "type": "string" },
+    "audience": { "type": "string", "format": "uri" },
+    "checks": {
+      "type": "object",
+      "required": ["auth_enforced","health_auth"],
+      "properties": {
+        "auth_enforced": {
+          "type": "object",
+          "required": ["expect","got","ok"],
+          "properties": {
+            "expect": { "type": "integer" },
+            "got":    { "type": "integer" },
+            "ok":     { "type": "boolean" }
+          }
+        },
+        "health_auth": {
+          "type": "object",
+          "required": ["expect","got","ok"],
+          "properties": {
+            "expect": { "type": "integer" },
+            "got":    { "type": "integer" },
+            "ok":     { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "status": { "enum": ["OPERATIONAL","DEGRADED"] }
+  },
+  "additionalProperties": false
+}
