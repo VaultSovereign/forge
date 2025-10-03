@@ -342,3 +342,154 @@ pnpm -w run build:web && pnpm -w run build:bff && pnpm -w run workbench:start
 ---
 
 **Note:** In production, the BFF serves the built frontend as static assets on a single port.
+
+## Risk Register Template (operations-risk-register)
+
+This template converts a long-form risk/control document into an auditable, schema-valid JSON risk register.
+
+### Files Added
+
+- `catalog/operations/risk_register.yaml` — runnable template definition
+- `schemas/output.schema.json` — new `operations.risk_register_report` schema
+- `tests/templates/test_risk_register.spec.ts` — schema validation test
+- `scripts/select-snippets.mjs` — selector to chunk down large docs
+- `docs/sources/operations/risk_register.md` — source placeholder for your 34k text
+
+### Inputs
+
+| Name              | Type   | Enum/Notes                                |
+| ----------------- | ------ | ----------------------------------------- |
+| `scope`           | enum   | `org`, `product`, `infra`, `vendor`       |
+| `timeframe`       | enum   | `now`, `quarter`, `year`                  |
+| `SOURCE_SNIPPETS` | string | Pre-extracted 2–4k tokens from source doc |
+| `output_format`   | string | Default `json`                            |
+
+### Output
+
+Strict JSON matching `#/definitions/operations/risk_register_report`:
+
+```json
+{
+  "generated_at": "2025-10-02T12:34:56Z",
+  "scope": "org",
+  "summary": "…",
+  "risks": [
+    {
+      "id": "R-001",
+      "title": "Vendor outage",
+      "owner": "Ops",
+      "likelihood": 3,
+      "impact": 4,
+      "controls": ["multi-region failover"],
+      "next_action": "Test DR plan",
+      "notes": "Optional free text"
+    }
+  ]
+}
+```
+
+### Workflow
+
+1. Prepare source
+
+Place your 34k doc at:
+
+```text
+docs/sources/operations/risk_register.md
+```
+
+2. Extract snippets (2–4k tokens)
+
+```bash
+node scripts/select-snippets.mjs \
+  --source docs/sources/operations/risk_register.md \
+  --query "risk control vendor outage compliance mitigation" \
+  --limit 4000 \
+  > /tmp/snips.txt
+```
+
+3. Build & test
+
+```bash
+pnpm run build && pnpm test
+```
+
+4. Run the template
+
+With jq:
+
+```bash
+pnpm run vm -- run operations-risk-register -p vault \
+  -a "$(jq -Rs --arg scope org --arg timeframe quarter \
+    '{scope:$scope,timeframe:$timeframe,SOURCE_SNIPPETS:.}' /tmp/snips.txt)" \
+  -f json
+```
+
+Or inline:
+
+```bash
+pnpm run vm -- run operations-risk-register -p vault \
+  -a '{"scope":"org","timeframe":"quarter","SOURCE_SNIPPETS":"<paste snippets here>"}' \
+  -f json
+```
+
+5. Review output
+
+- JSON is schema-validated automatically.
+- In CI/CD, failure to produce valid JSON will fail the build.
+- Optional: enable ledger-eligibility and a CI policy gate.
+
+### Next Steps (optional)
+
+- Ledger eligibility: write reports into the Reality Ledger + VaultMesh receipts for cryptographic proof.
+- Policy gate: fail CI if any risk has `likelihood*impact >= 12` without `next_action`.
+
+### Policy Gate (operations-risk-policy-gate)
+
+This governance template inspects a risk register and enforces actionability:
+
+- Input: a risk register JSON object (output from `operations-risk-register`).
+- Rule: fails if any risk with `likelihood*impact ≥ 12` lacks `next_action`.
+- Output: `{ passed: boolean, violations: [{ id, title, reason }] }` (schema: `#/definitions/operations/risk_policy_gate_result`).
+
+Run it (object input):
+
+````bash
+pnpm run vm -- run operations-risk-policy-gate \
+  -p vault -a '{"report": <risk_register_json>}' -f json
+
+Or from a file with Make:
+
+```bash
+make run:risk-policy-gate REPORT=out/risk_register.json
+````
+
+Notes:
+
+- The template accepts `report` as a JSON object.
+- The dispatcher auto-provides `REPORT_JSON` (a compact string) to the prompt for token efficiency.
+
+```
+
+CI tip: require `passed=true` before merging to prevent unmitigated high-severity risks.
+
+**Workbench Card:** The “Risk Gate” card shows the latest ledgered Risk Register and runs the policy gate on click, surfacing `passed/violations`. It uses `/v1/risk/latest` and `/v1/risk/policy-gate` exposed by the BFF.
+
+Evidence pack: use the “Export Receipts” button (or GET `/v1/risk/receipts/export`) to download a JSON bundle of ledgered risk reports and gate decisions for audits.
+
+Verification: click “Verify Latest” (or POST `/v1/risk/verify` with optional `{ "kind": "register"|"gate" }`) to recompute a stable hash (BLAKE3 if available, else SHA‑256) and compare with any stored hash on the event.
+
+Per-row Verify: In the Ledger table each row includes a Verify button that posts the specific event to `/v1/risk/verify` (as an event object). The server recomputes a stable hash (BLAKE3 if available, else SHA-256) and compares to any stored hash when available.
+
+Row-level determinism: The `/v1/risk/list` endpoint returns parsed events plus the original `raw_line` and a derived `stored_hash` for risk templates. The table can pass `{ event, raw_line, stored_hash }` to `/v1/risk/verify` so verification compares against the exact stored hash and original JSONL bytes.
+
+### Governance → Risk Events
+The Risk Events table queries `/v1/risk/list` and displays each row’s `ts`, `keyword`, and `stored_hash`. The Verify action uses the exact `raw_line` (JSONL) with the row’s `stored_hash` when present, enabling deterministic recomputation of the event hash (algorithm echoed when available).
+
+Pagination: Use Next/Prev to traverse history deterministically. Filters: `keyword=register|gate|all`, windowing via `since_ts`/`before_ts`. For CLI parity: `make curl:risk:list LIMIT=25`, `make curl:risk:list:page CURSOR=...`, and `make curl:risk:verify-line LINE='{"..."}'.
+
+Date window & cursors:
+- Use the Since/Before pickers to set an inclusive/exclusive time window, then click Apply (or Today for a quick day window).
+- The panel shows Prev/Next cursor tokens; click Copy to use them in CLI calls (e.g., `make curl:risk:list:page CURSOR="..."`).
+- Jump to cursor: paste any `shard:pos` token (e.g., `events-YYYY-MM-DD.jsonl:42`) into "Load from cursor" and click Load to jump directly to that position. Tokens are compatible with `make curl:risk:list:page CURSOR="…"`.
+```

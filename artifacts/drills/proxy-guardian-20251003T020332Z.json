@@ -1,0 +1,22 @@
+{
+  "kind": "vaultmesh.receipt.guardian_drill.v1",
+  "id": "proxy.guardian.20251003T020332Z",
+  "ts": "2025-10-03T02:03:31Z",
+  "project": "vaultmesh-473618",
+  "region": "europe-west1",
+  "service": "ai-companion-proxy",
+  "audience": "https://ai-companion-proxy-2llr4a5w3a-ew.a.run.app",
+  "checks": {
+    "auth_enforced": {
+      "expect": 403,
+      "got": 403,
+      "ok": true
+    },
+    "health_auth": {
+      "expect": 200,
+      "got": 200,
+      "ok": true
+    }
+  },
+  "status": "OPERATIONAL"
+}

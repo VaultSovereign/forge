@@ -58,6 +58,46 @@ vm run deck-fintech -a '{"brief":"Dubai DORA compliance check","audience":"found
 vm run tem-guardrails -p blue -a '{"agent":"Copilot","permissions_matrix":"./examples/iso27001.yaml"}'
 ```
 
+### Gemini Code Execution
+
+```bash
+# CLI:
+make gemini:code PROMPT="sum of first 50 primes" --
+make gemini:code:vertex PROMPT="factorial of 50" --
+
+# Guardian (chat):
+gemini code <task>
+gemini vertex code <task>
+
+# Env (optional):
+export GEMINI_VERTEX_LOCATION=europe-west1
+export GOOGLE_CLOUD_PROJECT=$(gcloud config get-value project)
+```
+
+#### Authentication & Environment Setup
+
+Before running Gemini commands, ensure you are authenticated with **Application Default Credentials (ADC):**
+
+```bash
+gcloud auth application-default login
+```
+
+Retrieve your current project and region:
+
+```bash
+gcloud config get-value project
+gcloud config get-value compute/region
+```
+
+Then set these in your .env file (already scaffolded):
+
+```env
+GOOGLE_CLOUD_PROJECT=<your-project-id>
+GEMINI_VERTEX_LOCATION=<your-region>
+```
+
+Without this, `gemini:code` and `gemini:code:vertex` will not work.
+
 #### Query Reality Ledger
 
 ```bash

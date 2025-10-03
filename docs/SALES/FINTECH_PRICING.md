@@ -1,5 +1,7 @@
 # VaultMesh FinTech Compliance Pricing — SKU Sheet & Quote Template
 
+<!-- Note: This file is for internal quoting use and is not part of the Marp build process -->
+
 **Per-Client, Per-Template Annual Subscriptions**  
 _Dubai ↔ Ireland Corridor • DORA-Grade • Regulated Templates_
 

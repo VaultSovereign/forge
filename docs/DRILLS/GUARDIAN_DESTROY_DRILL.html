@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Guardian Destroy Drill — Auth-Only Cloud Run (Workbench + Proxy)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<style>
+  body{font-family:ui-sans-serif,system-ui;max-width:920px;margin:40px auto;padding:0 16px;background:#0b0f14;color:#e6edf3}
+  h1{font-size:28px;margin:0 0 12px} h2{font-size:20px;color:#5eead4;margin-top:28px}
+  pre{background:#0f1723;border:1px solid #1f2937;border-radius:10px;padding:12px;overflow:auto}
+  .row{display:flex;gap:8px;align-items:center;margin:8px 0} button{border:1px solid #233044;background:#111827;color:#e6edf3;border-radius:8px;padding:6px 10px;cursor:pointer}
+  code{color:#93c5fd}
+</style>
+<script>
+function copy(id){navigator.clipboard.writeText(document.getElementById(id).innerText);}
+</script>
+</head>
+<body>
+<h1>🛡️ Guardian Destroy Drill</h1>
+<p>Teardown for <strong>auth-only + VPC connector/NAT</strong> posture. Removes public IAM, undeploys Cloud Run services, and (optionally) removes connector &amp; NAT. <em>Runs safely in steps.</em></p>
+
+<h2>0) Variables</h2>
+<div class="row"><button onclick="copy('vars')">Copy</button></div>
+<pre id="vars">export PROJECT_ID="$(gcloud config get-value project)"
+export REGION="europe-west3"
+export WORKBENCH="vaultmesh-workbench"
+export PROXY="ai-companion-proxy"
+</pre>
+
+<h2>1) Ensure no public IAM (idempotent)</h2>
+<div class="row"><button onclick="copy('iam')">Copy</button></div>
+<pre id="iam">gcloud run services remove-iam-policy-binding "$WORKBENCH" \
+  --region="$REGION" --member=allUsers --role=roles/run.invoker || true
+gcloud run services remove-iam-policy-binding "$PROXY" \
+  --region="$REGION" --member=allUsers --role=roles/run.invoker || true
+</pre>
+
+<h2>2) Disable invokers (break-glass off switch)</h2>
+<p>Temporarily block all callers by removing invoker bindings. Terraform will restore on next deploy.</p>
+<div class="row"><button onclick="copy('block')">Copy</button></div>
+<pre id="block">for SVC in "$WORKBENCH" "$PROXY"; do
+  POLICY=$(mktemp) && gcloud run services get-iam-policy "$SVC" --region="$REGION" > "$POLICY"
+  # Remove roles/run.invoker block entirely (keeps other roles)
+  yq -i 'del(.bindings[] | select(.role == "roles/run.invoker"))' "$POLICY"
+  gcloud run services set-iam-policy "$SVC" "$POLICY" --region="$REGION"
+  rm -f "$POLICY"
+done
+</pre>
+
+<h2>3) Undeploy services (keep infra)</h2>
+<p>Deletes <em>services</em> only. VPC connector/NAT left intact for future redeploys.</p>
+<div class="row"><button onclick="copy('undeploy')">Copy</button></div>
+<pre id="undeploy">gcloud run services delete "$WORKBENCH" --region="$REGION" --quiet || true
+gcloud run services delete "$PROXY"     --region="$REGION" --quiet || true
+</pre>
+
+<h2>4) Optional: Terraform destroy (connector/NAT/VPC)</h2>
+<p>Only if you intend a full cleanup. Review plan first.</p>
+<div class="row"><button onclick="copy('tf')">Copy</button></div>
+<pre id="tf">terraform plan -destroy -target=google_cloud_run_v2_service.vaultmesh-workbench \
+  -target=google_cloud_run_v2_service.ai_companion_proxy
+# Then (if desired) remove connector/NAT:
+# terraform destroy -target=google_vpc_access_connector.vmesh_sls -target=google_compute_router_nat.vmesh_nat
+# Finally:
+# terraform destroy</pre>
+
+<h2>5) Prove teardown</h2>
+<div class="row"><button onclick="copy('prove')">Copy</button></div>
+<pre id="prove"># Expect 404/Not Found for both services
+for S in "$WORKBENCH" "$PROXY"; do
+  URL=$(gcloud run services describe "$S" --region="$REGION" --format='value(status.uri)' 2>/dev/null || true)
+  test -z "$URL" && echo "✓ $S removed" || (curl -I "$URL/health" | head -n 1)
+done
+</pre>
+
+<h2>6) Seal Receipt</h2>
+<div class="row"><button onclick="copy('seal')">Copy</button></div>
+<pre id="seal">bash scripts/drill-receipt.sh guardian_destroy</pre>
+
+<p>⚔️ <em>Result:</em> services removed, public IAM scrubbed, optional infra preserved or destroyed per your choice.</p>
+</body>
+</html>

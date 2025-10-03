@@ -11,7 +11,7 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
-    include: ['tests/**/*.spec.ts', 'reality_ledger/**/*.spec.ts'],
+    include: ['tests/**/*.spec.ts', 'reality_ledger/**/*.spec.ts', '**/*.test.ts'],
     globals: true,
     coverage: {
       reporter: ['text', 'json', 'lcov', 'html'],

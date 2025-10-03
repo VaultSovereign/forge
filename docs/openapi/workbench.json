@@ -270,6 +270,110 @@
           }
         }
       }
+    },
+    "/v1/risk/list": {
+      "get": {
+        "summary": "List recent risk events with raw JSONL and stored hash",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": { "type": "integer", "minimum": 1, "maximum": 200, "default": 50 }
+          },
+          {
+            "in": "query",
+            "name": "before_ts",
+            "schema": { "type": "string", "format": "date-time" }
+          },
+          {
+            "in": "query",
+            "name": "since_ts",
+            "schema": { "type": "string", "format": "date-time" }
+          },
+          { "in": "query", "name": "keyword", "schema": { "type": "string" } },
+          { "in": "query", "name": "cursor", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "ETag": { "schema": { "type": "string" } },
+              "Cache-Control": { "schema": { "type": "string" } }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "ts": { "type": "string", "format": "date-time" },
+                          "keyword": { "type": "string" },
+                          "stored_hash": { "type": "string", "nullable": true },
+                          "algorithm": {
+                            "type": "string",
+                            "enum": ["blake3", "sha256"],
+                            "nullable": true
+                          },
+                          "event": { "type": "object", "additionalProperties": true },
+                          "raw_line": { "type": "string", "description": "Exact JSONL line" }
+                        }
+                      }
+                    },
+                    "count": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/risk/verify": {
+      "post": {
+        "summary": "Verify a single risk event (deterministic)",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Optional kind or direct event/line payload",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Verification result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "keyword": { "type": "string", "nullable": true },
+                    "ts": { "type": "string", "format": "date-time", "nullable": true },
+                    "stored_hash": { "type": "string", "nullable": true },
+                    "recompute": {
+                      "type": "object",
+                      "properties": {
+                        "event_obj_hash": { "type": "string" },
+                        "artifact_hash": { "type": "string", "nullable": true },
+                        "algorithm": { "type": "string", "enum": ["blake3", "sha256"] }
+                      }
+                    },
+                    "matches_stored": { "type": "boolean", "nullable": true }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

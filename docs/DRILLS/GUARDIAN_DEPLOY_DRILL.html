@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Guardian Deploy Drill — Auth-only + NAT</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif; margin: 24px; color: #24292e; }
+    h1 { margin: 0 0 8px; }
+    .lead { color: #57606a; margin-bottom: 20px; }
+    .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+    .card { border: 1px solid #d0d7de; border-radius: 8px; padding: 16px; background: #fff; }
+    .card h2 { margin-top: 0; font-size: 16px; }
+    pre { background: #f6f8fa; padding: 12px; border-radius: 6px; overflow: auto; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }
+    .btn { display: inline-block; padding: 8px 12px; background: #0969da; color: #fff; border-radius: 6px; text-decoration: none; font-weight: 600; cursor: pointer; }
+    .btn.alt { background: #6f42c1; }
+    .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .ok { color: #1a7f37; font-weight: 600; }
+    .warn { color: #9a6700; font-weight: 600; }
+    .muted { color: #57606a; }
+    .box { border: 1px dashed #d0d7de; padding: 12px; border-radius: 6px; background: #fbfcfd; }
+  </style>
+</head>
+<body>
+  <h1>Guardian Deploy Drill</h1>
+  <div class="lead">Auth-only Cloud Run + Serverless VPC Access (egress via Cloud NAT). Region: <strong>europe-west3</strong>. Gemini can remain in <strong>europe-west1</strong>.</div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>1) Variables</h2>
+      <pre><code id="vars">export PROJECT_ID=$(gcloud config get-value project)
+export REGION=europe-west3
+export WORKBENCH_SA="vaultmesh-workbench-sa@${PROJECT_ID}.iam.gserviceaccount.com"
+export PROXY_SA="ai-companion-proxy@${PROJECT_ID}.iam.gserviceaccount.com"
+export VPC_CONNECTOR=$(terraform output -raw sls_connector 2>/dev/null || echo projects/..../locations/europe-west3/connectors/..)
+export IMAGE="europe-west3-docker.pkg.dev/${PROJECT_ID}/vaultmesh/workbench:$(git rev-parse --short HEAD)"</code></pre>
+      <div class="row"><a class="btn" data-copy="#vars">Copy</a><span class="muted">Edit as needed</span></div>
+    </div>
+
+    <div class="card">
+      <h2>2) Auth-only Deploy (Workbench)</h2>
+      <pre><code id="deploy-wb">gcloud run deploy vaultmesh-workbench \
+  --region=${REGION} \
+  --image="${IMAGE}" \
+  --service-account="${WORKBENCH_SA}" \
+  --port=8787 \
+  --timeout=900 --memory=1Gi --cpu=1</code></pre>
+      <div class="row"><a class="btn" data-copy="#deploy-wb">Copy</a><span class="ok">No --allow-unauthenticated</span></div>
+      <div class="box muted">Terraform owns invokers via <code>google_cloud_run_v2_service_iam_binding</code>.</div>
+    </div>
+
+    <div class="card">
+      <h2>3) Connector Egress (Workbench)</h2>
+      <pre><code id="egress-wb">gcloud run deploy vaultmesh-workbench \
+  --region=${REGION} \
+  --image="${IMAGE}" \
+  --service-account="${WORKBENCH_SA}" \
+  --vpc-connector="${VPC_CONNECTOR}" \
+  --vpc-egress=all-traffic \
+  --port=8787 --timeout=900</code></pre>
+      <div class="row"><a class="btn" data-copy="#egress-wb">Copy</a><span class="muted">All egress → connector → VPC → NAT</span></div>
+    </div>
+
+    <div class="card">
+      <h2>4) Proxy (Auth-only + Egress)</h2>
+      <pre><code id="deploy-proxy">gcloud run deploy ai-companion-proxy \
+  --region=${REGION} \
+  --image="${REGION}-docker.pkg.dev/${PROJECT_ID}/vaultmesh/proxy:$(git rev-parse --short HEAD)" \
+  --service-account="${PROXY_SA}" \
+  --vpc-connector="${VPC_CONNECTOR}" \
+  --vpc-egress=all-traffic \
+  --port=8080 --timeout=60</code></pre>
+      <div class="row"><a class="btn" data-copy="#deploy-proxy">Copy</a><span class="ok">Auth-only</span></div>
+    </div>
+
+    <div class="card">
+      <h2>5) One-time Cleanup (if public before)</h2>
+      <pre><code id="cleanup">gcloud run services remove-iam-policy-binding vaultmesh-workbench \
+  --region=${REGION} --member=allUsers --role=roles/run.invoker || true
+
+gcloud run services remove-iam-policy-binding ai-companion-proxy \
+  --region=${REGION} --member=allUsers --role=roles/run.invoker || true</code></pre>
+      <div class="row"><a class="btn" data-copy="#cleanup">Copy</a><span class="warn">Removes legacy allUsers</span></div>
+    </div>
+
+    <div class="card">
+      <h2>6) Prove</h2>
+      <pre><code id="prove">URL=$(gcloud run services describe vaultmesh-workbench --region=${REGION} --format='value(status.url)')
+curl -i "$URL/health" | head -n 10   # 401/403
+curl -fsS -H "Authorization: Bearer $(gcloud auth print-identity-token)" "$URL/health" | jq .
+
+PURL=$(gcloud run services describe ai-companion-proxy --region=${REGION} --format='value(status.url)')
+curl -i "$PURL/health" | head -n 10
+curl -fsS -H "Authorization: Bearer $(gcloud auth print-identity-token)" "$PURL/health" | jq .</code></pre>
+      <div class="row"><a class="btn" data-copy="#prove">Copy</a></div>
+    </div>
+
+    <div class="card">
+      <h2>7) Seal Receipt</h2>
+      <pre><code id="seal">bash scripts/drill-receipt.sh guardian_deploy</code></pre>
+      <div class="row"><a class="btn" data-copy="#seal">Copy</a><span class="muted">Emits JSON receipt + daily root</span></div>
+    </div>
+
+    <div class="card">
+      <h2>8) Optional: Network/Budget Proof</h2>
+      <pre><code id="net-proof">jq -n --arg ts "$(date -u +%Y%m%dT%H%M%SZ)" \
+      --arg nat "$(gcloud compute addresses list --filter="name~nat AND region=europe-west3" --format='value(address)')" \
+      '{kind:"guardian.network_proof.v1", ts:$ts, nat:$nat}' \
+  > artifacts/drills/network-$(date -u +%Y%m%dT%H%M%SZ).json</code></pre>
+      <div class="row"><a class="btn" data-copy="#net-proof">Copy</a><span class="muted">Record NAT IP proof</span></div>
+    
+    <div class="card">
+      <h2>9) (Optional) Budget &amp; Egress IP Proof</h2>
+      <p>Record current NAT egress IP and ensure a budget guard exists. This does not change posture; it only proves it.</p>
+
+      <div class="row"><a class="btn" data-copy="#egress-proof">Copy</a></div>
+      <pre><code id="egress-proof"># NAT egress proof (public IP via ifconfig.me)
+curl -s https://ifconfig.me; echo
+# Expected NAT IPs (Cloud NAT addresses in europe-west3)
+gcloud compute addresses list   --filter="name~nat AND region=europe-west3"   --format="table(name,address)"</code></pre>
+
+      <div class="row"><a class="btn" data-copy="#budget-proof">Copy</a></div>
+      <pre><code id="budget-proof"># Create budget alerts (example $50 cap with 50% and 90% thresholds)
+BILLING=$(gcloud beta billing accounts list --format='value(name)' | head -1)
+gcloud beta billing budgets create   --billing-account="$BILLING"   --display-name="Run+NAT"   --budget-amount=50   --threshold-rule=percent=0.5   --threshold-rule=percent=0.9</code></pre>
+
+      <div class="row"><a class="btn" data-copy="#seal-network-receipt">Copy</a></div>
+      <pre><code id="seal-network-receipt"># Seal a network/budget proof receipt (optional)
+TS=$(date -u +%Y%m%dT%H%M%SZ)
+mkdir -p artifacts/drills artifacts/roots
+NAT_IPS=$(gcloud compute addresses list --filter="name~nat AND region=europe-west3" --format='value(address)' | paste -sd, -)
+jq -n --arg ts "$TS" --arg nat "$NAT_IPS"   '{kind:"guardian.network_proof.v1", ts:$ts, nat:$nat, region:env.REGION}'   > "artifacts/drills/network-${TS}.json"
+if command -v b3sum >/dev/null; then
+  find artifacts/drills -maxdepth 1 -name "network-$(date -u +%Y%m%d)*.json" -print0     | xargs -0 b3sum | awk '{print $1}' | b3sum     | awk -v d="$(date -u +%F)" '{printf("{"day":"%s","root":"%s"}
+", d, $1)}'     | tee "artifacts/roots/root-$(date -u +%F).json"
+fi</code></pre>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('click', (e)=>{
+      const t = e.target;
+      if (t.matches('[data-copy]')) {
+        const sel = t.getAttribute('data-copy');
+        const code = document.querySelector(sel);
+        if (code) {
+          const text = code.textContent.replace(/^\s+|\s+$/g, '');
+          navigator.clipboard.writeText(text).then(()=>{
+            const old = t.textContent; t.textContent = 'Copied!';
+            setTimeout(()=>{ t.textContent = old; }, 1000);
+          });
+        }
+        e.preventDefault();
+      }
+    });
+  </script>
+
+  <!--
+  <h2>⚠️ Lab Only: Temporary public access</h2>
+  <p>For workshops/labs only. Revert to auth-only immediately after.</p>
+  <div class="row"><a class="btn" data-copy="#lab-public">Copy</a></div>
+  <pre id="lab-public">gcloud run services add-iam-policy-binding "$WORKBENCH" \
+  --region="$REGION" --member=allUsers --role=roles/run.invoker
+
+# revert to auth-only after lab
+gcloud run services remove-iam-policy-binding "$WORKBENCH" \
+  --region="$REGION" --member=allUsers --role=roles/run.invoker || true
+  </pre>
+  -->
+</body>
+</html>

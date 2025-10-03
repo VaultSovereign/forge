@@ -130,3 +130,18 @@ Quick check (ledger redaction via tests):
 ```bash
 pnpm vitest -t "redacts"
 ```
+
+### Org Policy Safety Net (recommended)
+Prevents accidental `allUsers` grants on any service.
+
+```bash
+# Require an Org Admin or Folder Admin context if set higher than project
+gcloud org-policies set-policy <<'POLICY'
+name: projects/$(gcloud config get-value project)/policies/iam.allowedPolicyMemberDomains
+spec:
+  rules:
+  - denyAll: true
+POLICY
+```
+
+(If your org enforces allowed domains differently, adjust accordingly. The goal: no public members.)

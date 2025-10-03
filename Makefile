@@ -1,11 +1,20 @@
+# Quieter nested make
+MAKEFLAGS += --no-print-directory
+
 .PHONY: forge-prepush install-git-hooks proposal-verify purge-check quality dev lint lint-fix lint-quiet docs-openapi typecheck doctor prepush-scans \
         dev-bff dev-web build-bff build-web curl-mode curl-mode-head curl-metrics curl-templates-count \
         smoke-bff smoke-web smoke-up smoke-guardian smoke-templates smoke-execute docs-internal-dev docs-external-dev \
         docs-internal-preview docs-external docs-sitemap status commits \
         audit audit-gpt5 audit-claude-opus audit-deepseek \
-        cons-audit cons-audit-verify cons-audit-demo cons-audit-seal
+        cons-audit cons-audit-verify cons-audit-demo cons-audit-seal \
+        proxy-health proxy-who proxy-drill proxy-receipts \
+        mandala-stamp mandala-png mandala-webp mandala-social mandala-open mandala-link-check
 
 FORGE_FAST ?= 0
+
+# Path anchors
+PROXY_DIR := $(CURDIR)/ai-companion-proxy-starter
+MANDALA := docs/VaultMesh_Mandala.svg
 
 # --- Purification & Quality Gates ---
 
@@ -198,10 +207,10 @@ evolution-journal:
 	@node scripts/journal_append.mjs
 	@tail -n 5 artifacts/evolution/template_journal.jsonl || true
 
-.PHONY: gif:risk-flow
+.PHONY: gif-risk-flow
 # Records a ~12s GIF of Risk Gate panel interactions.
 # macOS uses avfoundation; Linux uses x11grab. Requires ffmpeg.
-gif:risk-flow:
+gif-risk-flow:
 	@echo "Recording Risk Gate flow…"
 	@if [ "$$(uname)" = "Darwin" ]; then \
 	  echo "Open the Workbench in a visible window, then recording starts in 3s…"; \
@@ -216,46 +225,67 @@ gif:risk-flow:
 	fi; \
 	echo "→ GIF at /tmp/risk-flow.gif"
 
-.PHONY: curl:risk:latest curl:risk:gate
-curl:risk:latest:
+gif\:risk-flow:
+	@$(MAKE) gif-risk-flow --no-print-directory
+
+.PHONY: curl-risk-latest curl-risk-gate
+curl-risk-latest:
 	@curl -sS http://localhost:8787/v1/risk/latest | jq
 
-curl:risk:gate:
+curl-risk-gate:
 	@curl -sS -X POST http://localhost:8787/v1/risk/policy-gate \
 	  -H 'content-type: application/json' --data '{}' | jq
 
-.PHONY: curl:risk:receipts
+curl\:risk\:latest:
+	@$(MAKE) curl-risk-latest --no-print-directory
+
+curl\:risk\:gate:
+	@$(MAKE) curl-risk-gate --no-print-directory
+
+.PHONY: curl-risk-receipts
 # Optional date window: make curl:risk:receipts FROM=2025-10-01T00:00:00Z TO=2025-10-03T00:00:00Z
-curl:risk:receipts:
+curl-risk-receipts:
 	@URL="http://localhost:8787/v1/risk/receipts/export"; \
 	[ -n "$(FROM)" ] && URL="$$URL?from=$(FROM)"; \
-	[ -n "$(TO)" ] && URL="$${URL}$$([ -n "$(FROM)" ] && echo '&' || echo '?')to=$(TO)"; \
+	[ -n "$(TO)" ] && URL="$$URL$$([ -n "$(FROM)" ] && echo '&' || echo '?')to=$(TO)"; \
 	echo "→ GET $$URL"; \
 	curl -sS "$$URL" | jq '.generated_at, .count'
 
-.PHONY: curl:risk:verify
+curl\:risk\:receipts:
+	@$(MAKE) curl-risk-receipts --no-print-directory
+
+.PHONY: curl-risk-verify
 # KIND=register|gate (optional). Default: latest of either.
-curl:risk:verify:
+curl-risk-verify:
 	@URL="http://localhost:8787/v1/risk/verify"; \
 	[ -n "$(KIND)" ] && BODY="$$(jq -nc --arg k "$(KIND)" '{kind:$$k}')" || BODY="{}"; \
 	echo "→ POST $$URL  body=$$BODY"; \
 	curl -sS -X POST "$$URL" -H 'content-type: application/json' --data "$$BODY" | jq
 
-.PHONY: curl:risk:verify-line
+curl\:risk\:verify:
+	@$(MAKE) curl-risk-verify --no-print-directory
+
+.PHONY: curl-risk-verify-line
 # Use: make curl:risk:verify-line LINE='{"keyword":"operations-risk-register",...}'
-curl:risk:verify-line:
+curl-risk-verify-line:
 	@URL="http://localhost:8787/v1/risk/verify"; \
 	BODY=$$(jq -nc --arg line '$(LINE)' '{line:$$line}'); \
 	echo "→ POST $$URL"; \
 	curl -sS -X POST "$$URL" -H 'content-type: application/json' --data "$$BODY" | jq
 
-.PHONY: curl:risk:list
-curl:risk:list:
+curl\:risk\:verify-line:
+	@$(MAKE) curl-risk-verify-line --no-print-directory
+
+.PHONY: curl-risk-list
+curl-risk-list:
 	@curl -sS "http://localhost:8787/v1/risk/list?limit=$${LIMIT:-25}" | jq '.count, (.events[0] | {keyword,ts,stored_hash})'
 
-.PHONY: curl:risk:list:page
+curl\:risk\:list:
+	@$(MAKE) curl-risk-list --no-print-directory
+
+.PHONY: curl-risk-list-page
 # Usage: make curl:risk:list:page LIMIT=50 CURSOR="events-2025-10-02.jsonl:42" KEYWORD=register BEFORE=2025-10-02T23:59:59Z SINCE=2025-10-01T00:00:00Z
-curl:risk:list:page:
+curl-risk-list-page:
 	@URL="http://localhost:8787/v1/risk/list?limit=$${LIMIT:-50}"; \
 	[ -n "$(KEYWORD)" ] && URL="$$URL&keyword=$(KEYWORD)"; \
 	[ -n "$(BEFORE)" ] && URL="$$URL&before_ts=$(BEFORE)"; \
@@ -264,15 +294,21 @@ curl:risk:list:page:
 	echo "→ GET $$URL"; \
 	curl -sS "$$URL" | jq '{count, next_cursor, prev_cursor, window}'
 
-.PHONY: run:risk-policy-gate
+curl\:risk\:list\:page:
+	@$(MAKE) curl-risk-list-page --no-print-directory
+
+.PHONY: run-risk-policy-gate
 # Usage: make run:risk-policy-gate REPORT=path/to/risk_register.json [PROFILE=vault]
-run:risk-policy-gate:
+run-risk-policy-gate:
 	@if [ -z "$(REPORT)" ]; then echo "Set REPORT=path/to/risk_register.json"; exit 2; fi
 	@if [ ! -f "$(REPORT)" ]; then echo "REPORT file not found: $(REPORT)"; exit 2; fi
 	@PROFILE_ARG=$${PROFILE:-vault}; \
 	ARGS=$$(jq -c --argfile r "$(REPORT)" '{report: $$r}'); \
 	echo "→ Running policy gate with $$PROFILE_ARG on $(REPORT)"; \
 	pnpm run vm -- run operations-risk-policy-gate -p $$PROFILE_ARG -a "$$ARGS" -f json
+
+run\:risk-policy-gate:
+	@$(MAKE) run-risk-policy-gate --no-print-directory
 
 
 # -------------------------------
@@ -412,6 +448,57 @@ cons-audit-seal:
 	@command -v b3sum >/dev/null 2>&1 && b3sum $(AUDIT_OUT)/*.yaml | tee artifacts/seals/consciousness.reports.b3sum || shasum -a 256 $(AUDIT_OUT)/*.yaml | tee artifacts/seals/consciousness.reports.sha256
 	@echo "$$(date -u +%FT%TZ)  cons-audit sealed" | tee -a artifacts/seals/SEALLOG.txt
 
+# ----- AI Companion Proxy shortcuts (root) -----
+.PHONY: proxy-health proxy-url proxy-token proxy-who proxy-drill \
+        proxy-receipts proxy-receipts-verify proxy-receipts-validate \
+        proxy-receipts-gc proxy-receipts-root
+
+proxy-health:
+	@$(MAKE) -C $(PROXY_DIR) proxy-health-auth
+
+proxy-url:
+	@$(MAKE) -C $(PROXY_DIR) proxy-url
+
+proxy-token:
+	@$(MAKE) -C $(PROXY_DIR) proxy-token
+
+proxy-who:
+	@$(MAKE) -C $(PROXY_DIR) proxy-who
+
+proxy-drill:
+	@ART_DIR="$(PROXY_DIR)/artifacts/drills" bash $(PROXY_DIR)/scripts/guardian-drill.sh ; \
+	ls -1t $(PROXY_DIR)/artifacts/drills/proxy-guardian-*.json 2>/dev/null | head -n1 | \
+	xargs -I{} sh -c 'echo "🧾 Latest receipt: {}"; if command -v jq >/dev/null 2>&1; then jq . {}; else cat {}; fi'
+
+proxy-receipts:
+	@DIR="$(PROXY_DIR)/artifacts/drills"; \
+	echo "📜 Guardian Drill Receipts (latest 10)"; echo "======================================"; \
+	for f in $$(ls -1t $$DIR/proxy-guardian-*.json 2>/dev/null | head -n 10); do \
+		if command -v jq >/dev/null 2>&1; then \
+			printf "• %s | %s | %s\n" "$$(jq -r .ts $$f)" "$$(jq -r .status $$f)" "$$(jq -r .id $$f)"; \
+		else echo "• $$f"; fi; \
+	done
+
+proxy-receipts-verify:
+	@$(MAKE) -C $(PROXY_DIR) proxy-receipts-verify
+
+proxy-receipts-validate:
+	@$(MAKE) -C $(PROXY_DIR) proxy-receipts-validate
+
+proxy-receipts-gc:
+	@$(MAKE) -C $(PROXY_DIR) proxy-receipts-gc
+
+proxy-receipts-root:
+	@$(MAKE) -C $(PROXY_DIR) proxy-receipts-root
+
+.PHONY: makefile-lint
+makefile-lint:
+	@ if sed 's/\\:/.ESC/g' Makefile $(PROXY_DIR)/Makefile | grep -nE '^\s*\.PHONY:.*:' >/dev/null 2>&1; then \
+	    echo "❌ .PHONY contains colon’d names"; exit 1; fi
+	@ if grep -nE '^[^#[:space:]].*:' Makefile $(PROXY_DIR)/Makefile | grep ':' | grep -v '::' >/dev/null 2>&1; then \
+	    echo "✅ Target names may include colon, but ensure recipes are correct"; fi
+	@ awk 'prev==1 && $$0 !~ /^\t/ {print "⚠ recipe not starting with tab @ line " NR " in Makefile"} {prev=(/^[^#[:space:]].*:/)}' Makefile >/dev/null || true
+
 # --- Codebase Audit (with model selection) ---
 
 .PHONY: audit audit-gpt5 audit-claude-opus audit-deepseek
@@ -428,3 +515,121 @@ audit-claude-opus:
 
 audit-deepseek:
 	@bash scripts/audit-with-gpt5.sh deepseek/deepseek-r1-distill-llama-70b
+
+# --- Gemini Code Execution ---
+
+.PHONY: gemini\-code gemini\-code\-vertex gemini\-help
+
+# Dash aliases (for CI/CD or shells that dislike colons)
+.PHONY: gemini-code gemini-code-vertex
+gemini-code: gemini\:code
+gemini-code-vertex: gemini\:code\:vertex
+
+gemini\:help:
+	@echo 'make gemini:code PROMPT="sum of first 50 primes" --'
+	@echo 'make gemini:code:vertex PROMPT="factorial of 50" -- (uses $$GEMINI_VERTEX_LOCATION or us-central1)'
+
+gemini\:code:
+	@node scripts/gemini-code-exec.mjs --prompt "$(PROMPT)"
+
+gemini\:code\:vertex:
+	@node scripts/gemini-code-exec.mjs --vertex --location=$${GEMINI_VERTEX_LOCATION:-us-central1} --prompt "$(PROMPT)"
+
+# ============================================================================
+# Mandala — Interactive SVG diagram of the Five Pillars
+# ============================================================================
+
+mandala-stamp:
+	@echo "🌀 Stamping mandala with latest Merkle root..."
+	@node scripts/mandala-stamp-root.mjs
+
+# Requires inkscape or rsvg-convert (choose one that's installed)
+mandala-png:
+	@echo "🖼️  Exporting mandala to PNG..."
+	@if command -v inkscape >/dev/null 2>&1; then \
+	    inkscape $(MANDALA) --export-type=png --export-filename=docs/VaultMesh_Mandala.png --export-dpi=220; \
+	  elif command -v rsvg-convert >/dev/null 2>&1; then \
+	    rsvg-convert -f png -o docs/VaultMesh_Mandala.png $(MANDALA); \
+	  else \
+	    echo "❌ Install inkscape or rsvg-convert to export PNG"; \
+	    exit 1; \
+	  fi
+	@echo "✅ docs/VaultMesh_Mandala.png"
+
+mandala-webp:
+	@echo "🖼️  Exporting mandala to WebP..."
+	@if command -v cwebp >/dev/null 2>&1; then \
+	    cwebp -q 92 docs/VaultMesh_Mandala.png -o docs/VaultMesh_Mandala.webp; \
+	    echo "✅ docs/VaultMesh_Mandala.webp"; \
+	  else \
+	    echo "❌ Install cwebp (libwebp) to export WebP"; \
+	  fi
+
+mandala-open:
+	@echo "🌀 Opening mandala..."
+	@xdg-open $(MANDALA) 2>/dev/null || open $(MANDALA) 2>/dev/null || echo "ℹ️  Open $(MANDALA) in your browser"
+
+mandala-link-check:
+	@echo "🔗 Checking mandala links..."
+	@node scripts/mandala-link-check.mjs
+
+mandala-social:
+	@echo "📱 Exporting mandala for social media (1600×1600)..."
+	@if command -v rsvg-convert >/dev/null 2>&1; then \
+	    rsvg-convert -f png -w 1600 -o docs/VaultMesh_Mandala_social.png $(MANDALA); \
+	    echo "✅ docs/VaultMesh_Mandala_social.png (1600×1600)"; \
+	  else \
+	    echo "❌ Install rsvg-convert (librsvg2-bin) for social export"; \
+	    exit 1; \
+	  fi
+	@if command -v cwebp >/dev/null 2>&1; then \
+	    cwebp -q 92 docs/VaultMesh_Mandala_social.png -o docs/VaultMesh_Mandala_social.webp; \
+	    echo "✅ docs/VaultMesh_Mandala_social.webp (~100KB)"; \
+	  else \
+	    echo "⚠️  Install cwebp for WebP optimization (optional)"; \
+	  fi
+
+
+# --- Docs Drills Shortcuts ---
+.PHONY: drill:ledger
+
+drill\:ledger:
+	@echo "Open: docs/DRILLS/GUARDIAN_LEDGER.html"
+
+.PHONY: drill:deploy drill:destroy
+drill\:deploy:
+	@echo "Open: docs/DRILLS/GUARDIAN_DEPLOY_DRILL.html"
+
+drill\:destroy:
+	@echo "Open: docs/DRILLS/GUARDIAN_DESTROY_DRILL.html"
+
+.PHONY: prove:egress prove:budget
+prove\:egress:
+	@echo "NAT IP(s):"; 	gcloud compute addresses list --filter="name~nat AND region=europe-west3" 	  --format="table(name,address)"
+
+prove\:budget:
+	@BILLING=$$(gcloud beta billing accounts list --format='value(name)' | head -1); 	echo "Budget accounts: $$BILLING"; 	echo "Use docs block to create thresholds."
+
+
+.PHONY: drill:ledger:url
+drill\:ledger\:url:
+	@echo "Pages URL:"
+	@echo "https://vaultsovereign.github.io/$(shell basename $$PWD)/DRILLS/GUARDIAN_LEDGER.html"
+
+.PHONY: drill:ledger:url
+drill\:ledger\:url:
+	@echo "Pages URL:"
+	@echo "https://vaultsovereign.github.io/$(shell basename $$PWD)/DRILLS/GUARDIAN_LEDGER.html"
+
+.PHONY: prove:docs
+prove\:docs:
+	@DOCS_DOMAIN=$${DOCS_DOMAIN:-docs.vaultmesh.org}; \
+	echo "CNAME for $$DOCS_DOMAIN:"; \
+	{ command -v dig >/dev/null 2>&1 && dig +short CNAME $$DOCS_DOMAIN || true; } || true; \
+	{ command -v host >/dev/null 2>&1 && host -t CNAME $$DOCS_DOMAIN 2>/dev/null || true; } || true; \
+	echo ""; \
+	echo "HTTPS HEAD:"; \
+	curl -sSI "https://$$DOCS_DOMAIN/DRILLS/GUARDIAN_LEDGER.html" | head -n 1 || true; \
+	echo ""; \
+	echo "HTTP → HTTPS redirect (optional):"; \
+	curl -sI "http://$$DOCS_DOMAIN/DRILLS/GUARDIAN_LEDGER.html" | sed -n '1,3p' || true

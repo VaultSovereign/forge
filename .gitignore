@@ -87,3 +87,9 @@ schemas/tprm.v1.json
 workbench/**/dist/
 # If you need to version specific builds, whitelist them explicitly below:
 # !path/to/required/dist/
+
+.gemini/
+gha-creds-*.json
+
+# Guardian signing private key (NEVER COMMIT)
+ai-companion-proxy-starter/keys/guardian.key
