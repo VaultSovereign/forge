@@ -2,4 +2,4 @@ name: cmd-ci
 on: [push, pull_request]
 jobs:
   cmd:
-    uses: VaultSovereign/cmd/.github/workflows/cmd-reusable.yml@main
+    uses: VaultSovereign/cmd/.github/workflows/cmd-reusable.yml@2ca92e2ebeef5d1d9a7b525daf6bd140f559515b

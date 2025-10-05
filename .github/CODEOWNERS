@@ -1,0 +1,8 @@
+# Code Owners for forge repository
+# Review required for specific paths
+
+# Workflows and CI configuration
+/.github/workflows/*  @VaultSovereign/ops
+
+# cmd submodule
+/tools/cmd/**         @VaultSovereign/ops

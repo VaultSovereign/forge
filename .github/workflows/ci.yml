@@ -24,6 +24,9 @@ jobs:
         node-version: [22]
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
 
       - name: Node & pnpm setup (Node 22)
         uses: ./.github/actions/node-pnpm-setup
@@ -64,6 +67,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          submodules: true
           fetch-depth: 0
 
       - name: Node & pnpm setup (Node 22)
