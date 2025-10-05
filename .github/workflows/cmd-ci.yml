@@ -1,0 +1,5 @@
+name: cmd-ci
+on: [push, pull_request]
+jobs:
+  cmd:
+    uses: VaultSovereign/cmd/.github/workflows/cmd-reusable.yml@main
