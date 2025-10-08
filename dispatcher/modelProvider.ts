@@ -1,4 +1,6 @@
 import OpenAI from 'openai';
+import { ProviderManager } from './providerFallback.js';
+import type { Provider, ProviderCall, Result } from './types.js';
 
 export type ProviderName = 'openai' | 'openrouter' | 'local_ollama';
 
@@ -128,4 +130,19 @@ function extractOllamaContent(payload: unknown): string | null {
     .filter((content): content is string => Boolean(content))
     .join('\n');
   return combined.length ? combined : null;
+}
+
+export function createDefaultProviderManager(providers: Array<{ provider: Provider; weight?: number }>) {
+  const pm = new ProviderManager({ baseTimeoutMs: 60000 });
+  for (const { provider, weight = 1 } of providers) {
+    pm.register(provider, weight);
+  }
+  return pm;
+}
+
+export async function callWithFallback(
+  pm: ReturnType<typeof createDefaultProviderManager>,
+  input: ProviderCall
+): Promise<Result<string>> {
+  return pm.call(input);
 }

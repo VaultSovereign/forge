@@ -1,6 +1,6 @@
 {
   "name": "Forge (TypeScript Capsule)",
-  "image": "mcr.microsoft.com/devcontainers/javascript-node:22-bookworm",
+  "image": "ghcr.io/vaultsovereign/forge-capsule:node-v2",
   "workspaceFolder": "/workspace",
   "remoteUser": "node",
   "mounts": [

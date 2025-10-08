@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vaultmesh.dev/schemas/forge-template.schema.json",
+  "title": "Forge Ritual Clause Template",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "version", "keyword", "inputs", "prompts"],
+  "properties": {
+    "id": { "type": "string", "minLength": 3 },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+(\\.[0-9]+)?(-[a-z0-9\\.-]+)?$" },
+    "keyword": { "type": "string" },
+    "title": { "type": "string" },
+    "purpose": { "type": "string" },
+    "risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "level": { "type": "string", "enum": ["low", "medium", "high"] },
+        "notes": { "type": "string" }
+      }
+    },
+    "frameworks": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "type"],
+        "properties": {
+          "name": { "type": "string" },
+          "type": { "type": "string", "enum": ["string", "number", "boolean", "enum", "json"] },
+          "required": { "type": "boolean", "default": true },
+          "enum": { "type": "array", "items": { "type": "string" } },
+          "default": {}
+        }
+      }
+    },
+    "prompts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["system", "user"],
+      "properties": {
+        "system": { "type": "string" },
+        "user": { "type": "string" }
+      }
+    },
+    "outputs": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "guardrails": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "level": { "type": "string", "enum": ["read-only", "advisory", "lab-only", "restricted"] },
+        "checks": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

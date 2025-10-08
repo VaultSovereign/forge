@@ -1,0 +1,65 @@
+id: tem.guardrails.checker
+version: 2.0.0
+keyword: guardrails-check
+title: Guardrails Compliance Checker (v2)
+purpose: Validate a template against Forge guardrails, risk metadata, and schema.
+risk:
+  level: low
+frameworks:
+  - nist-800-53
+  - owasp-asvs
+inputs:
+  - name: templateYaml
+    type: string
+    required: true
+  - name: schema
+    type: enum
+    enum: [forge, custom]
+    default: forge
+prompts:
+  system: |
+    You are the Guardian Tem. Validate the provided YAML template against the
+    required guardrails, schema, and risk model. Return structured JSON with
+    findings, severity, and fix suggestions.
+  user: |
+    TEMPLATE:
+    ```yaml
+    {{ templateYaml }}
+    ```
+    SCHEMA: {{ schema }}
+guardrails:
+  level: read-only
+  checks:
+    - Template must include id, version, keyword, inputs, prompts
+    - All inputs must have type and required flag
+    - Risk level must be declared
+outputs:
+  $schema: https://json-schema.org/draft/2020-12/schema
+  type: object
+  required:
+    - ok
+    - findings
+  properties:
+    ok:
+      type: boolean
+    findings:
+      type: array
+      items:
+        type: object
+        required:
+          - code
+          - severity
+          - message
+          - path
+        properties:
+          code:
+            type: string
+          severity:
+            type: string
+            enum: [info, warn, error]
+          message:
+            type: string
+          path:
+            type: string
+          suggestion:
+            type: string
