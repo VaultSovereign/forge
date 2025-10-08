@@ -26,7 +26,7 @@ node workbench/bff/src/server.v3.ts
 ```
 Then trigger an execution:
 ```bash
-curl -s -X POST localhost:3002/v2/templates/exec \
+curl -s -X POST localhost:8787/v2/templates/exec \
   -H 'content-type: application/json' \
   -d '{"keyword":"guardrails-check","args":{"templateYaml":"id:x\nversion:1.0.0\nkeyword:test\ninputs:[]\nprompts:{system:\"ok\",user:\"ok\"}"}}' | jq .
 ```

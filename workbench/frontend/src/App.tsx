@@ -5,12 +5,14 @@ import GuardianConsole from './components/GuardianConsole.js';
 import LedgerTable from './components/LedgerTable';
 import StreamingBadge from './components/StreamingBadge';
 import TemplateRunner from './components/TemplateRunner';
+import ForgeRunPanel from './components/ForgeRunPanel.js';
 import OverviewStrip, { type OverviewItem } from './components/dashboard/OverviewStrip.js';
 import Panel from './components/dashboard/Panel.js';
 import QuickLinks from './components/dashboard/QuickLinks.js';
 import { useDashboardSnapshot } from './hooks/useDashboardSnapshot.js';
 import { useGuardianMode } from './hooks/useGuardianMode.js';
 import { useTemplateCount } from './hooks/useTemplateCount.js';
+import MetricsStrip from './components/MetricsStrip.js';
 
 export default function App() {
   const snapshot = useDashboardSnapshot(20);
@@ -140,9 +142,19 @@ export default function App() {
         href: 'https://github.com/VaultSovereign/forge/blob/main/workbench/README-WORKBENCH.md',
       },
       {
-        label: 'Reality Ledger (API)',
-        description: 'Inspect the raw JSON feed backing this dashboard to debug issues quickly.',
-        href: 'http://localhost:8787/v1/api/ledger/events?limit=25',
+        label: 'Forge API Dashboard',
+        description: 'Self-serve health, ledger, and SSE checks directly from the 8787 BFF.',
+        href: 'http://localhost:8787/dev/dashboard',
+      },
+      {
+        label: 'Reality Ledger (Last Event)',
+        description: 'Inspect the final ledger entry for today to verify executions chained correctly.',
+        href: 'http://localhost:8787/v1/ledger/last',
+      },
+      {
+        label: 'Metrics Snapshot',
+        description: 'Quick heartbeat of day counts and receipts straight from /metrics/forge.',
+        href: 'http://localhost:8787/metrics/forge',
       },
       {
         label: 'Template Catalog',
@@ -164,6 +176,7 @@ export default function App() {
         <nav>
           <a href="#overview">Overview</a>
           <a href="#run">Template Runner</a>
+          <a href="#forge-run">Forge Run</a>
           <a href="#ledger">Reality Ledger</a>
           <a href="#resources">Resources</a>
         </nav>
@@ -190,6 +203,10 @@ export default function App() {
 
         <OverviewStrip items={overviewItems} />
 
+        <div style={{ margin: '16px 0' }}>
+          <MetricsStrip />
+        </div>
+
         {snapshot.error ? (
           <div className="callout" role="alert">
             <strong>API request failed</strong>
@@ -209,6 +226,15 @@ export default function App() {
             description="Run templates once via REST or stream outputs using server-sent events."
           >
             <TemplateRunner />
+          </Panel>
+
+          <Panel
+            id="forge-run"
+            label="Forge"
+            title="Forge Run"
+            description="Execute a ritual and watch the ledger binding lifecycle over SSE."
+          >
+            <ForgeRunPanel />
           </Panel>
 
           <Panel
