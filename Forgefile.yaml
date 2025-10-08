@@ -1,0 +1,14 @@
+rituals:
+  daily-anchor:
+    steps:
+      - call: "system.selftest"
+      - call: "mcp:ping"
+      - call: "vaultmesh.rollup"
+      - call: "grafana.annotate"
+        with:
+          text: "Daily anchor complete"
+  seal-doc:
+    steps:
+      - call: "system.selftest"
+      - call: "grafana.annotate"
+        with: { text: "Docs sealed" }
