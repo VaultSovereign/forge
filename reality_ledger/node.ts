@@ -15,6 +15,8 @@ import {
 import { promises as fs, constants as FS_CONSTANTS } from 'fs';
 import * as path from 'path';
 import stringify from 'safe-stable-stringify';
+import { stableEventEnvelope, canonicalizeToJSON, asJson, Json } from '../lib/c14n.js';
+import { sha256 } from '../lib/hash.js';
 
 export interface LedgerEvent {
   id: string;
@@ -42,6 +44,41 @@ export interface LedgerQueryFilters {
   profile?: string;
   since?: string;
   limit?: number;
+}
+
+export type CanonicalEnvelope = ReturnType<typeof stableEventEnvelope>;
+
+export function computeCanonicalEventHash(e: {
+  id: string;
+  ts: string;
+  template: string;
+  profile: string;
+  input: unknown;
+  output: unknown;
+  actor?: string;
+  traceId?: string;
+  prev?: string;
+  dayRoot?: string;
+}): { envelope: CanonicalEnvelope; hash: string } {
+  const payload = {
+    template: e.template,
+    profile: e.profile,
+    input: asJson(e.input),
+    output: asJson(e.output),
+  } satisfies Record<string, Json>;
+
+  const envelope = stableEventEnvelope({
+    id: e.id,
+    ts: e.ts,
+    type: e.template,
+    actor: e.actor,
+    traceId: e.traceId,
+    payload,
+    prev: e.prev,
+    dayRoot: e.dayRoot,
+  });
+  const hash = sha256(canonicalizeToJSON(envelope));
+  return { envelope, hash };
 }
 
 function getLedgerDir(): string {

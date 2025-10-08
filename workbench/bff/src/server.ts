@@ -7,12 +7,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { Counter } from 'prom-client';
+import { randomUUID } from 'node:crypto';
 
 import { authPreHandler } from './auth/oidc.js';
 import { loadRbacMatrix } from './auth/rbac.js';
 import { env } from './env.js';
 import security from './security.js';
 import { fromHere } from './utils/esm-paths.js';
+import { initSse } from '../sse.js';
 
 export async function buildServer(): Promise<FastifyInstance> {
   const app = Fastify({ logger: true, bodyLimit: 1 * 1024 * 1024 });
@@ -214,6 +216,21 @@ export async function buildServer(): Promise<FastifyInstance> {
     }
     await app.register(devRoutes);
   }
+
+  app.get('/v1/sse/execute', async (req, reply) => {
+    const queryTrace = (req.query as Record<string, unknown>)?.traceId as string | undefined;
+    const resolvedTraceId = queryTrace ?? randomUUID();
+    const sse = initSse(req, reply, { route: 'sse.execute', traceId: resolvedTraceId });
+
+    sse.send('progress', { step: 'accepted', traceId: resolvedTraceId });
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    sse.send('progress', { step: 'preflight', traceId: resolvedTraceId });
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    sse.send('progress', { step: 'run', traceId: resolvedTraceId });
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    sse.send('done', { ok: true, traceId: resolvedTraceId });
+    sse.close();
+  });
 
   app.setNotFoundHandler((req, reply) => {
     if (req.method === 'GET' && !req.url.startsWith('/v1/api/')) {

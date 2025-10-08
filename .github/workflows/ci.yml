@@ -837,6 +837,24 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
 
+  receipts:
+    runs-on: ubuntu-latest
+    needs: build-test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Witness artifacts
+        run: node scripts/witness.v2.js
+      - name: Rollup receipts
+        run: bash scripts/rollup.v2.sh
+      - name: Upload receipts
+        uses: actions/upload-artifact@v4
+        with:
+          name: forge-receipts
+          path: receipts/**
+
   validate-templates:
     runs-on: ubuntu-latest
     strategy:
@@ -879,27 +897,9 @@ jobs:
 
       - name: Validate template schemas
         run: |
-          for file in catalog/**/*.yaml; do
-            echo "Validating $file"
-            node -e "
-              const fs = require('fs');
-              const yaml = require('yaml');
-              const ajv = require('ajv');
-
-              const schema = JSON.parse(fs.readFileSync('schemas/prompt.schema.json', 'utf8'));
-              const template = yaml.parse(fs.readFileSync('$file', 'utf8'));
-
-              const validator = new ajv();
-              const valid = validator.validate(schema, template);
-
-              if (!valid) {
-                console.error('Validation errors:', validator.errors);
-                process.exit(1);
-              }
-
-              console.log('✅ Valid');
-            "
-          done
+          npx -p ajv@8 -p ajv-formats@2 -p ajv-cli@5 ajv \
+            -s forge/schemas/template.schema.json \
+            -d 'catalog/**/*.yaml' -c ajv-formats --strict=false
 
       - name: Test template loading
         run: |
