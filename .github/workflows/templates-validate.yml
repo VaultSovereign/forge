@@ -1,0 +1,32 @@
+name: templates-validate
+on:
+  pull_request:
+    paths:
+      - 'catalog/**.yml'
+      - 'catalog/**.yaml'
+      - 'schemas/**'
+  push:
+    branches: [ main ]
+    paths:
+      - 'catalog/**.yml'
+      - 'catalog/**.yaml'
+      - 'schemas/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile || pnpm install
+      - name: Install dev deps for validation
+        run: pnpm add -D ajv yaml
+      - name: Validate templates
+        run: node scripts/validate-templates.mjs
