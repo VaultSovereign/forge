@@ -18,6 +18,7 @@
     "tools/**/*",
     "mcp/**/*",
     "scripts/**/*",
-    "reality_ledger/**/*"
+    "reality_ledger/**/*",
+    "providers/**/*"
   ]
 }
