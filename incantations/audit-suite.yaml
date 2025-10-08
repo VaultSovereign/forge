@@ -1,0 +1,19 @@
+# Example "incantation": a composed ritual that runs multiple templates in order.
+# Each step will be executed and bound into the Reality Ledger.
+id: incantation.audit-suite
+version: 1.0.0
+keyword: audit-suite
+title: Audit Suite (Guardrails + DORA ICT Risk check)
+steps:
+  - template: guardrails-check
+    args:
+      templateYaml: |
+        id: x
+        version: 1.0.0
+        keyword: test
+        inputs: []
+        prompts: { system: "ok", user: "hi" }
+  - template: dora.ict_risk_framework.v1
+    args:
+      org: "VaultMesh Ltd"
+runlevel: advisory

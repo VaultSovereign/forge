@@ -1,0 +1,56 @@
+name: forge-run-proof
+
+on:
+  pull_request:
+    types:
+      - labeled
+  workflow_dispatch:
+
+jobs:
+  proof:
+    if: github.event_name == 'workflow_dispatch' || (github.event.label && github.event.label.name == 'forge-run')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install || true
+
+      - name: Execute proof smoke
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY || '' }}
+          PROOF_KEYWORD: guardrails-check
+          PROOF_ARGS: '{"templateYaml":"id:x\nversion:1.0.0\nkeyword:test\ninputs:[]\nprompts:{system:\"ok\",user:\"hi\"}"}'
+        run: node scripts/proof-smoke.mjs
+
+      - name: Seal receipts
+        run: |
+          node scripts/witness.v2.js
+          bash scripts/rollup.v2.sh
+
+      - name: Upload proof artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: forge-proof-${{ github.run_id }}
+          path: |
+            ledger/**
+            receipts/**
+
+      - name: Label PR with proof:ok
+        if: github.event_name == 'pull_request'
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: proof:ok
