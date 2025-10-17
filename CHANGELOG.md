@@ -42,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI: added GHCR login; container scan targets moved to `ghcr.io/vaultsovereign/forge`.
 - Pages workflow switched to publish `docs/` (rendered Markdown) vs raw blobs.
 - README: added “Docs Links (internal vs external)” under Run Modes; updated Pages URLs to `/forge/`; reordered badges; added tagline + Quickstart pointer; curated docs navigation.
-- Repo metadata updated to `VaultSovereign/forge` (homepage/repository/bugs).
+- Repo metadata updated to `VaultSovereign/vm-forge` (homepage/repository/bugs).
 
 ### Security
 
@@ -67,7 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - To enable remote scanners in CI, set one of: `OPENROUTER_API_KEY`, `OPENAI_API_KEY`, or `OLLAMA_HOST`.
 - Optional ledger signing: set `VAULTMESH_SIGNING_KEY`/`VAULTMESH_VERIFY_KEY`.
 
-# [1.0.1]: https://github.com/VaultSovereign/forge/releases/tag/v1.0.1
+# [1.0.1]: https://github.com/VaultSovereign/vm-forge/releases/tag/v1.0.1
 
 - (placeholder)
 

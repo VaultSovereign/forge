@@ -2,7 +2,7 @@
 
 ## Context
 
-The local `forge` repository and `github.com/VaultSovereign/forge` (origin/main) have diverged completely—no common ancestor commits. This guide walks you through the synchronization ritual.
+The local `forge` repository and `github.com/VaultSovereign/vm-forge` (origin/main) have diverged completely—no common ancestor commits. This guide walks you through the synchronization ritual.
 
 ## Automated Sync Script
 
@@ -37,7 +37,7 @@ git push -u origin sync/align-local-with-remote
 If the remote has a GHCR badge you want to preserve, manually add it to the top of `README.md`:
 
 ```markdown
-[![ghcr](https://img.shields.io/badge/GHCR-forge-blue)](https://github.com/VaultSovereign/forge/pkgs/container/forge)
+[![ghcr](https://img.shields.io/badge/GHCR-forge-blue)](https://github.com/VaultSovereign/vm-forge/pkgs/container/forge)
 ```
 
 ### 2. Review Merge Commit

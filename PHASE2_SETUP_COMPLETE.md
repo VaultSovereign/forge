@@ -7,7 +7,7 @@
 
 ### 1. Repository Structure ✅
 - Created `~/GitHub/forge/` from `~/forge`
-- Set up proper GitHub remote: `git@github.com:VaultSovereign/forge.git`
+- Set up proper GitHub remote: `git@github.com:VaultSovereign/vm-forge.git`
 - Branch: `main`
 
 ### 2. DevContainer Scaffolding ✅

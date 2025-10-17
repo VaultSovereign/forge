@@ -139,7 +139,7 @@ export default function App() {
       {
         label: 'Workbench README',
         description: 'Follow the setup notes for running the frontend + BFF locally or in Replit.',
-        href: 'https://github.com/VaultSovereign/forge/blob/main/workbench/README-WORKBENCH.md',
+        href: 'https://github.com/VaultSovereign/vm-forge/blob/main/workbench/README-WORKBENCH.md',
       },
       {
         label: 'Forge API Dashboard',
@@ -160,7 +160,7 @@ export default function App() {
         label: 'Template Catalog',
         description:
           'Browse the source templates shipped with VaultMesh to design new automations.',
-        href: 'https://github.com/VaultSovereign/forge/tree/main/catalog',
+        href: 'https://github.com/VaultSovereign/vm-forge/tree/main/catalog',
       },
     ],
     []

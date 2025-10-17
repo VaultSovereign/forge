@@ -2,7 +2,7 @@
 
 Sovereign prompt orchestration for compliance and cybersecurity — short, focused README with links to full docs.
 
-[CI](.github/workflows/ci.yml) · [Releases](https://github.com/VaultSovereign/forge/releases) · [Docs Index](https://doc.vaultmesh.org/) · [OpenAPI](docs/OPENAPI.md)
+[CI](.github/workflows/ci.yml) · [Releases](https://github.com/VaultSovereign/vm-forge/releases) · [Docs Index](https://doc.vaultmesh.org/) · [OpenAPI](docs/OPENAPI.md)
 
 ## Quickstart
 

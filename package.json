@@ -12,13 +12,13 @@
     "mcp",
     "templates"
   ],
-  "homepage": "https://github.com/VaultSovereign/forge#readme",
+  "homepage": "https://github.com/VaultSovereign/vm-forge#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/VaultSovereign/forge.git"
+    "url": "git+https://github.com/VaultSovereign/vm-forge.git"
   },
   "bugs": {
-    "url": "https://github.com/VaultSovereign/forge/issues"
+    "url": "https://github.com/VaultSovereign/vm-forge/issues"
   },
   "author": "VaultSovereign",
   "license": "Apache-2.0",
