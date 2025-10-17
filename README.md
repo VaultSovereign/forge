@@ -2,6 +2,11 @@
 
 Sovereign prompt orchestration for compliance and cybersecurity — short, focused README with links to full docs.
 
+> Sales Collateral: to avoid duplication, the SALES/ materials now live
+> in the umbrella repository under:
+>
+> `../../docs/blueprints/SALES/`
+
 [CI](.github/workflows/ci.yml) · [Releases](https://github.com/VaultSovereign/vm-forge/releases) · [Docs Index](https://doc.vaultmesh.org/) · [OpenAPI](docs/OPENAPI.md)
 
 ## Quickstart
